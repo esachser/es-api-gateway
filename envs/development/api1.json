@@ -1,0 +1,45 @@
+{
+    "transports": [
+        {
+            "type": "http",
+            "parameters": {
+                "routeContext": "/api/teste"
+            },
+            "pre": [],
+            "pos": [
+                {
+                    "type": "EsPropertyMiddleware",
+                    "data": {
+                        "name": "response.headers.responsetest",
+                        "value": "testandoResposta"
+                    }
+                },
+                {
+                    "type": "EsPropertyMiddleware",
+                    "data": {
+                        "name": "response.body",
+                        "value": {
+                            "ok": true
+                        }
+                    }
+                },
+                {
+                    "type": "EsPropertyMiddleware",
+                    "data": {
+                        "name": "response.status",
+                        "value": 200
+                    }
+                }
+            ]
+        }
+    ],
+    "execution": [
+        {
+            "type": "EsPropertyMiddleware",
+            "data": {
+                "name": "headers.test",
+                "value": "testando"
+            }
+        }
+    ]
+}

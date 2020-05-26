@@ -1,0 +1,96 @@
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 3000","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 3000","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading middleware es-property-middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":{"transports":[{"type":"http","parameters":{"routeContext":"/api/teste"},"pre":[],"pos":[{"type":"EsPropertyMiddleware","data":{"name":"response.headers.responsetest","value":"testandoResposta"}},{"type":"EsPropertyMiddleware","data":{"name":"response.body","value":{"ok":true}}},{"type":"EsPropertyMiddleware","data":{"name":"response.status","value":200}}]}],"execution":[{"type":"EsPropertyMiddleware","data":{"name":"headers.test","value":"testando"}}]},"level":"debug","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":{"transports":[{"type":"http","parameters":{"routeContext":"/api/teste"},"pre":[],"pos":[{"type":"EsPropertyMiddleware","data":{"name":"response.headers.responsetest","value":"testandoResposta"}},{"type":"EsPropertyMiddleware","data":{"name":"response.body","value":{"ok":true}}},{"type":"EsPropertyMiddleware","data":{"name":"response.status","value":200}}]}],"execution":[{"type":"EsPropertyMiddleware","data":{"name":"headers.test","value":"testando"}}]},"level":"debug","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":{"transports":[{"type":"http","parameters":{"routeContext":"/api/teste"},"pre":[],"pos":[{"type":"EsPropertyMiddleware","data":{"name":"response.headers.responsetest","value":"testandoResposta"}},{"type":"EsPropertyMiddleware","data":{"name":"response.body","value":{"ok":true}}},{"type":"EsPropertyMiddleware","data":{"name":"response.status","value":200}}]}],"execution":[{"type":"EsPropertyMiddleware","data":{"name":"headers.test","value":"testando"}}]},"level":"debug","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":{"transports":[{"type":"http","parameters":{"routeContext":"/api/teste"},"pre":[],"pos":[{"type":"EsPropertyMiddleware","data":{"name":"response.headers.responsetest","value":"testandoResposta"}},{"type":"EsPropertyMiddleware","data":{"name":"response.body","value":{"ok":true}}},{"type":"EsPropertyMiddleware","data":{"name":"response.status","value":200}}]}],"execution":[{"type":"EsPropertyMiddleware","data":{"name":"headers.test","value":"testando"}}]},"level":"debug","service":"es-apigw"}
+{"message":"Reloading global config file","level":"info","service":"es-apigw"}
+{"message":"Loading Property Middleware","level":"info","service":"es-apigw"}
+{"message":"Removing all ","level":"info","service":"es-apigw"}
+{"message":"Loading Http Tranport","level":"info","service":"es-apigw"}
+{"message":"Removing all transports","level":"info","service":"es-apigw"}
+{"message":"Http Server running on port 4000","level":"info","service":"es-apigw"}
+{"message":"Loading API api1.json","level":"info","service":"es-apigw"}
+{"message":{"transports":[{"type":"http","parameters":{"routeContext":"/api/teste"},"pre":[],"pos":[{"type":"EsPropertyMiddleware","data":{"name":"response.headers.responsetest","value":"testandoResposta"}},{"type":"EsPropertyMiddleware","data":{"name":"response.body","value":{"ok":true}}},{"type":"EsPropertyMiddleware","data":{"name":"response.status","value":200}}]}],"execution":[{"type":"EsPropertyMiddleware","data":{"name":"headers.test","value":"testando"}}]},"level":"debug","service":"es-apigw"}
