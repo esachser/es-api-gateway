@@ -60,6 +60,8 @@ export class EsHttpTransport implements IEsTransport {
 
             ctx.iesContext = context;
 
+            logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
+
             return next();
         });
 
@@ -70,13 +72,13 @@ export class EsHttpTransport implements IEsTransport {
             httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), async (ctx, next) => {
                 // Executa middleware central
                 await this.middleware?.execute(ctx.iesContext);
-                //await runMiddlewares(this.middleware, ctx.iesContext);
                 return next();
             });
         });
 
         httpRouter.use(this.routeContext, async (ctx) => {
             // Captura resultados e escreve a resposta
+            logger.info(`Call ${ctx.iesContext.properties.httpctx.path} ended at ${new Date().valueOf()}`);
             ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
             ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
             ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');

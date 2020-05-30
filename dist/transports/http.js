@@ -78,6 +78,7 @@ var EsHttpTransport = /** @class */ (function () {
                     rawbody: ctx.request.rawBody
                 };
                 ctx.iesContext = context;
+                logger_1.logger.info("Call " + context.properties.httpctx.path + " started at " + new Date().valueOf());
                 return [2 /*return*/, next()];
             });
         }); });
@@ -94,7 +95,6 @@ var EsHttpTransport = /** @class */ (function () {
                         case 1:
                             // Executa middleware central
                             _b.sent();
-                            //await runMiddlewares(this.middleware, ctx.iesContext);
                             return [2 /*return*/, next()];
                     }
                 });
@@ -103,6 +103,7 @@ var EsHttpTransport = /** @class */ (function () {
         http_server_1.httpRouter.use(this.routeContext, function (ctx) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 // Captura resultados e escreve a resposta
+                logger_1.logger.info("Call " + ctx.iesContext.properties.httpctx.path + " ended at " + new Date().valueOf());
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
                 ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                 ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');

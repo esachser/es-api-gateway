@@ -1,4 +1,7 @@
 // import workerpool from 'workerpool';
+import lodash from 'lodash';
+import { getMiddlewareConstructor } from '../middlewares';
+import { getTransportConstructor } from '../transports';
 
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
@@ -62,3 +65,62 @@ export interface IEsTransport {
 //         await pool.exec(mid.execute, [ctx]);
 //     }
 // }
+
+export function createMiddleware(arr: any[], idx: number): IEsMiddleware | undefined {
+    if (idx >= arr.length) {
+        return undefined;
+    }
+
+    const type = lodash.get(arr[idx], 'type');
+    const data = lodash.get(arr[idx], 'data');
+
+    const ctor = getMiddlewareConstructor(type);
+
+    if (ctor !== undefined) {
+        return new ctor(data, createMiddleware(arr, idx + 1));
+    }
+    return createMiddleware(arr, idx + 1);
+}
+
+export function connect2Mids(mid1: IEsMiddleware, mid2: IEsMiddleware) {
+    let mid = mid1;
+
+    while (mid.next !== undefined) mid = mid.next;
+
+    mid.next = mid2;
+}
+
+export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]) {
+    let mid = undefined;
+
+    if (middlewares.length > 0) {
+
+        mid = middlewares[0];
+
+        let i = 1;
+
+        while (mid === undefined) {
+            mid = middlewares[i];
+            i++;
+        }
+
+        for (; i < middlewares.length; i++) {
+            let md = middlewares[i];
+            if (md !== undefined) {
+                connect2Mids(mid, md);
+            }
+        }
+    }
+
+    return mid;
+}
+
+export function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined) {
+    const ctor = getTransportConstructor(type);
+
+    if (ctor !== undefined) {
+        return new ctor(parameters, middleware);
+    }
+
+    return undefined;
+}

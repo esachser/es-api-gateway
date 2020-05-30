@@ -4,59 +4,10 @@ import path from 'path';
 import lodash from 'lodash';
 import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
-import { IEsMiddleware, IEsTransport } from '../core';
+import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
 import { getMiddlewareConstructor } from '../middlewares';
 import { getTransportConstructor } from '../transports';
 import { httpRouter } from '../util/http-server';
-
-function createMiddleware(arr: any[], idx: number): IEsMiddleware | undefined {
-    if (idx >= arr.length) {
-        return undefined;
-    }
-
-    const type = lodash.get(arr[idx], 'type');
-    const data = lodash.get(arr[idx], 'data');
-
-    const ctor = getMiddlewareConstructor(type);
-
-    if (ctor !== undefined) {
-        return new ctor(data, createMiddleware(arr, idx + 1));
-    }
-    return createMiddleware(arr, idx + 1);
-}
-
-function connect2Mids(mid1: IEsMiddleware, mid2: IEsMiddleware) {
-    let mid = mid1;
-
-    while (mid.next !== undefined) mid = mid.next;
-
-    mid.next = mid2;
-}
-
-function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]) {
-    let mid = undefined;
-
-    if (middlewares.length > 0) {
-
-        mid = middlewares[0];
-
-        let i = 1;
-
-        while (mid === undefined) {
-            mid = middlewares[i];
-            i++;
-        }
-
-        for (; i < middlewares.length; i++) {
-            let md = middlewares[i];
-            if (md !== undefined) {
-                connect2Mids(mid, md);
-            }
-        }
-    }
-
-    return mid;
-}
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -92,12 +43,12 @@ async function loadApiFile(fname: string) {
 
             const mid = connectMiddlewares(pre, centralMid);
 
-            const ctor = getTransportConstructor(type);
-            if (ctor !== undefined) {
+            const trp = createTransport(type, parameters, mid);
+            if (trp !== undefined) {
                 if (api.transports[id] !== undefined) {
                     api.transports[id].clear();
                 }
-                api.transports[id] = new ctor(parameters, mid);
+                api.transports[id] = trp;
             }
         });
     }

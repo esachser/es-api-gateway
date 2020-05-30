@@ -46,49 +46,8 @@ var path_1 = __importDefault(require("path"));
 var lodash_1 = __importDefault(require("lodash"));
 var util_1 = require("../util");
 var logger_1 = require("../util/logger");
-var middlewares_1 = require("../middlewares");
-var transports_1 = require("../transports");
+var core_1 = require("../core");
 var http_server_1 = require("../util/http-server");
-function createMiddleware(arr, idx) {
-    if (idx >= arr.length) {
-        return undefined;
-    }
-    var type = lodash_1.default.get(arr[idx], 'type');
-    var data = lodash_1.default.get(arr[idx], 'data');
-    var ctor = middlewares_1.getMiddlewareConstructor(type);
-    if (ctor !== undefined) {
-        return new ctor(data, createMiddleware(arr, idx + 1));
-    }
-    return createMiddleware(arr, idx + 1);
-}
-function connect2Mids(mid1, mid2) {
-    var mid = mid1;
-    while (mid.next !== undefined)
-        mid = mid.next;
-    mid.next = mid2;
-}
-function connectMiddlewares() {
-    var middlewares = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        middlewares[_i] = arguments[_i];
-    }
-    var mid = undefined;
-    if (middlewares.length > 0) {
-        mid = middlewares[0];
-        var i = 1;
-        while (mid === undefined) {
-            mid = middlewares[i];
-            i++;
-        }
-        for (; i < middlewares.length; i++) {
-            var md = middlewares[i];
-            if (md !== undefined) {
-                connect2Mids(mid, md);
-            }
-        }
-    }
-    return mid;
-}
 var apis = {};
 function loadApiFile(fname) {
     return __awaiter(this, void 0, void 0, function () {
@@ -102,7 +61,7 @@ function loadApiFile(fname) {
                     apiJson = _b.apply(_a, [(_c.sent()).toString()]);
                     logger_1.logger.debug(apiJson);
                     executionJs = lodash_1.default.get(apiJson, 'execution');
-                    centralMid = createMiddleware(executionJs, 0);
+                    centralMid = core_1.createMiddleware(executionJs, 0);
                     api = apis[fname] || {
                         transports: [],
                         central: centralMid
@@ -114,14 +73,14 @@ function loadApiFile(fname) {
                             var id = lodash_1.default.get(transport, 'id');
                             var parameters = lodash_1.default.get(transport, 'parameters');
                             var mids = lodash_1.default.get(transport, 'mids');
-                            var pre = createMiddleware(mids, 0);
-                            var mid = connectMiddlewares(pre, centralMid);
-                            var ctor = transports_1.getTransportConstructor(type);
-                            if (ctor !== undefined) {
+                            var pre = core_1.createMiddleware(mids, 0);
+                            var mid = core_1.connectMiddlewares(pre, centralMid);
+                            var trp = core_1.createTransport(type, parameters, mid);
+                            if (trp !== undefined) {
                                 if (api.transports[id] !== undefined) {
                                     api.transports[id].clear();
                                 }
-                                api.transports[id] = new ctor(parameters, mid);
+                                api.transports[id] = trp;
                             }
                         });
                     }
