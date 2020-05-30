@@ -1,3 +1,6 @@
+// import workerpool from 'workerpool';
+
+
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
@@ -48,3 +51,14 @@ export interface IEsTransport {
     clear(): void
 }
 
+// Rodar em um pool de trabalhadores os middlewares
+
+// const pool = workerpool.pool();
+
+// import workertr from 'worker_threads';
+
+// export async function runMiddlewares(mid: IEsMiddleware | undefined, ctx: IEsContext) {
+//     if (mid !== undefined) {
+//         await pool.exec(mid.execute, [ctx]);
+//     }
+// }

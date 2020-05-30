@@ -1,6 +1,5 @@
 import { IEsTransport, EsParameters, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import { httpRouter } from '../util/http-server';
-import mount from 'koa-mount';
 import lodash from 'lodash';
 import Router from 'koa-router';
 import { logger } from '../util/logger';
@@ -71,6 +70,7 @@ export class EsHttpTransport implements IEsTransport {
             httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), async (ctx, next) => {
                 // Executa middleware central
                 await this.middleware?.execute(ctx.iesContext);
+                //await runMiddlewares(this.middleware, ctx.iesContext);
                 return next();
             });
         });

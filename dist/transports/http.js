@@ -94,6 +94,7 @@ var EsHttpTransport = /** @class */ (function () {
                         case 1:
                             // Executa middleware central
                             _b.sent();
+                            //await runMiddlewares(this.middleware, ctx.iesContext);
                             return [2 /*return*/, next()];
                     }
                 });

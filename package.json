@@ -23,7 +23,8 @@
     "koa-helmet": "^5.2.0",
     "koa-mount": "^4.0.0",
     "koa-router": "^8.0.8",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "workerpool": "^6.0.0"
   },
   "devDependencies": {
     "@types/koa": "^2.11.3",
@@ -31,6 +32,7 @@
     "@types/koa-helmet": "^5.2.0",
     "@types/koa-mount": "^4.0.0",
     "@types/koa-router": "^7.4.1",
-    "@types/lodash": "^4.14.152"
+    "@types/lodash": "^4.14.152",
+    "@types/workerpool": "^5.0.1"
   }
 }
