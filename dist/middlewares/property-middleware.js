@@ -54,6 +54,11 @@ var EsPropertyMiddleware = /** @class */ (function () {
             'value': {
                 type: 'any',
                 optional: false
+            },
+            'runAfter': {
+                type: 'boolean',
+                optional: true,
+                defaultValue: false
             }
         };
         this.isInOut = false;
@@ -62,11 +67,27 @@ var EsPropertyMiddleware = /** @class */ (function () {
         this.next = nextMiddleware;
     }
     EsPropertyMiddleware.prototype.execute = function (context) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                lodash_1.default.set(context.properties, this.values['name'], this.values['value']);
-                return [2 /*return*/, (_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context)];
+            var runAfter;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        runAfter = lodash_1.default.get(this.values, 'runAfter') || false;
+                        if (!runAfter) return [3 /*break*/, 2];
+                        return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
+                    case 1:
+                        _c.sent();
+                        lodash_1.default.set(context.properties, this.values['name'], this.values['value']);
+                        return [3 /*break*/, 4];
+                    case 2:
+                        lodash_1.default.set(context.properties, this.values['name'], this.values['value']);
+                        return [4 /*yield*/, ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context))];
+                    case 3:
+                        _c.sent();
+                        _c.label = 4;
+                    case 4: return [2 /*return*/];
+                }
             });
         });
     };

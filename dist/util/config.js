@@ -45,6 +45,7 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var _1 = require(".");
 var logger_1 = require("./logger");
+var envs_1 = require("../envs");
 ;
 exports.configuration = { env: 'local' };
 var configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.json');
@@ -71,6 +72,9 @@ fs_1.default.watch(configFileName, function (event, fname) { return __awaiter(vo
         switch (_a.label) {
             case 0: return [4 /*yield*/, loadConfig()];
             case 1:
+                _a.sent();
+                return [4 /*yield*/, envs_1.loadEnv(exports.configuration.env)];
+            case 2:
                 _a.sent();
                 return [2 /*return*/];
         }

@@ -39,13 +39,12 @@ export interface IEsMiddleware {
 }
 
 export interface IEsTranportConstructor {
-    new(params: any, pre?: IEsMiddleware, pos?: IEsMiddleware, central?: IEsMiddleware): IEsTransport
+    new(params: any, middleware?: IEsMiddleware): IEsTransport
 }
 
 export interface IEsTransport {
     parameters: EsParameters
-    preMiddleware: IEsMiddleware | undefined
-    posMiddleware: IEsMiddleware | undefined
-    central: IEsMiddleware | undefined
+    middleware: IEsMiddleware | undefined
+    clear(): void
 }
 

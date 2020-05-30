@@ -8,6 +8,6 @@ export declare class EsPropertyMiddleware implements IEsMiddleware {
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, nextMiddleware?: IEsMiddleware);
-    execute(context: IEsContext): Promise<void | undefined>;
+    execute(context: IEsContext): Promise<void>;
 }
 export declare const EsPropertyMiddlewareContructor: IEsMiddlewareConstructor;

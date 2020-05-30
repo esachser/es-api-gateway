@@ -12,8 +12,17 @@ export function loadHttpServer() {
     const app = new koa();
     app.use(helmet());
 
+    app.use(async (ctx, next) => {
+        await next();
+        if (ctx.status === 404 && ctx.body === undefined) {
+            ctx.body = {
+                error: 'Not Found'
+            };
+        }
+    });
+
     app.use(bodyParser());
-    app.use(httpRouter.middleware());
+    app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     
     const server = app.listen(configuration.httpPort || 3000, () => {
         const { port } = server.address() as import('net').AddressInfo;

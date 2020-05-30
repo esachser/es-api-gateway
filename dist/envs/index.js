@@ -41,12 +41,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadEnv = void 0;
 var promises_1 = __importDefault(require("fs/promises"));
+var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var lodash_1 = __importDefault(require("lodash"));
 var util_1 = require("../util");
 var logger_1 = require("../util/logger");
 var middlewares_1 = require("../middlewares");
 var transports_1 = require("../transports");
+var http_server_1 = require("../util/http-server");
 function createMiddleware(arr, idx) {
     if (idx >= arr.length) {
         return undefined;
@@ -59,7 +61,76 @@ function createMiddleware(arr, idx) {
     }
     return createMiddleware(arr, idx + 1);
 }
+function connect2Mids(mid1, mid2) {
+    var mid = mid1;
+    while (mid.next !== undefined)
+        mid = mid.next;
+    mid.next = mid2;
+}
+function connectMiddlewares() {
+    var middlewares = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        middlewares[_i] = arguments[_i];
+    }
+    var mid = undefined;
+    if (middlewares.length > 0) {
+        mid = middlewares[0];
+        var i = 1;
+        while (mid === undefined) {
+            mid = middlewares[i];
+            i++;
+        }
+        for (; i < middlewares.length; i++) {
+            var md = middlewares[i];
+            if (md !== undefined) {
+                connect2Mids(mid, md);
+            }
+        }
+    }
+    return mid;
+}
 var apis = {};
+function loadApiFile(fname) {
+    return __awaiter(this, void 0, void 0, function () {
+        var apiJson, _a, _b, executionJs, centralMid, api, transports;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    _b = (_a = JSON).parse;
+                    return [4 /*yield*/, promises_1.default.readFile(fname)];
+                case 1:
+                    apiJson = _b.apply(_a, [(_c.sent()).toString()]);
+                    logger_1.logger.debug(apiJson);
+                    executionJs = lodash_1.default.get(apiJson, 'execution');
+                    centralMid = createMiddleware(executionJs, 0);
+                    api = apis[fname] || {
+                        transports: [],
+                        central: centralMid
+                    };
+                    transports = lodash_1.default.get(apiJson, 'transports');
+                    if (transports !== undefined) {
+                        transports.forEach(function (transport) {
+                            var type = lodash_1.default.get(transport, 'type');
+                            var id = lodash_1.default.get(transport, 'id');
+                            var parameters = lodash_1.default.get(transport, 'parameters');
+                            var mids = lodash_1.default.get(transport, 'mids');
+                            var pre = createMiddleware(mids, 0);
+                            var mid = connectMiddlewares(pre, centralMid);
+                            var ctor = transports_1.getTransportConstructor(type);
+                            if (ctor !== undefined) {
+                                if (api.transports[id] !== undefined) {
+                                    api.transports[id].clear();
+                                }
+                                api.transports[id] = new ctor(parameters, mid);
+                            }
+                        });
+                    }
+                    apis[fname] = api;
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 function reloadEnv(dir) {
     return __awaiter(this, void 0, void 0, function () {
         var finfos;
@@ -70,38 +141,13 @@ function reloadEnv(dir) {
                 case 1:
                     finfos = _a.sent();
                     finfos.filter(function (f) { return f.isFile() && f.name.endsWith('.json'); }).forEach(function (finfo) { return __awaiter(_this, void 0, void 0, function () {
-                        var apiJson, _a, _b, executionJs, centralMid, api, transports;
-                        return __generator(this, function (_c) {
-                            switch (_c.label) {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
                                 case 0:
                                     logger_1.logger.info("Loading API " + finfo.name);
-                                    _b = (_a = JSON).parse;
-                                    return [4 /*yield*/, promises_1.default.readFile(path_1.default.resolve(dir, finfo.name))];
+                                    return [4 /*yield*/, loadApiFile(path_1.default.resolve(dir, finfo.name))];
                                 case 1:
-                                    apiJson = _b.apply(_a, [(_c.sent()).toString()]);
-                                    logger_1.logger.debug(apiJson);
-                                    executionJs = lodash_1.default.get(apiJson, 'execution');
-                                    centralMid = createMiddleware(executionJs, 0);
-                                    api = {
-                                        transports: [],
-                                        central: centralMid
-                                    };
-                                    transports = lodash_1.default.get(apiJson, 'transports');
-                                    if (transports !== undefined) {
-                                        transports.forEach(function (transport) {
-                                            var type = lodash_1.default.get(transport, 'type');
-                                            var parameters = lodash_1.default.get(transport, 'parameters');
-                                            var preJs = lodash_1.default.get(transport, 'pre');
-                                            var posJs = lodash_1.default.get(transport, 'pos');
-                                            var pre = createMiddleware(preJs, 0);
-                                            var pos = createMiddleware(posJs, 0);
-                                            var ctor = transports_1.getTransportConstructor(type);
-                                            if (ctor !== undefined) {
-                                                api.transports.push(new ctor(parameters, pre, pos, centralMid));
-                                            }
-                                        });
-                                    }
-                                    apis[finfo.name] = api;
+                                    _a.sent();
                                     return [2 /*return*/];
                             }
                         });
@@ -111,13 +157,36 @@ function reloadEnv(dir) {
         });
     });
 }
+var watcher = undefined;
 function loadEnv(envName) {
     return __awaiter(this, void 0, void 0, function () {
-        var envDir;
+        var envDir, envDirExists, envFinfo;
         return __generator(this, function (_a) {
-            envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);
-            reloadEnv(envDir);
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);
+                    envDirExists = fs_1.default.existsSync(envDir);
+                    if (watcher !== undefined) {
+                        watcher.close();
+                        http_server_1.httpRouter.stack = [];
+                    }
+                    if (!envDirExists) return [3 /*break*/, 2];
+                    return [4 /*yield*/, promises_1.default.stat(envDir)];
+                case 1:
+                    envFinfo = _a.sent();
+                    if (envFinfo.isDirectory()) {
+                        reloadEnv(envDir);
+                        watcher = fs_1.default.watch(envDir, function (ev, fname) {
+                            if (fname.endsWith('.json')) {
+                                // reloadEnv(envDir);
+                                logger_1.logger.info("Reloading " + fname + ".");
+                                loadApiFile(path_1.default.resolve(envDir, fname));
+                            }
+                        });
+                    }
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
+            }
         });
     });
 }

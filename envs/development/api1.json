@@ -2,16 +2,21 @@
     "transports": [
         {
             "type": "http",
+            "id": "http",
             "parameters": {
-                "routeContext": "/api/teste"
+                "routeContext": "/api/teste/",
+                "routes": {
+                    "/": ["GET", "POST"],
+                    "/healthz": ["GET"]
+                }
             },
-            "pre": [],
-            "pos": [
+            "mids": [
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetest",
-                        "value": "testandoResposta"
+                        "value": "testandoResposta",
+                        "runAfter": true
                     }
                 },
                 {
@@ -20,14 +25,16 @@
                         "name": "response.body",
                         "value": {
                             "ok": true
-                        }
+                        },
+                        "runAfter": true
                     }
                 },
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.status",
-                        "value": 200
+                        "value": 200,
+                        "runAfter": true
                     }
                 }
             ]

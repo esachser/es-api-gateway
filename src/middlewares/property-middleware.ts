@@ -10,6 +10,11 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         'value': {
             type: 'any',
             optional: false
+        },
+        'runAfter': {
+            type: 'boolean',
+            optional: true,
+            defaultValue: false
         }
     };
 
@@ -29,9 +34,15 @@ export class EsPropertyMiddleware implements IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
-        lodash.set(context.properties, this.values['name'], this.values['value']);
-
-        return this.next?.execute(context);
+        const runAfter = lodash.get(this.values, 'runAfter') || false;
+        if (runAfter) {
+            await this.next?.execute(context);
+            lodash.set(context.properties, this.values['name'], this.values['value']);
+        }
+        else {
+            lodash.set(context.properties, this.values['name'], this.values['value']);
+            await this.next?.execute(context);
+        }
     }
 };
 

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { baseDirectory } from '.';
 import { logger } from './logger';
+import { loadEnv } from '../envs';
 
 export interface IEsConfig {
     env: string,
@@ -23,4 +24,5 @@ export async function loadConfig() {
 
 fs.watch(configFileName, async (event, fname) => {
     await loadConfig();
+    await loadEnv(configuration.env);
 });

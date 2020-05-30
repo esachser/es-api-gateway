@@ -2,6 +2,23 @@ import { IEsTransport, EsParameters, IEsMiddleware, IEsContext, IEsTranportConst
 import { httpRouter } from '../util/http-server';
 import mount from 'koa-mount';
 import lodash from 'lodash';
+import Router from 'koa-router';
+import { logger } from '../util/logger';
+
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+interface IEsHttpTransportParams {
+    routeContext: string,
+    routes: { [id: string]: Array<Method> },
+    swagger?: any
+};
+
+declare module 'koa' {
+    interface BaseContext {
+        iesContext: IEsContext
+    }
+}
+
 
 export class EsHttpTransport implements IEsTransport {
     parameters: EsParameters = {
@@ -10,49 +27,67 @@ export class EsHttpTransport implements IEsTransport {
             optional: false
         }
     };
-    preMiddleware: IEsMiddleware | undefined;
-    posMiddleware: IEsMiddleware | undefined;
-    central: IEsMiddleware | undefined;
+    middleware: IEsMiddleware | undefined;
 
     routeContext: string;
+
+    router: Router;
 
     /**
      *
      */
-    constructor(params: any, pre: IEsMiddleware | undefined, pos: IEsMiddleware | undefined, central: IEsMiddleware | undefined) {
+    constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined) {
         // Verifica padrões
-        this.preMiddleware = pre;
-        this.posMiddleware = pos;
+        this.middleware = middleware;
         this.routeContext = params.routeContext;
-        this.central = central;
+        this.router = new Router();
 
-        httpRouter.get(this.routeContext, async ctx => {
+        if (!this.routeContext.endsWith('/')) {
+            this.routeContext += '/';
+        }
+
+        httpRouter.use(this.routeContext, async (ctx, next) => {
             // Prepara a chamada
             const context: IEsContext = {
                 properties: {
                     httpctx: ctx,
                     headers: ctx.request.headers,
+                    params: ctx.params,
+                    query: ctx.query
                 },
                 parsedbody: ctx.request.body,
                 rawbody: ctx.request.rawBody
-            }
+            };
 
-            // Executa os middlewares iniciais
-            await this.preMiddleware?.execute(context);
+            ctx.iesContext = context;
 
-            // Executa middleware central
-            await this.central?.execute(context);
+            return next();
+        });
 
-            // Executa o final
-            await this.posMiddleware?.execute(context);
+        Object.keys(params.routes).forEach(path => {
+            let totalPath = `${this.routeContext}${path}`;
+            totalPath = totalPath.replace(/\/{2,}/g,'/');
 
+            httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), async (ctx, next) => {
+                // Executa middleware central
+                await this.middleware?.execute(ctx.iesContext);
+                return next();
+            });
+        });
+
+        httpRouter.use(this.routeContext, async (ctx) => {
             // Captura resultados e escreve a resposta
-
-            ctx.set(lodash.get(context.properties, 'response.headers') || {});
-            ctx.status = lodash.get(context.properties, 'response.status');
-            ctx.body = lodash.get(context.properties, 'response.body');
+            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
+            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
+            ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
         });
     }
-} 
+
+    clear() {
+        httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
+        logger.info(`Clear ${this.routeContext} executed`);
+        logger.debug(httpRouter.stack);
+    }
+}
 
 export const EsHttpTransportContructor: IEsTranportConstructor = EsHttpTransport;

@@ -12,7 +12,7 @@ async function start() {
     loadTransports();
     loadCustomTransports();
     loadHttpServer();
-    loadEnv(configuration.env);
+    await loadEnv(configuration.env);
 }
 
 start().catch(e => {

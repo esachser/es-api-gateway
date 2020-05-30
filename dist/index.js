@@ -54,7 +54,9 @@ function start() {
                     transports_1.loadTransports();
                     transports_1.loadCustomTransports();
                     http_server_1.loadHttpServer();
-                    envs_1.loadEnv(config_1.configuration.env);
+                    return [4 /*yield*/, envs_1.loadEnv(config_1.configuration.env)];
+                case 2:
+                    _a.sent();
                     return [2 /*return*/];
             }
         });

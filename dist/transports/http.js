@@ -42,11 +42,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EsHttpTransportContructor = exports.EsHttpTransport = void 0;
 var http_server_1 = require("../util/http-server");
 var lodash_1 = __importDefault(require("lodash"));
+var koa_router_1 = __importDefault(require("koa-router"));
+var logger_1 = require("../util/logger");
+;
 var EsHttpTransport = /** @class */ (function () {
     /**
      *
      */
-    function EsHttpTransport(params, pre, pos, central) {
+    function EsHttpTransport(params, middleware) {
         var _this = this;
         this.parameters = {
             'routeContext': {
@@ -55,48 +58,63 @@ var EsHttpTransport = /** @class */ (function () {
             }
         };
         // Verifica padrões
-        this.preMiddleware = pre;
-        this.posMiddleware = pos;
+        this.middleware = middleware;
         this.routeContext = params.routeContext;
-        this.central = central;
-        http_server_1.httpRouter.get(this.routeContext, function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+        this.router = new koa_router_1.default();
+        if (!this.routeContext.endsWith('/')) {
+            this.routeContext += '/';
+        }
+        http_server_1.httpRouter.use(this.routeContext, function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
             var context;
-            var _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        context = {
-                            properties: {
-                                httpctx: ctx,
-                                headers: ctx.request.headers,
-                            },
-                            parsedbody: ctx.request.body,
-                            rawbody: ctx.request.rawBody
-                        };
-                        // Executa os middlewares iniciais
-                        return [4 /*yield*/, ((_a = this.preMiddleware) === null || _a === void 0 ? void 0 : _a.execute(context))];
-                    case 1:
-                        // Executa os middlewares iniciais
-                        _d.sent();
+            return __generator(this, function (_a) {
+                context = {
+                    properties: {
+                        httpctx: ctx,
+                        headers: ctx.request.headers,
+                        params: ctx.params,
+                        query: ctx.query
+                    },
+                    parsedbody: ctx.request.body,
+                    rawbody: ctx.request.rawBody
+                };
+                ctx.iesContext = context;
+                return [2 /*return*/, next()];
+            });
+        }); });
+        Object.keys(params.routes).forEach(function (path) {
+            var totalPath = "" + _this.routeContext + path;
+            totalPath = totalPath.replace(/\/{2,}/g, '/');
+            http_server_1.httpRouter.register(totalPath, params.routes[path].map(function (t) { return t.toString(); }), function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: 
                         // Executa middleware central
-                        return [4 /*yield*/, ((_b = this.central) === null || _b === void 0 ? void 0 : _b.execute(context))];
-                    case 2:
-                        // Executa middleware central
-                        _d.sent();
-                        // Executa o final
-                        return [4 /*yield*/, ((_c = this.posMiddleware) === null || _c === void 0 ? void 0 : _c.execute(context))];
-                    case 3:
-                        // Executa o final
-                        _d.sent();
-                        // Captura resultados e escreve a resposta
-                        ctx.set(lodash_1.default.get(context.properties, 'response.headers') || {});
-                        ctx.status = lodash_1.default.get(context.properties, 'response.status');
-                        ctx.body = lodash_1.default.get(context.properties, 'response.body');
-                        return [2 /*return*/];
-                }
+                        return [4 /*yield*/, ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(ctx.iesContext))];
+                        case 1:
+                            // Executa middleware central
+                            _b.sent();
+                            return [2 /*return*/, next()];
+                    }
+                });
+            }); });
+        });
+        http_server_1.httpRouter.use(this.routeContext, function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                // Captura resultados e escreve a resposta
+                ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
+                ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
+                return [2 /*return*/];
             });
         }); });
     }
+    EsHttpTransport.prototype.clear = function () {
+        var _this = this;
+        http_server_1.httpRouter.stack = http_server_1.httpRouter.stack.filter(function (l) { return !l.path.startsWith(_this.routeContext); });
+        logger_1.logger.info("Clear " + this.routeContext + " executed");
+        logger_1.logger.debug(http_server_1.httpRouter.stack);
+    };
     return EsHttpTransport;
 }());
 exports.EsHttpTransport = EsHttpTransport;

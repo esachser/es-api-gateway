@@ -1,5 +1,5 @@
 {
     "env": "development",
     "httpPort": 4000,
-    "logLevel": "debug"
+    "logLevel": "info"
 }
