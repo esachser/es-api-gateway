@@ -1,8 +1,8 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
 import lodash from 'lodash';
 
 export class EsPropertyMiddleware implements IEsMiddleware {
-    parameters: EsParameters = {
+    static readonly parameters: EsParameters = {
         'name': {
             type: 'string',
             optional: false
@@ -17,12 +17,11 @@ export class EsPropertyMiddleware implements IEsMiddleware {
             defaultValue: false
         }
     };
+    static readonly isInOut = true;
 
     values: any;
 
     next?: IEsMiddleware;
-
-    isInOut = false;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -45,6 +44,8 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         }
     }
 };
+
+export const EsPropertyMiddlwareParams: IEsMiddlewareParams = EsPropertyMiddleware;
 
 export const EsPropertyMiddlewareContructor: IEsMiddlewareConstructor = EsPropertyMiddleware;
 

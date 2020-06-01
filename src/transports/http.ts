@@ -83,6 +83,8 @@ export class EsHttpTransport implements IEsTransport {
             ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
             ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
         });
+
+        logger.info(`Loaded ${this.routeContext}`);
     }
 
     clear() {

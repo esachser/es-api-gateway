@@ -12,6 +12,12 @@
             },
             "mids": [
                 {
+                    "type": "EsMetricsMiddleware",
+                    "data":{
+                        "prop": "metrics.timems"
+                    }
+                },
+                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetest",

@@ -39,29 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsPropertyMiddlewareContructor = exports.EsPropertyMiddleware = void 0;
+exports.EsPropertyMiddlewareContructor = exports.EsPropertyMiddlwareParams = exports.EsPropertyMiddleware = void 0;
 var lodash_1 = __importDefault(require("lodash"));
 var EsPropertyMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     function EsPropertyMiddleware(values, nextMiddleware) {
-        this.parameters = {
-            'name': {
-                type: 'string',
-                optional: false
-            },
-            'value': {
-                type: 'any',
-                optional: false
-            },
-            'runAfter': {
-                type: 'boolean',
-                optional: true,
-                defaultValue: false
-            }
-        };
-        this.isInOut = false;
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
@@ -91,9 +75,26 @@ var EsPropertyMiddleware = /** @class */ (function () {
             });
         });
     };
+    EsPropertyMiddleware.parameters = {
+        'name': {
+            type: 'string',
+            optional: false
+        },
+        'value': {
+            type: 'any',
+            optional: false
+        },
+        'runAfter': {
+            type: 'boolean',
+            optional: true,
+            defaultValue: false
+        }
+    };
+    EsPropertyMiddleware.isInOut = true;
     return EsPropertyMiddleware;
 }());
 exports.EsPropertyMiddleware = EsPropertyMiddleware;
 ;
+exports.EsPropertyMiddlwareParams = EsPropertyMiddleware;
 exports.EsPropertyMiddlewareContructor = EsPropertyMiddleware;
 //# sourceMappingURL=property-middleware.js.map

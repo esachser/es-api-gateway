@@ -110,6 +110,7 @@ var EsHttpTransport = /** @class */ (function () {
                 return [2 /*return*/];
             });
         }); });
+        logger_1.logger.info("Loaded " + this.routeContext);
     }
     EsHttpTransport.prototype.clear = function () {
         var _this = this;

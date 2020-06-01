@@ -25,13 +25,15 @@ export interface IEsMiddlewareConstructor {
     new (values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware;
 }
 export interface IEsMiddleware {
-    parameters: EsParameters;
     values: {
         [id: string]: any;
     };
-    isInOut: boolean;
     next?: IEsMiddleware;
     execute(context: IEsContext): void;
+}
+export interface IEsMiddlewareParams {
+    parameters: EsParameters;
+    isInOut: boolean;
 }
 export interface IEsTranportConstructor {
     new (params: any, middleware?: IEsMiddleware): IEsTransport;
