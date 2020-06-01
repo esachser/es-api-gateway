@@ -43,11 +43,14 @@ async function loadApiFile(fname: string) {
 
             const mid = connectMiddlewares(pre, centralMid);
 
+            if (api.transports[id] !== undefined) {
+                api.transports[id].clear();
+                delete api.transports[id];
+            }
+
             const trp = createTransport(type, parameters, mid);
+
             if (trp !== undefined) {
-                if (api.transports[id] !== undefined) {
-                    api.transports[id].clear();
-                }
                 api.transports[id] = trp;
             }
         });

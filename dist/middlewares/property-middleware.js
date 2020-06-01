@@ -41,6 +41,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EsPropertyMiddlewareContructor = exports.EsPropertyMiddlwareParams = exports.EsPropertyMiddleware = void 0;
 var lodash_1 = __importDefault(require("lodash"));
+var vm2_1 = require("vm2");
+var logger_1 = require("../util/logger");
+var stringify_object_1 = __importDefault(require("stringify-object"));
+var vm = new vm2_1.NodeVM();
 var EsPropertyMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -49,6 +53,25 @@ var EsPropertyMiddleware = /** @class */ (function () {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
+        // Se for uma expressão, prepara VMScript para rodar.
+        var script = '';
+        if (values['value'] === undefined &&
+            values['expression'] !== undefined) {
+            script += "module.exports=function(props){return " + values['expression'] + ";}";
+        }
+        // Senão, prepara VMScript para somente devolver o valor
+        else {
+            script += "module.exports=function(props){return " + stringify_object_1.default(values['value']) + ";}";
+        }
+        logger_1.logger.debug("script: " + script);
+        try {
+            this.vmScript = new vm2_1.VMScript(script).compile();
+        }
+        catch (err) {
+            logger_1.logger.error({ error: err, script: script });
+            this.vmScript = new vm2_1.VMScript('{}').compile();
+        }
+        logger_1.logger.debug(vm.run(this.vmScript));
     }
     EsPropertyMiddleware.prototype.execute = function (context) {
         var _a, _b;
@@ -58,14 +81,15 @@ var EsPropertyMiddleware = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         runAfter = lodash_1.default.get(this.values, 'runAfter') || false;
+                        vm.freeze(context.properties, 'props');
                         if (!runAfter) return [3 /*break*/, 2];
                         return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
                     case 1:
                         _c.sent();
-                        lodash_1.default.set(context.properties, this.values['name'], this.values['value']);
+                        lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context.properties));
                         return [3 /*break*/, 4];
                     case 2:
-                        lodash_1.default.set(context.properties, this.values['name'], this.values['value']);
+                        lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context.properties));
                         return [4 /*yield*/, ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context))];
                     case 3:
                         _c.sent();
@@ -82,7 +106,11 @@ var EsPropertyMiddleware = /** @class */ (function () {
         },
         'value': {
             type: 'any',
-            optional: false
+            optional: true
+        },
+        'expression': {
+            type: 'string',
+            optional: true
         },
         'runAfter': {
             type: 'boolean',

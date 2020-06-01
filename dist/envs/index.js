@@ -75,11 +75,12 @@ function loadApiFile(fname) {
                             var mids = lodash_1.default.get(transport, 'mids');
                             var pre = core_1.createMiddleware(mids, 0);
                             var mid = core_1.connectMiddlewares(pre, centralMid);
+                            if (api.transports[id] !== undefined) {
+                                api.transports[id].clear();
+                                delete api.transports[id];
+                            }
                             var trp = core_1.createTransport(type, parameters, mid);
                             if (trp !== undefined) {
-                                if (api.transports[id] !== undefined) {
-                                    api.transports[id].clear();
-                                }
                                 api.transports[id] = trp;
                             }
                         });
