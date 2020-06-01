@@ -60,9 +60,18 @@ export class EsHttpTransport implements IEsTransport {
 
             ctx.iesContext = context;
 
-            logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
+            //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
+            let init = Date.now();
 
-            return next();
+            // Roda o que precisa
+            await next();
+            
+            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
+            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
+            ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
+            
+            let diff = Date.now() - init;
+            logger.debug(`Call ${ctx.iesContext.properties.httpctx.path} ended in ${diff}ms`);
         });
 
         Object.keys(params.routes).forEach(path => {
@@ -74,14 +83,6 @@ export class EsHttpTransport implements IEsTransport {
                 await this.middleware?.execute(ctx.iesContext);
                 return next();
             });
-        });
-
-        httpRouter.use(this.routeContext, async (ctx) => {
-            // Captura resultados e escreve a resposta
-            logger.info(`Call ${ctx.iesContext.properties.httpctx.path} ended at ${new Date().valueOf()}`);
-            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
-            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
-            ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
         });
 
         logger.info(`Loaded ${this.routeContext}`);

@@ -10,6 +10,15 @@ export const httpRouter = new Router();
 
 export function loadHttpServer() {
     const app = new koa();
+    
+    app.use(async (ctx,next) => {
+        // Avaliando tempo de execução total da aplicação koa
+        let init = Date.now();
+        await next();
+        let diff = Date.now() - init;
+        logger.debug(`Total app process time: ${diff}ms`);
+    });
+
     app.use(helmet());
 
     app.use(async (ctx, next) => {

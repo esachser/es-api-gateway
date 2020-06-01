@@ -65,21 +65,34 @@ var EsHttpTransport = /** @class */ (function () {
             this.routeContext += '/';
         }
         http_server_1.httpRouter.use(this.routeContext, function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
-            var context;
+            var context, init, diff;
             return __generator(this, function (_a) {
-                context = {
-                    properties: {
-                        httpctx: ctx,
-                        headers: ctx.request.headers,
-                        params: ctx.params,
-                        query: ctx.query
-                    },
-                    parsedbody: ctx.request.body,
-                    rawbody: ctx.request.rawBody
-                };
-                ctx.iesContext = context;
-                logger_1.logger.info("Call " + context.properties.httpctx.path + " started at " + new Date().valueOf());
-                return [2 /*return*/, next()];
+                switch (_a.label) {
+                    case 0:
+                        context = {
+                            properties: {
+                                httpctx: ctx,
+                                headers: ctx.request.headers,
+                                params: ctx.params,
+                                query: ctx.query
+                            },
+                            parsedbody: ctx.request.body,
+                            rawbody: ctx.request.rawBody
+                        };
+                        ctx.iesContext = context;
+                        init = Date.now();
+                        // Roda o que precisa
+                        return [4 /*yield*/, next()];
+                    case 1:
+                        // Roda o que precisa
+                        _a.sent();
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
+                        ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                        ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
+                        diff = Date.now() - init;
+                        logger_1.logger.debug("Call " + ctx.iesContext.properties.httpctx.path + " ended in " + diff + "ms");
+                        return [2 /*return*/];
+                }
             });
         }); });
         Object.keys(params.routes).forEach(function (path) {
@@ -100,16 +113,6 @@ var EsHttpTransport = /** @class */ (function () {
                 });
             }); });
         });
-        http_server_1.httpRouter.use(this.routeContext, function (ctx) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                // Captura resultados e escreve a resposta
-                logger_1.logger.info("Call " + ctx.iesContext.properties.httpctx.path + " ended at " + new Date().valueOf());
-                ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
-                ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
-                ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
-                return [2 /*return*/];
-            });
-        }); });
         logger_1.logger.info("Loaded " + this.routeContext);
     }
     EsHttpTransport.prototype.clear = function () {

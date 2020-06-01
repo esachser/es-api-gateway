@@ -50,6 +50,21 @@ exports.httpRouter = new koa_router_1.default();
 function loadHttpServer() {
     var _this = this;
     var app = new koa_1.default();
+    app.use(function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
+        var init, diff;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    init = Date.now();
+                    return [4 /*yield*/, next()];
+                case 1:
+                    _a.sent();
+                    diff = Date.now() - init;
+                    logger_1.logger.debug("Total app process time: " + diff + "ms");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     app.use(koa_helmet_1.default());
     app.use(function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
