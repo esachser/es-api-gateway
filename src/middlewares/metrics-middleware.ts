@@ -9,7 +9,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
             optional: false
         }
     };
-    static readonly isInOut = false;
+    static readonly isInOut = true;
 
     values: any;
 

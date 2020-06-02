@@ -26,6 +26,34 @@
                     }
                 },
                 {
+                    "type": "EsParallelMiddleware",
+                    "data": {
+                        "mids": [
+                            [
+                                {
+                                    "type": "EsPropertyMiddleware",
+                                    "data": {
+                                        "name": "response.headers.pa",
+                                        "expression": "Date.now()",
+                                        "runAfter": true
+                                    }
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "EsPropertyMiddleware",
+                                    "data": {
+                                        "name": "response.headers.pb",
+                                        "expression": "Date.now()",
+                                        "runAfter": true
+                                    }
+                                }
+                            ]
+                        ],
+                        "runAfter": true
+                    }
+                },
+                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetest",

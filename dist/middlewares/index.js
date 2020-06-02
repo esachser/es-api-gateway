@@ -9,6 +9,7 @@ var fs_1 = __importDefault(require("fs"));
 var logger_1 = require("../util/logger");
 var property_middleware_1 = require("./property-middleware");
 var metrics_middleware_1 = require("./metrics-middleware");
+var parallel_middleware_1 = require("./parallel-middleware");
 var mids = {};
 function readDirectoryProjects(dir) {
     var finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -24,6 +25,8 @@ function loadMiddlewares() {
     mids['EsPropertyMiddleware'] = property_middleware_1.EsPropertyMiddlewareContructor;
     logger_1.logger.info('Loading Metrics Middleware');
     mids['EsMetricsMiddleware'] = metrics_middleware_1.EsMetricsMiddlewareContructor;
+    logger_1.logger.info('Loading Parallel Middleware');
+    mids['EsParallelMiddleware'] = parallel_middleware_1.EsParallelMiddlewareContructor;
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

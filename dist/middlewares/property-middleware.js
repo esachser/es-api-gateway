@@ -69,9 +69,8 @@ var EsPropertyMiddleware = /** @class */ (function () {
         }
         catch (err) {
             logger_1.logger.error({ error: err, script: script });
-            this.vmScript = new vm2_1.VMScript('{}').compile();
+            this.vmScript = new vm2_1.VMScript('module.exports=() => undefined').compile();
         }
-        logger_1.logger.debug(vm.run(this.vmScript));
     }
     EsPropertyMiddleware.prototype.execute = function (context) {
         var _a, _b;

@@ -13,7 +13,7 @@ export declare type EsObjectSchema = {
     defaultValue?: any;
 };
 export declare type EsOtherSchema = {
-    type: 'string' | 'number' | 'boolean' | 'any';
+    type: 'string' | 'number' | 'boolean' | 'any' | 'array';
     optional: boolean;
     defaultValue?: any;
 };
@@ -25,9 +25,6 @@ export interface IEsMiddlewareConstructor {
     new (values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware;
 }
 export interface IEsMiddleware {
-    values: {
-        [id: string]: any;
-    };
     next?: IEsMiddleware;
     execute(context: IEsContext): void;
 }

@@ -60,10 +60,8 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         }
         catch (err) {
             logger.error({error: err, script});
-            this.vmScript = new VMScript('{}').compile();
+            this.vmScript = new VMScript('module.exports=() => undefined').compile();
         }
-
-        logger.debug(vm.run(this.vmScript));
     }
 
     async execute(context: IEsContext) {

@@ -35,53 +35,71 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsMetricsMiddlewareContructor = exports.EsMetricsMiddlwareParams = exports.EsMetricsMiddleware = void 0;
-var lodash_1 = __importDefault(require("lodash"));
-var logger_1 = require("../util/logger");
-var EsMetricsMiddleware = /** @class */ (function () {
+exports.EsParallelMiddlewareContructor = exports.EsParallelMiddlwareParams = exports.EsParallelMiddleware = void 0;
+var core_1 = require("../core");
+var EsParallelMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    function EsMetricsMiddleware(values, nextMiddleware) {
+    function EsParallelMiddleware(values, nextMiddleware) {
         // Verifica values contra o esquema.
-        this.values = values;
+        this.values = [];
         this.next = nextMiddleware;
+        if (Array.isArray(values['mids'])) {
+            this.values['mids'] = values['mids'].map(function (ms) {
+                if (Array.isArray(ms)) {
+                    return core_1.createMiddleware(ms, 0);
+                }
+                else {
+                    return undefined;
+                }
+            });
+        }
     }
-    EsMetricsMiddleware.prototype.execute = function (context) {
+    EsParallelMiddleware.prototype.execute = function (context) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var init, end, diff;
+            var rAfter;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        init = new Date().valueOf();
-                        return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
+                        rAfter = Boolean(this.values['runAfter']);
+                        if (!!rAfter) return [3 /*break*/, 2];
+                        return [4 /*yield*/, Promise.all(this.values['mids'].map(function (m) { return m === null || m === void 0 ? void 0 : m.execute(context); }))];
                     case 1:
                         _b.sent();
-                        end = new Date().valueOf();
-                        diff = end - init;
-                        logger_1.logger.info("Duration: " + diff + "ms");
-                        lodash_1.default.set(context.properties, this.values['prop'], diff);
-                        return [2 /*return*/];
+                        _b.label = 2;
+                    case 2: return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
+                    case 3:
+                        _b.sent();
+                        if (!rAfter) return [3 /*break*/, 5];
+                        return [4 /*yield*/, Promise.all(this.values['mids'].map(function (m) { return m === null || m === void 0 ? void 0 : m.execute(context); }))];
+                    case 4:
+                        _b.sent();
+                        _b.label = 5;
+                    case 5: return [2 /*return*/];
                 }
             });
         });
     };
-    EsMetricsMiddleware.parameters = {
-        'prop': {
-            type: 'string',
-            optional: false
+    EsParallelMiddleware.parameters = {
+        'mids': {
+            type: 'array',
+            optional: false,
+            defaultValue: []
+        },
+        'runAfter': {
+            type: 'boolean',
+            optional: true,
+            defaultValue: false
         }
     };
-    EsMetricsMiddleware.isInOut = true;
-    return EsMetricsMiddleware;
+    EsParallelMiddleware.isInOut = true;
+    return EsParallelMiddleware;
 }());
-exports.EsMetricsMiddleware = EsMetricsMiddleware;
+exports.EsParallelMiddleware = EsParallelMiddleware;
 ;
-exports.EsMetricsMiddlwareParams = EsMetricsMiddleware;
-exports.EsMetricsMiddlewareContructor = EsMetricsMiddleware;
-//# sourceMappingURL=metrics-middleware.js.map
+exports.EsParallelMiddlwareParams = EsParallelMiddleware;
+exports.EsParallelMiddlewareContructor = EsParallelMiddleware;
+//# sourceMappingURL=parallel-middleware.js.map

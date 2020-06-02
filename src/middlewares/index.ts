@@ -6,6 +6,7 @@ import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
 import { EsPropertyMiddlewareContructor } from './property-middleware';
 import { EsMetricsMiddlewareContructor } from './metrics-middleware';
+import { EsParallelMiddlewareContructor } from './parallel-middleware';
 
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
 
@@ -28,6 +29,9 @@ export function loadMiddlewares() {
 
     logger.info('Loading Metrics Middleware');
     mids['EsMetricsMiddleware'] = EsMetricsMiddlewareContructor;
+
+    logger.info('Loading Parallel Middleware');
+    mids['EsParallelMiddleware'] = EsParallelMiddlewareContructor;
 
 };
 

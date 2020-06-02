@@ -27,7 +27,7 @@ export interface IEsContext {
 }
 
 export type EsObjectSchema = { type: 'object', optional: boolean, schema: EsObjectSchema, defaultValue?: any };
-export type EsOtherSchema = { type: 'string' | 'number' | 'boolean' | 'any', optional: boolean, defaultValue?: any };
+export type EsOtherSchema = { type: 'string' | 'number' | 'boolean' | 'any' | 'array', optional: boolean, defaultValue?: any };
 
 export type EsSchema = EsObjectSchema | EsOtherSchema;
 export type EsParameters = { [id:string] : EsSchema };
@@ -37,7 +37,6 @@ export interface IEsMiddlewareConstructor {
 }
 
 export interface IEsMiddleware {
-    values: { [id: string]: any };
     next?: IEsMiddleware
     execute(context: IEsContext): void
 }
