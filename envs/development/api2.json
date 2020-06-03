@@ -4,7 +4,7 @@
             "type": "http",
             "id": "http",
             "parameters": {
-                "routeContext": "/api/teste/",
+                "routeContext": "/api/v2/teste/",
                 "routes": {
                     "/": ["GET", "POST"],
                     "/healthz": ["GET"]
@@ -26,47 +26,11 @@
                     }
                 },
                 {
-                    "type": "EsParallelMiddleware",
-                    "data": {
-                        "mids": [
-                            [
-                                {
-                                    "type": "EsPropertyMiddleware",
-                                    "data": {
-                                        "name": "response.headers.pa",
-                                        "expression": "Date.now()",
-                                        "runAfter": true
-                                    }
-                                }
-                            ],
-                            [
-                                {
-                                    "type": "EsPropertyMiddleware",
-                                    "data": {
-                                        "name": "response.headers.pb",
-                                        "expression": "Date.now()",
-                                        "runAfter": true
-                                    }
-                                }
-                            ]
-                        ],
-                        "runAfter": true
-                    }
-                },
-                {
-                    "type": "EsPropertyMiddleware",
-                    "data": {
-                        "name": "response.headers.responsetest",
-                        "value": "testandoResposta",
-                        "runAfter": true
-                    }
-                },
-                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.body",
                         "value": {
-                            "ok": true
+                            "ok2": true
                         },
                         "runAfter": true
                     }

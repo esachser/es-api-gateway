@@ -2,6 +2,7 @@
 import lodash from 'lodash';
 import { getMiddlewareConstructor } from '../middlewares';
 import { getTransportConstructor } from '../transports';
+import { validateObject } from './schemas';
 
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
@@ -56,19 +57,7 @@ export interface IEsTransport {
     clear(): void
 }
 
-// Rodar em um pool de trabalhadores os middlewares
-
-// const pool = workerpool.pool();
-
-// import workertr from 'worker_threads';
-
-// export async function runMiddlewares(mid: IEsMiddleware | undefined, ctx: IEsContext) {
-//     if (mid !== undefined) {
-//         await pool.exec(mid.execute, [ctx]);
-//     }
-// }
-
-export function createMiddleware(arr: any[], idx: number): IEsMiddleware | undefined {
+export async function createMiddleware(arr: any[], idx: number): Promise<IEsMiddleware | undefined> {
     if (idx >= arr.length) {
         return undefined;
     }
@@ -78,8 +67,10 @@ export function createMiddleware(arr: any[], idx: number): IEsMiddleware | undef
 
     const ctor = getMiddlewareConstructor(type);
 
-    if (ctor !== undefined) {
-        return new ctor(data, createMiddleware(arr, idx + 1));
+    const v = await validateObject(type, data);
+
+    if (ctor !== undefined && v) {
+        return new ctor(data, await createMiddleware(arr, idx + 1));
     }
     return createMiddleware(arr, idx + 1);
 }

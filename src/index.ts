@@ -4,6 +4,7 @@ import { logger } from './util/logger';
 import { loadTransports, loadCustomTransports } from './transports';
 import { loadEnv } from './envs';
 import { loadHttpServer } from './util/http-server';
+import { loadJsonSchemaValidator } from './core/schemas';
 
 async function start() {
     await loadConfig();
@@ -12,10 +13,12 @@ async function start() {
     loadTransports();
     loadCustomTransports();
     loadHttpServer();
+    loadJsonSchemaValidator();
     await loadEnv(configuration.env);
 }
 
 start().catch(e => {
+    console.log(e);
     logger.error(e);
 });
 

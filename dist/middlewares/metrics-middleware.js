@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsMetricsMiddlewareContructor = exports.EsMetricsMiddlwareParams = exports.EsMetricsMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsMetricsMiddleware = void 0;
 var lodash_1 = __importDefault(require("lodash"));
 var logger_1 = require("../util/logger");
 var EsMetricsMiddleware = /** @class */ (function () {
@@ -71,17 +71,25 @@ var EsMetricsMiddleware = /** @class */ (function () {
             });
         });
     };
-    EsMetricsMiddleware.parameters = {
-        'prop': {
-            type: 'string',
-            optional: false
-        }
-    };
     EsMetricsMiddleware.isInOut = true;
     return EsMetricsMiddleware;
 }());
 exports.EsMetricsMiddleware = EsMetricsMiddleware;
 ;
-exports.EsMetricsMiddlwareParams = EsMetricsMiddleware;
-exports.EsMetricsMiddlewareContructor = EsMetricsMiddleware;
+exports.MiddlewareCtor = EsMetricsMiddleware;
+exports.MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsMetricsMiddleware",
+    "title": "Metrics Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "prop"
+    ],
+    "properties": {
+        "prop": {
+            "type": "string"
+        }
+    }
+};
 //# sourceMappingURL=metrics-middleware.js.map

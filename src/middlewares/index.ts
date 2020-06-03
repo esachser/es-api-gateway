@@ -4,9 +4,10 @@ import path from 'path';
 import { IEsMiddlewareConstructor } from '../core';
 import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
-import { EsPropertyMiddlewareContructor } from './property-middleware';
-import { EsMetricsMiddlewareContructor } from './metrics-middleware';
-import { EsParallelMiddlewareContructor } from './parallel-middleware';
+import { MiddlewareCtor as EsPropertyMiddlewareContructor, MiddlewareSchema as EsPropertySchema } from './property-middleware';
+import { MiddlewareCtor as EsMetricsMiddlewareContructor, MiddlewareSchema as EsMetricsSchema } from './metrics-middleware';
+import { MiddlewareCtor as EsParallelMiddlewareContructor, MiddlewareSchema as EsParallelSchema } from './parallel-middleware';
+import { addNewSchema } from '../core/schemas';
 
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
 
@@ -26,13 +27,15 @@ export function loadMiddlewares() {
 
     logger.info('Loading Property Middleware');
     mids['EsPropertyMiddleware'] = EsPropertyMiddlewareContructor;
+    addNewSchema('EsPropertyMiddleware', EsPropertySchema);
 
     logger.info('Loading Metrics Middleware');
     mids['EsMetricsMiddleware'] = EsMetricsMiddlewareContructor;
+    addNewSchema('EsMetricsMiddleware', EsMetricsSchema);
 
     logger.info('Loading Parallel Middleware');
     mids['EsParallelMiddleware'] = EsParallelMiddlewareContructor;
-
+    addNewSchema('EsParallelMiddleware', EsParallelSchema);
 };
 
 export function loadCustomMiddlewares() {

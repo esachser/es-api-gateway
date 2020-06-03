@@ -7,25 +7,6 @@ import stringifyObject from 'stringify-object';
 const vm = new NodeVM();
 
 export class EsPropertyMiddleware implements IEsMiddleware {
-    static readonly parameters: EsParameters = {
-        'name': {
-            type: 'string',
-            optional: false
-        },
-        'value': {
-            type: 'any',
-            optional: true
-        },
-        'expression': {
-            type: 'string',
-            optional: true
-        },
-        'runAfter': {
-            type: 'boolean',
-            optional: true,
-            defaultValue: false
-        }
-    };
     static readonly isInOut = true;
 
     values: any;
@@ -46,12 +27,12 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         let script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-            
-            script += `module.exports=function(props){return ${values['expression']};}`;
+
+            script += `module.exports=function(props){ try { return ${values['expression']};} catch(err) { return undefined; } }`;
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script += `module.exports=function(props){return ${stringifyObject(values['value'])};}`;
+            script += `module.exports=function(props){ try { return ${stringifyObject(values['value'])};} catch(err) { return undefined; } }`;
         }
         logger.debug(`script: ${script}`);
 
@@ -59,7 +40,7 @@ export class EsPropertyMiddleware implements IEsMiddleware {
             this.vmScript = new VMScript(script).compile();
         }
         catch (err) {
-            logger.error({error: err, script});
+            logger.error({ error: err, script });
             this.vmScript = new VMScript('module.exports=() => undefined').compile();
         }
     }
@@ -78,7 +59,43 @@ export class EsPropertyMiddleware implements IEsMiddleware {
     }
 };
 
-export const EsPropertyMiddlwareParams: IEsMiddlewareParams = EsPropertyMiddleware;
+export const MiddlewareCtor: IEsMiddlewareConstructor = EsPropertyMiddleware;
 
-export const EsPropertyMiddlewareContructor: IEsMiddlewareConstructor = EsPropertyMiddleware;
+export const MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsPropertyMiddleware",
+    "title": "Property Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "name",
+        "runAfter"
+    ],
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "value": {
+            "type": ["object", "number", "boolean", "string", "null"]
+        },
+        "expression": {
+            "type": "string"
+        },
+        "runAfter": {
+            "type": "boolean"
+        }
+    },
+    "oneOf": [
+        {
+            "required": [
+                "value"
+            ]
+        },
+        {
+            "required": [
+                "expression"
+            ]
+        }
+    ]
+};
 

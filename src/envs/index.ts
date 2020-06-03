@@ -8,6 +8,7 @@ import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, crea
 import { getMiddlewareConstructor } from '../middlewares';
 import { getTransportConstructor } from '../transports';
 import { httpRouter } from '../util/http-server';
+import { validateObject } from '../core/schemas';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -21,9 +22,13 @@ async function loadApiFile(fname: string) {
 
     logger.debug(apiJson);
 
+    if (!(await validateObject('es-api', apiJson))) {
+        return;
+    }
+
     // Carrega Middlewares centrais.
     const executionJs = lodash.get(apiJson, 'execution') as any[];
-    const centralMid = createMiddleware(executionJs, 0);
+    const centralMid = await createMiddleware(executionJs, 0);
 
     let api: IEsApi = apis[fname] || {
         transports: [],
@@ -33,13 +38,13 @@ async function loadApiFile(fname: string) {
     const transports = lodash.get(apiJson, 'transports');
 
     if (transports !== undefined) {
-        transports.forEach((transport: any) => {
+        transports.forEach(async (transport: any) => {
             const type = lodash.get(transport, 'type');
             const id = lodash.get(transport, 'id');
             const parameters = lodash.get(transport, 'parameters');
             const mids = lodash.get(transport, 'mids') as any[];
 
-            const pre = createMiddleware(mids, 0);
+            const pre = await createMiddleware(mids, 0);
 
             const mid = connectMiddlewares(pre, centralMid);
 
@@ -65,7 +70,9 @@ async function reloadEnv(dir: string) {
     finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(async finfo => {
         logger.info(`Loading API ${finfo.name}`);
 
-        await loadApiFile(path.resolve(dir, finfo.name));
+        await loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
+            logger.error(e);
+        });
     });
 }
 
@@ -74,7 +81,7 @@ let watcher: fs.FSWatcher | undefined = undefined;
 export async function loadEnv(envName: string) {
     const envDir = path.resolve(baseDirectory, 'envs', envName);
 
-    const envDirExists = fs.existsSync(envDir);   
+    const envDirExists = fs.existsSync(envDir);
 
     if (watcher !== undefined) {
         watcher.close();

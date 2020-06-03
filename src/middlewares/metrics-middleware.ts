@@ -3,12 +3,6 @@ import lodash from 'lodash';
 import { logger } from '../util/logger';
 
 export class EsMetricsMiddleware implements IEsMiddleware {
-    static readonly parameters: EsParameters = {
-        'prop': {
-            type: 'string',
-            optional: false
-        }
-    };
     static readonly isInOut = true;
 
     values: any;
@@ -35,7 +29,20 @@ export class EsMetricsMiddleware implements IEsMiddleware {
     }
 };
 
-export const EsMetricsMiddlwareParams: IEsMiddlewareParams = EsMetricsMiddleware;
+export const MiddlewareCtor: IEsMiddlewareConstructor = EsMetricsMiddleware;
 
-export const EsMetricsMiddlewareContructor: IEsMiddlewareConstructor = EsMetricsMiddleware;
-
+export const MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsMetricsMiddleware",
+    "title": "Metrics Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "prop"
+    ],
+    "properties": {
+        "prop": {
+            "type": "string"
+        }
+    }
+};

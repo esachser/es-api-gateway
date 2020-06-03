@@ -42,6 +42,7 @@ var logger_1 = require("./util/logger");
 var transports_1 = require("./transports");
 var envs_1 = require("./envs");
 var http_server_1 = require("./util/http-server");
+var schemas_1 = require("./core/schemas");
 function start() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -54,6 +55,7 @@ function start() {
                     transports_1.loadTransports();
                     transports_1.loadCustomTransports();
                     http_server_1.loadHttpServer();
+                    schemas_1.loadJsonSchemaValidator();
                     return [4 /*yield*/, envs_1.loadEnv(config_1.configuration.env)];
                 case 2:
                     _a.sent();
@@ -63,6 +65,7 @@ function start() {
     });
 }
 start().catch(function (e) {
+    console.log(e);
     logger_1.logger.error(e);
 });
 //# sourceMappingURL=index.js.map

@@ -9,7 +9,7 @@ var path_1 = __importDefault(require("path"));
 var _1 = require(".");
 exports.logger = winston_1.default.createLogger({
     level: 'info',
-    format: winston_1.default.format.json(),
+    format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
     defaultMeta: { service: 'es-apigw' },
     transports: [
         new winston_1.default.transports.File({ filename: path_1.default.resolve(_1.baseDirectory, 'logs', 'error.log'), level: 'error' }),

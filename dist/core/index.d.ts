@@ -40,7 +40,7 @@ export interface IEsTransport {
     middleware: IEsMiddleware | undefined;
     clear(): void;
 }
-export declare function createMiddleware(arr: any[], idx: number): IEsMiddleware | undefined;
+export declare function createMiddleware(arr: any[], idx: number): Promise<IEsMiddleware | undefined>;
 export declare function connect2Mids(mid1: IEsMiddleware, mid2: IEsMiddleware): void;
 export declare function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]): IEsMiddleware | undefined;
 export declare function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined): IEsTransport | undefined;

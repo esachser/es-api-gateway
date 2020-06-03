@@ -1,6 +1,5 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
+import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 export declare class EsParallelMiddleware implements IEsMiddleware {
-    static readonly parameters: EsParameters;
     static readonly isInOut = true;
     values: any;
     next?: IEsMiddleware;
@@ -10,5 +9,26 @@ export declare class EsParallelMiddleware implements IEsMiddleware {
     constructor(values: any, nextMiddleware?: IEsMiddleware);
     execute(context: IEsContext): Promise<void>;
 }
-export declare const EsParallelMiddlwareParams: IEsMiddlewareParams;
-export declare const EsParallelMiddlewareContructor: IEsMiddlewareConstructor;
+export declare const MiddlewareCtor: IEsMiddlewareConstructor;
+export declare const MiddlewareSchema: {
+    $schema: string;
+    $id: string;
+    title: string;
+    type: string;
+    additionalProperties: boolean;
+    required: string[];
+    properties: {
+        mids: {
+            type: string;
+            items: {
+                type: string;
+                items: {
+                    $ref: string;
+                };
+            };
+        };
+        runAfter: {
+            type: string;
+        };
+    };
+};

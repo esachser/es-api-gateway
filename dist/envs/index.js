@@ -48,10 +48,12 @@ var util_1 = require("../util");
 var logger_1 = require("../util/logger");
 var core_1 = require("../core");
 var http_server_1 = require("../util/http-server");
+var schemas_1 = require("../core/schemas");
 var apis = {};
 function loadApiFile(fname) {
     return __awaiter(this, void 0, void 0, function () {
         var apiJson, _a, _b, executionJs, centralMid, api, transports;
+        var _this = this;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -60,30 +62,46 @@ function loadApiFile(fname) {
                 case 1:
                     apiJson = _b.apply(_a, [(_c.sent()).toString()]);
                     logger_1.logger.debug(apiJson);
+                    return [4 /*yield*/, schemas_1.validateObject('es-api', apiJson)];
+                case 2:
+                    if (!(_c.sent())) {
+                        return [2 /*return*/];
+                    }
                     executionJs = lodash_1.default.get(apiJson, 'execution');
-                    centralMid = core_1.createMiddleware(executionJs, 0);
+                    return [4 /*yield*/, core_1.createMiddleware(executionJs, 0)];
+                case 3:
+                    centralMid = _c.sent();
                     api = apis[fname] || {
                         transports: [],
                         central: centralMid
                     };
                     transports = lodash_1.default.get(apiJson, 'transports');
                     if (transports !== undefined) {
-                        transports.forEach(function (transport) {
-                            var type = lodash_1.default.get(transport, 'type');
-                            var id = lodash_1.default.get(transport, 'id');
-                            var parameters = lodash_1.default.get(transport, 'parameters');
-                            var mids = lodash_1.default.get(transport, 'mids');
-                            var pre = core_1.createMiddleware(mids, 0);
-                            var mid = core_1.connectMiddlewares(pre, centralMid);
-                            if (api.transports[id] !== undefined) {
-                                api.transports[id].clear();
-                                delete api.transports[id];
-                            }
-                            var trp = core_1.createTransport(type, parameters, mid);
-                            if (trp !== undefined) {
-                                api.transports[id] = trp;
-                            }
-                        });
+                        transports.forEach(function (transport) { return __awaiter(_this, void 0, void 0, function () {
+                            var type, id, parameters, mids, pre, mid, trp;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        type = lodash_1.default.get(transport, 'type');
+                                        id = lodash_1.default.get(transport, 'id');
+                                        parameters = lodash_1.default.get(transport, 'parameters');
+                                        mids = lodash_1.default.get(transport, 'mids');
+                                        return [4 /*yield*/, core_1.createMiddleware(mids, 0)];
+                                    case 1:
+                                        pre = _a.sent();
+                                        mid = core_1.connectMiddlewares(pre, centralMid);
+                                        if (api.transports[id] !== undefined) {
+                                            api.transports[id].clear();
+                                            delete api.transports[id];
+                                        }
+                                        trp = core_1.createTransport(type, parameters, mid);
+                                        if (trp !== undefined) {
+                                            api.transports[id] = trp;
+                                        }
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
                     }
                     apis[fname] = api;
                     return [2 /*return*/];
@@ -105,7 +123,9 @@ function reloadEnv(dir) {
                             switch (_a.label) {
                                 case 0:
                                     logger_1.logger.info("Loading API " + finfo.name);
-                                    return [4 /*yield*/, loadApiFile(path_1.default.resolve(dir, finfo.name))];
+                                    return [4 /*yield*/, loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(function (e) {
+                                            logger_1.logger.error(e);
+                                        })];
                                 case 1:
                                     _a.sent();
                                     return [2 /*return*/];

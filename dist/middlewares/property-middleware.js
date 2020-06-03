@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsPropertyMiddlewareContructor = exports.EsPropertyMiddlwareParams = exports.EsPropertyMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
 var lodash_1 = __importDefault(require("lodash"));
 var vm2_1 = require("vm2");
 var logger_1 = require("../util/logger");
@@ -57,11 +57,11 @@ var EsPropertyMiddleware = /** @class */ (function () {
         var script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-            script += "module.exports=function(props){return " + values['expression'] + ";}";
+            script += "module.exports=function(props){ try { return " + values['expression'] + ";} catch(err) { return undefined; } }";
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script += "module.exports=function(props){return " + stringify_object_1.default(values['value']) + ";}";
+            script += "module.exports=function(props){ try { return " + stringify_object_1.default(values['value']) + ";} catch(err) { return undefined; } }";
         }
         logger_1.logger.debug("script: " + script);
         try {
@@ -98,30 +98,47 @@ var EsPropertyMiddleware = /** @class */ (function () {
             });
         });
     };
-    EsPropertyMiddleware.parameters = {
-        'name': {
-            type: 'string',
-            optional: false
-        },
-        'value': {
-            type: 'any',
-            optional: true
-        },
-        'expression': {
-            type: 'string',
-            optional: true
-        },
-        'runAfter': {
-            type: 'boolean',
-            optional: true,
-            defaultValue: false
-        }
-    };
     EsPropertyMiddleware.isInOut = true;
     return EsPropertyMiddleware;
 }());
 exports.EsPropertyMiddleware = EsPropertyMiddleware;
 ;
-exports.EsPropertyMiddlwareParams = EsPropertyMiddleware;
-exports.EsPropertyMiddlewareContructor = EsPropertyMiddleware;
+exports.MiddlewareCtor = EsPropertyMiddleware;
+exports.MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsPropertyMiddleware",
+    "title": "Property Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "name",
+        "runAfter"
+    ],
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "value": {
+            "type": ["object", "number", "boolean", "string", "null"]
+        },
+        "expression": {
+            "type": "string"
+        },
+        "runAfter": {
+            "type": "boolean"
+        }
+    },
+    "oneOf": [
+        {
+            "required": [
+                "value"
+            ]
+        },
+        {
+            "required": [
+                "expression"
+            ]
+        }
+    ]
+};
 //# sourceMappingURL=property-middleware.js.map

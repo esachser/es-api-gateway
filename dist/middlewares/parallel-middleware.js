@@ -36,25 +36,36 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsParallelMiddlewareContructor = exports.EsParallelMiddlwareParams = exports.EsParallelMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsParallelMiddleware = void 0;
 var core_1 = require("../core");
 var EsParallelMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     function EsParallelMiddleware(values, nextMiddleware) {
+        var _this = this;
         // Verifica values contra o esquema.
-        this.values = [];
+        this.values = {};
+        this.values['runAfter'] = values['runAfter'];
+        this.values['mids'] = [];
         this.next = nextMiddleware;
         if (Array.isArray(values['mids'])) {
-            this.values['mids'] = values['mids'].map(function (ms) {
-                if (Array.isArray(ms)) {
-                    return core_1.createMiddleware(ms, 0);
-                }
-                else {
-                    return undefined;
-                }
-            });
+            values['mids'].forEach(function (ms, i) { return __awaiter(_this, void 0, void 0, function () {
+                var _a, _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            if (!Array.isArray(ms)) return [3 /*break*/, 2];
+                            _a = this.values['mids'];
+                            _b = i;
+                            return [4 /*yield*/, core_1.createMiddleware(ms, 0)];
+                        case 1:
+                            _a[_b] = _c.sent();
+                            _c.label = 2;
+                        case 2: return [2 /*return*/];
+                    }
+                });
+            }); });
         }
     }
     EsParallelMiddleware.prototype.execute = function (context) {
@@ -83,23 +94,35 @@ var EsParallelMiddleware = /** @class */ (function () {
             });
         });
     };
-    EsParallelMiddleware.parameters = {
-        'mids': {
-            type: 'array',
-            optional: false,
-            defaultValue: []
-        },
-        'runAfter': {
-            type: 'boolean',
-            optional: true,
-            defaultValue: false
-        }
-    };
     EsParallelMiddleware.isInOut = true;
     return EsParallelMiddleware;
 }());
 exports.EsParallelMiddleware = EsParallelMiddleware;
 ;
-exports.EsParallelMiddlwareParams = EsParallelMiddleware;
-exports.EsParallelMiddlewareContructor = EsParallelMiddleware;
+exports.MiddlewareCtor = EsParallelMiddleware;
+exports.MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v2/schemas/EsParallelMiddleware",
+    "title": "Parallel Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "mids",
+        "runAfter"
+    ],
+    "properties": {
+        "mids": {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {
+                    "$ref": "https://esachser.github.io/es-apigw/v1/schemas/es-middleware"
+                }
+            }
+        },
+        "runAfter": {
+            "type": "boolean"
+        }
+    }
+};
 //# sourceMappingURL=parallel-middleware.js.map

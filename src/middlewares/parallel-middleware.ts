@@ -3,18 +3,6 @@ import lodash from 'lodash';
 import { logger } from '../util/logger';
 
 export class EsParallelMiddleware implements IEsMiddleware {
-    static readonly parameters: EsParameters = {
-        'mids': {
-            type: 'array',
-            optional: false,
-            defaultValue: []
-        },
-        'runAfter': {
-            type: 'boolean',
-            optional: true,
-            defaultValue: false
-        }
-    };
     static readonly isInOut = true;
 
     values: any;
@@ -26,16 +14,15 @@ export class EsParallelMiddleware implements IEsMiddleware {
      */
     constructor(values: any, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
-        this.values = [];
+        this.values = {};
+        this.values['runAfter'] = values['runAfter'];
+        this.values['mids'] = [];
         this.next = nextMiddleware;
 
         if (Array.isArray(values['mids'])) {
-            this.values['mids'] = values['mids'].map(ms => {
+            values['mids'].forEach(async (ms, i) => {
                 if (Array.isArray(ms)) {
-                    return createMiddleware(ms, 0);
-                }
-                else {
-                    return undefined;
+                    this.values['mids'][i] =  await createMiddleware(ms, 0);
                 }
             });
         }
@@ -53,7 +40,30 @@ export class EsParallelMiddleware implements IEsMiddleware {
     }
 };
 
-export const EsParallelMiddlwareParams: IEsMiddlewareParams = EsParallelMiddleware;
+export const MiddlewareCtor: IEsMiddlewareConstructor = EsParallelMiddleware;
 
-export const EsParallelMiddlewareContructor: IEsMiddlewareConstructor = EsParallelMiddleware;
-
+export const MiddlewareSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsParallelMiddleware",
+    "title": "Parallel Middleware",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "mids",
+        "runAfter"
+    ],
+    "properties": {
+        "mids": {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {
+                    "$ref": "es-middleware"
+                }
+            }
+        },
+        "runAfter": {
+            "type": "boolean"
+        }
+    }
+};

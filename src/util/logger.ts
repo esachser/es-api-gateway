@@ -4,7 +4,7 @@ import { baseDirectory } from '.';
 
 export const logger = winston.createLogger({
     level: 'info',
-    format: winston.format.json(),
+    format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     defaultMeta: { service: 'es-apigw' },
     transports: [
         new winston.transports.File({ filename: path.resolve(baseDirectory, 'logs', 'error.log'), level: 'error' }),
