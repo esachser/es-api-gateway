@@ -6,8 +6,13 @@
             "parameters": {
                 "routeContext": "/api/v2/teste/",
                 "routes": {
-                    "/": ["GET", "POST"],
-                    "/healthz": ["GET"]
+                    "/": [
+                        "GET",
+                        "POST"
+                    ],
+                    "/healthz": [
+                        "GET"
+                    ]
                 }
             },
             "mids": [
@@ -21,7 +26,7 @@
                 },
                 {
                     "type": "EsMetricsMiddleware",
-                    "data":{
+                    "data": {
                         "prop": "metrics.timems"
                     }
                 },
@@ -29,9 +34,7 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.body",
-                        "value": {
-                            "ok2": true
-                        },
+                        "expression": "{ 'var': props.var3 }",
                         "runAfter": true
                     }
                 },
@@ -48,10 +51,44 @@
     ],
     "execution": [
         {
-            "type": "EsPropertyMiddleware",
+            "type": "EsSequenceMiddleware",
             "data": {
-                "name": "headers.test",
-                "value": "testando",
+                "mids": [
+                    {
+                        "type": "EsPropertyMiddleware",
+                        "data": {
+                            "name": "var1",
+                            "expression": "1",
+                            "runAfter": true
+                        }
+                    },
+                    [
+                        {
+                            "type": "EsPropertyMiddleware",
+                            "data": {
+                                "name": "var2",
+                                "expression": "(props.var1 || 0) * (props.var4 || 1)",
+                                "runAfter": true
+                            }
+                        },
+                        {
+                            "type": "EsPropertyMiddleware",
+                            "data": {
+                                "name": "var4",
+                                "expression": "3",
+                                "runAfter": false
+                            }
+                        }
+                    ],
+                    {
+                        "type": "EsPropertyMiddleware",
+                        "data": {
+                            "name": "var3",
+                            "expression": "(props.var2 || 0) * 2",
+                            "runAfter": false
+                        }
+                    }
+                ],
                 "runAfter": false
             }
         }

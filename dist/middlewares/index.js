@@ -10,6 +10,7 @@ var logger_1 = require("../util/logger");
 var property_middleware_1 = require("./property-middleware");
 var metrics_middleware_1 = require("./metrics-middleware");
 var parallel_middleware_1 = require("./parallel-middleware");
+var sequence_middleware_1 = require("./sequence-middleware");
 var schemas_1 = require("../core/schemas");
 var mids = {};
 function readDirectoryProjects(dir) {
@@ -31,6 +32,9 @@ function loadMiddlewares() {
     logger_1.logger.info('Loading Parallel Middleware');
     mids['EsParallelMiddleware'] = parallel_middleware_1.MiddlewareCtor;
     schemas_1.addNewSchema('EsParallelMiddleware', parallel_middleware_1.MiddlewareSchema);
+    logger_1.logger.info('Loading Sequence Middleware');
+    mids['EsSequenceMiddleware'] = sequence_middleware_1.MiddlewareCtor;
+    schemas_1.addNewSchema('EsSequenceMiddleware', sequence_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

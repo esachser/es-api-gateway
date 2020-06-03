@@ -7,6 +7,7 @@ import { logger } from '../util/logger';
 import { MiddlewareCtor as EsPropertyMiddlewareContructor, MiddlewareSchema as EsPropertySchema } from './property-middleware';
 import { MiddlewareCtor as EsMetricsMiddlewareContructor, MiddlewareSchema as EsMetricsSchema } from './metrics-middleware';
 import { MiddlewareCtor as EsParallelMiddlewareContructor, MiddlewareSchema as EsParallelSchema } from './parallel-middleware';
+import { MiddlewareCtor as EsSequenceMiddlewareContructor, MiddlewareSchema as EsSequenceSchema } from './sequence-middleware';
 import { addNewSchema } from '../core/schemas';
 
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
@@ -36,6 +37,10 @@ export function loadMiddlewares() {
     logger.info('Loading Parallel Middleware');
     mids['EsParallelMiddleware'] = EsParallelMiddlewareContructor;
     addNewSchema('EsParallelMiddleware', EsParallelSchema);
+
+    logger.info('Loading Sequence Middleware');
+    mids['EsSequenceMiddleware'] = EsSequenceMiddlewareContructor;
+    addNewSchema('EsSequenceMiddleware', EsSequenceSchema);
 };
 
 export function loadCustomMiddlewares() {

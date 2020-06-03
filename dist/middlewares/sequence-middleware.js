@@ -36,13 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsParallelMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsSequenceMiddleware = void 0;
 var core_1 = require("../core");
-var EsParallelMiddleware = /** @class */ (function () {
+var EsSequenceMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    function EsParallelMiddleware(values, nextMiddleware) {
+    function EsSequenceMiddleware(values, nextMiddleware) {
         var _this = this;
         // Verifica values contra o esquema.
         this.values = {};
@@ -51,59 +51,82 @@ var EsParallelMiddleware = /** @class */ (function () {
         this.next = nextMiddleware;
         if (Array.isArray(values['mids'])) {
             values['mids'].forEach(function (ms, i) { return __awaiter(_this, void 0, void 0, function () {
-                var _a, _b;
-                return __generator(this, function (_c) {
-                    switch (_c.label) {
+                var _a, _b, _c, _d;
+                return __generator(this, function (_e) {
+                    switch (_e.label) {
                         case 0:
                             if (!Array.isArray(ms)) return [3 /*break*/, 2];
                             _a = this.values['mids'];
                             _b = i;
                             return [4 /*yield*/, core_1.createMiddleware(ms, 0)];
                         case 1:
-                            _a[_b] = _c.sent();
-                            _c.label = 2;
-                        case 2: return [2 /*return*/];
+                            _a[_b] = _e.sent();
+                            return [3 /*break*/, 4];
+                        case 2:
+                            _c = this.values['mids'];
+                            _d = i;
+                            return [4 /*yield*/, core_1.createMiddleware([ms], 0)];
+                        case 3:
+                            _c[_d] = _e.sent();
+                            _e.label = 4;
+                        case 4: return [2 /*return*/];
                     }
                 });
             }); });
         }
     }
-    EsParallelMiddleware.prototype.execute = function (context) {
-        var _a;
+    EsSequenceMiddleware.prototype.execute = function (context) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function () {
-            var rAfter;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var rAfter, i, i;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         rAfter = Boolean(this.values['runAfter']);
-                        if (!!rAfter) return [3 /*break*/, 2];
-                        return [4 /*yield*/, Promise.all(this.values['mids'].map(function (m) { return m === null || m === void 0 ? void 0 : m.execute(context); }))];
+                        if (!!rAfter) return [3 /*break*/, 4];
+                        if (!Array.isArray(this.values['mids'])) return [3 /*break*/, 4];
+                        i = 0;
+                        _d.label = 1;
                     case 1:
-                        _b.sent();
-                        _b.label = 2;
-                    case 2: return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
+                        if (!(i < this.values['mids'].length)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, ((_a = this.values['mids'][i]) === null || _a === void 0 ? void 0 : _a.execute(context))];
+                    case 2:
+                        _d.sent();
+                        _d.label = 3;
                     case 3:
-                        _b.sent();
-                        if (!rAfter) return [3 /*break*/, 5];
-                        return [4 /*yield*/, Promise.all(this.values['mids'].map(function (m) { return m === null || m === void 0 ? void 0 : m.execute(context); }))];
-                    case 4:
-                        _b.sent();
-                        _b.label = 5;
-                    case 5: return [2 /*return*/];
+                        i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [4 /*yield*/, ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context))];
+                    case 5:
+                        _d.sent();
+                        if (!rAfter) return [3 /*break*/, 9];
+                        if (!Array.isArray(this.values['mids'])) return [3 /*break*/, 9];
+                        i = 0;
+                        _d.label = 6;
+                    case 6:
+                        if (!(i < this.values['mids'].length)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, ((_c = this.values['mids'][i]) === null || _c === void 0 ? void 0 : _c.execute(context))];
+                    case 7:
+                        _d.sent();
+                        _d.label = 8;
+                    case 8:
+                        i++;
+                        return [3 /*break*/, 6];
+                    case 9: return [2 /*return*/];
                 }
             });
         });
     };
-    EsParallelMiddleware.isInOut = true;
-    return EsParallelMiddleware;
+    EsSequenceMiddleware.isInOut = true;
+    return EsSequenceMiddleware;
 }());
-exports.EsParallelMiddleware = EsParallelMiddleware;
+exports.EsSequenceMiddleware = EsSequenceMiddleware;
 ;
-exports.MiddlewareCtor = EsParallelMiddleware;
+exports.MiddlewareCtor = EsSequenceMiddleware;
 exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsParallelMiddleware",
-    "title": "Parallel Middleware",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsSequenceMiddleware",
+    "title": "Sequence Middleware",
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -114,10 +137,17 @@ exports.MiddlewareSchema = {
         "mids": {
             "type": "array",
             "items": {
-                "type": "array",
-                "items": {
-                    "$ref": "es-middleware"
-                }
+                "anyOf": [
+                    {
+                        "$ref": "es-middleware"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "$ref": "es-middleware"
+                        }
+                    }
+                ]
             }
         },
         "runAfter": {
@@ -125,4 +155,4 @@ exports.MiddlewareSchema = {
         }
     }
 };
-//# sourceMappingURL=parallel-middleware.js.map
+//# sourceMappingURL=sequence-middleware.js.map
