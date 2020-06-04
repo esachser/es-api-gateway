@@ -17,6 +17,40 @@
             },
             "mids": [
                 {
+                    "type": "EsConditionMiddleware",
+                    "data": {
+                        "runAfter": true,
+                        "conditions": [
+                            {
+                                "conditionExpression": "ctx.properties.metrics.timems < 3",
+                                "mids": [
+                                    {
+                                        "type": "EsPropertyMiddleware",
+                                        "data": {
+                                            "name": "response.headers.timemsg",
+                                            "value": "Rápido, muito rápido",
+                                            "runAfter": true
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "conditionExpression": "true",
+                                "mids": [
+                                    {
+                                        "type": "EsPropertyMiddleware",
+                                        "data": {
+                                            "name": "response.headers.timemsg",
+                                            "value": "Demorou, hein",
+                                            "runAfter": true
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",

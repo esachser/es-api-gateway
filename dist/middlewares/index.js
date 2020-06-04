@@ -11,6 +11,7 @@ var property_middleware_1 = require("./property-middleware");
 var metrics_middleware_1 = require("./metrics-middleware");
 var parallel_middleware_1 = require("./parallel-middleware");
 var sequence_middleware_1 = require("./sequence-middleware");
+var condition_middleware_1 = require("./condition-middleware");
 var schemas_1 = require("../core/schemas");
 var mids = {};
 function readDirectoryProjects(dir) {
@@ -35,6 +36,9 @@ function loadMiddlewares() {
     logger_1.logger.info('Loading Sequence Middleware');
     mids['EsSequenceMiddleware'] = sequence_middleware_1.MiddlewareCtor;
     schemas_1.addNewSchema('EsSequenceMiddleware', sequence_middleware_1.MiddlewareSchema);
+    logger_1.logger.info('Loading Condition Middleware');
+    mids['EsConditionMiddleware'] = condition_middleware_1.MiddlewareCtor;
+    schemas_1.addNewSchema('EsConditionMiddleware', condition_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;
