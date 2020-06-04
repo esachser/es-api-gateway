@@ -18,7 +18,6 @@ async function start() {
 }
 
 start().catch(e => {
-    console.log(e);
-    logger.error(e);
+    logger.error('General error', e);
 });
 

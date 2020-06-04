@@ -1,7 +1,7 @@
 {
     "transports": [
         {
-            "type": "http",
+            "type": "EsHttpTransport",
             "id": "http",
             "parameters": {
                 "routeContext": "/api/v2/teste/",

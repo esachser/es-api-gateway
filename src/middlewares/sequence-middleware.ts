@@ -1,4 +1,4 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware, createTransport } from '../core';
+import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 

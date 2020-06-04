@@ -65,7 +65,6 @@ function start() {
     });
 }
 start().catch(function (e) {
-    console.log(e);
-    logger_1.logger.error(e);
+    logger_1.logger.error('General error', e);
 });
 //# sourceMappingURL=index.js.map

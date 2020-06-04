@@ -24,5 +24,31 @@ export declare class EsHttpTransport implements IEsTransport {
     constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined);
     clear(): void;
 }
-export declare const EsHttpTransportContructor: IEsTranportConstructor;
+export declare const TransportContructor: IEsTranportConstructor;
+export declare const TransportSchema: {
+    $schema: string;
+    $id: string;
+    title: string;
+    type: string;
+    additionalProperties: boolean;
+    required: string[];
+    properties: {
+        routes: {
+            type: string;
+            additionalProperties: boolean;
+            patternProperties: {
+                "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
+                    type: string;
+                    items: {
+                        type: string;
+                        enum: string[];
+                    };
+                };
+            };
+        };
+        routeContext: {
+            type: string;
+        };
+    };
+};
 export {};

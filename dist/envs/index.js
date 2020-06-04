@@ -94,7 +94,9 @@ function loadApiFile(fname) {
                                             api.transports[id].clear();
                                             delete api.transports[id];
                                         }
-                                        trp = core_1.createTransport(type, parameters, mid);
+                                        return [4 /*yield*/, core_1.createTransport(type, parameters, mid)];
+                                    case 2:
+                                        trp = _a.sent();
                                         if (trp !== undefined) {
                                             api.transports[id] = trp;
                                         }
@@ -124,7 +126,7 @@ function reloadEnv(dir) {
                                 case 0:
                                     logger_1.logger.info("Loading API " + finfo.name);
                                     return [4 /*yield*/, loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(function (e) {
-                                            logger_1.logger.error(e);
+                                            logger_1.logger.error("Error loding file " + finfo.name, e);
                                         })];
                                 case 1:
                                     _a.sent();
@@ -160,7 +162,9 @@ function loadEnv(envName) {
                             if (fname.endsWith('.json')) {
                                 // reloadEnv(envDir);
                                 logger_1.logger.info("Reloading " + fname + ".");
-                                loadApiFile(path_1.default.resolve(envDir, fname));
+                                loadApiFile(path_1.default.resolve(envDir, fname)).catch(function (err) {
+                                    logger_1.logger.error("Error reloading file " + fname + ".", err);
+                                });
                             }
                         });
                     }

@@ -4,7 +4,8 @@ import path from 'path';
 import { IEsTranportConstructor } from '../core';
 import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
-import { EsHttpTransportContructor } from './http';
+import { TransportContructor as EsHttpTransportContructor, TransportSchema as EsHttpTransportSchema } from './http';
+import { addNewSchema } from '../core/schemas';
 
 const transports: {[id:string]:IEsTranportConstructor} = {};
 
@@ -21,7 +22,8 @@ function readDirectoryProjects(dir: string) {
 
 export function loadTransports() {
     logger.info('Loading Http Tranport');
-    transports['http'] = EsHttpTransportContructor;
+    transports['EsHttpTransport'] = EsHttpTransportContructor;
+    addNewSchema('EsHttpTransport', EsHttpTransportSchema);
 };
 
 export function loadCustomTransports() {

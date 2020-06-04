@@ -108,10 +108,12 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
     return mid;
 }
 
-export function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined) {
+export async function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined) {
     const ctor = getTransportConstructor(type);
 
-    if (ctor !== undefined) {
+    const v = await validateObject(type, parameters);
+
+    if (ctor !== undefined && v) {
         return new ctor(parameters, middleware);
     }
 

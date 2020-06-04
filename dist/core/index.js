@@ -115,11 +115,22 @@ function connectMiddlewares() {
 }
 exports.connectMiddlewares = connectMiddlewares;
 function createTransport(type, parameters, middleware) {
-    var ctor = transports_1.getTransportConstructor(type);
-    if (ctor !== undefined) {
-        return new ctor(parameters, middleware);
-    }
-    return undefined;
+    return __awaiter(this, void 0, void 0, function () {
+        var ctor, v;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    ctor = transports_1.getTransportConstructor(type);
+                    return [4 /*yield*/, schemas_1.validateObject(type, parameters)];
+                case 1:
+                    v = _a.sent();
+                    if (ctor !== undefined && v) {
+                        return [2 /*return*/, new ctor(parameters, middleware)];
+                    }
+                    return [2 /*return*/, undefined];
+            }
+        });
+    });
 }
 exports.createTransport = createTransport;
 //# sourceMappingURL=index.js.map

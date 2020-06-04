@@ -86,8 +86,7 @@ export function loadJsonSchemaValidator() {
                  .addSchema(API_SCHEMA, 'es-api');
     }
     catch (err) {
-        logger.error(err);
-        logger.error(ajv.errorsText(ajv.errors));
+        logger.error(ajv.errorsText(ajv.errors), err);
     }
 }
 
@@ -106,8 +105,7 @@ export async function validateObject(schemaName:string, obj:any): Promise<boolea
         return v;
     }
     catch (err) {
-        logger.error(err);
-        logger.error(ajv.errorsText(ajv.errors));
+        logger.error(ajv.errorsText(ajv.errors), err);
     }
     return false;    
 }

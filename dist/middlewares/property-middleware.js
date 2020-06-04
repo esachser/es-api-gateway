@@ -63,7 +63,6 @@ var EsPropertyMiddleware = /** @class */ (function () {
         else {
             script += "module.exports=function(props){ try { return " + stringify_object_1.default(values['value']) + ";} catch(err) { return undefined; } }";
         }
-        logger_1.logger.debug("script: " + script);
         try {
             this.vmScript = new vm2_1.VMScript(script).compile();
         }

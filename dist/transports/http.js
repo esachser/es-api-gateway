@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsHttpTransportContructor = exports.EsHttpTransport = void 0;
+exports.TransportSchema = exports.TransportContructor = exports.EsHttpTransport = void 0;
 var http_server_1 = require("../util/http-server");
 var lodash_1 = __importDefault(require("lodash"));
 var koa_router_1 = __importDefault(require("koa-router"));
@@ -124,5 +124,34 @@ var EsHttpTransport = /** @class */ (function () {
     return EsHttpTransport;
 }());
 exports.EsHttpTransport = EsHttpTransport;
-exports.EsHttpTransportContructor = EsHttpTransport;
+exports.TransportContructor = EsHttpTransport;
+exports.TransportSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsHttpTransport",
+    "title": "Http Transport parameters",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "routeContext",
+        "routes"
+    ],
+    "properties": {
+        "routes": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+                    }
+                }
+            }
+        },
+        "routeContext": {
+            "type": "string"
+        }
+    }
+};
 //# sourceMappingURL=http.js.map

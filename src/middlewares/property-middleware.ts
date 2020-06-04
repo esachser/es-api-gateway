@@ -34,7 +34,6 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         else {
             script += `module.exports=function(props){ try { return ${stringifyObject(values['value'])};} catch(err) { return undefined; } }`;
         }
-        logger.debug(`script: ${script}`);
 
         try {
             this.vmScript = new VMScript(script).compile();

@@ -95,4 +95,35 @@ export class EsHttpTransport implements IEsTransport {
     }
 }
 
-export const EsHttpTransportContructor: IEsTranportConstructor = EsHttpTransport;
+export const TransportContructor: IEsTranportConstructor = EsHttpTransport;
+
+export const TransportSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsHttpTransport",
+    "title": "Http Transport parameters",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "routeContext",
+        "routes"
+    ],
+    "properties": {
+        "routes": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
+                    "type": "array",
+                    "items" : {
+                        "type": "string",
+                        "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+                    }
+                }
+            }
+        },
+        "routeContext": {
+            "type": "string"
+        }
+    }
+};
+

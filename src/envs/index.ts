@@ -53,7 +53,7 @@ async function loadApiFile(fname: string) {
                 delete api.transports[id];
             }
 
-            const trp = createTransport(type, parameters, mid);
+            const trp = await createTransport(type, parameters, mid);
 
             if (trp !== undefined) {
                 api.transports[id] = trp;
@@ -71,7 +71,7 @@ async function reloadEnv(dir: string) {
         logger.info(`Loading API ${finfo.name}`);
 
         await loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
-            logger.error(e);
+            logger.error(`Error loding file ${finfo.name}`, e);
         });
     });
 }
@@ -96,7 +96,9 @@ export async function loadEnv(envName: string) {
                 if (fname.endsWith('.json')) {
                     // reloadEnv(envDir);
                     logger.info(`Reloading ${fname}.`);
-                    loadApiFile(path.resolve(envDir, fname));
+                    loadApiFile(path.resolve(envDir, fname)).catch(err => {
+                        logger.error(`Error reloading file ${fname}.`, err);
+                    });
                 }
             });
         }

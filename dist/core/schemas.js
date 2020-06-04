@@ -123,8 +123,7 @@ function loadJsonSchemaValidator() {
             .addSchema(exports.API_SCHEMA, 'es-api');
     }
     catch (err) {
-        logger_1.logger.error(err);
-        logger_1.logger.error(ajv.errorsText(ajv.errors));
+        logger_1.logger.error(ajv.errorsText(ajv.errors), err);
     }
 }
 exports.loadJsonSchemaValidator = loadJsonSchemaValidator;
@@ -150,8 +149,7 @@ function validateObject(schemaName, obj) {
                     return [2 /*return*/, v];
                 case 2:
                     err_1 = _a.sent();
-                    logger_1.logger.error(err_1);
-                    logger_1.logger.error(ajv.errorsText(ajv.errors));
+                    logger_1.logger.error(ajv.errorsText(ajv.errors), err_1);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/, false];
             }
