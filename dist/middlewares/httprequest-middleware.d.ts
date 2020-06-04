@@ -1,10 +1,8 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import { VMScript } from 'vm2';
-export declare class EsPropertyMiddleware implements IEsMiddleware {
+export declare class EsHttpRequestMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
     values: any;
     next?: IEsMiddleware;
-    readonly vmScript: VMScript;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
@@ -18,23 +16,4 @@ export declare const MiddlewareSchema: {
     $id: string;
     title: string;
     type: string;
-    additionalProperties: boolean;
-    required: string[];
-    properties: {
-        name: {
-            type: string;
-        };
-        value: {
-            type: string[];
-        };
-        expression: {
-            type: string;
-        };
-        runAfter: {
-            type: string;
-        };
-    };
-    oneOf: {
-        required: string[];
-    }[];
 };

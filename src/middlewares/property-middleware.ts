@@ -28,11 +28,11 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
 
-            script += `module.exports=function(props){ try { return ${values['expression']};} catch(err) { return undefined; } }`;
+            script += `module.exports=function(ctx){ try { return ${values['expression']};} catch(err) { return undefined; } }`;
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script += `module.exports=function(props){ try { return ${stringifyObject(values['value'])};} catch(err) { return undefined; } }`;
+            script += `module.exports=function(ctx){ try { return ${stringifyObject(values['value'])};} catch(err) { return undefined; } }`;
         }
 
         try {
@@ -44,15 +44,21 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         }
     }
 
+    async runInternal(context: IEsContext) {
+        lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+    }
+
     async execute(context: IEsContext) {
-        const runAfter = lodash.get(this.values, 'runAfter') || false;
-        vm.freeze(context.properties, 'props');
-        if (runAfter) {
+        const runAfter = Boolean(lodash.get(this.values, 'runAfter'));
+        vm.freeze(context, 'ctx');
+        
+        const rAfter = Boolean(this.values['runAfter']);
+        if (rAfter) {
             await this.next?.execute(context);
-            lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context.properties));
+            await this.runInternal(context);
         }
         else {
-            lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context.properties));
+            await this.runInternal(context);
             await this.next?.execute(context);
         }
     }

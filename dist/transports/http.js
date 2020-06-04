@@ -64,21 +64,29 @@ var EsHttpTransport = /** @class */ (function () {
         if (!this.routeContext.endsWith('/')) {
             this.routeContext += '/';
         }
+        var routeContextSize = this.routeContext.length - 1;
         http_server_1.httpRouter.use(this.routeContext, function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
-            var context, init, diff;
+            var allPath, context, init, diff;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        allPath = ctx.path;
+                        if (!allPath.endsWith('/')) {
+                            allPath += '/';
+                        }
                         context = {
                             properties: {
                                 httpctx: ctx,
                                 headers: ctx.request.headers,
                                 params: ctx.params,
-                                query: ctx.query
+                                query: ctx.query,
+                                path: allPath.substr(routeContextSize),
+                                method: ctx.method,
                             },
                             parsedbody: ctx.request.body,
                             rawbody: ctx.request.rawBody
                         };
+                        logger_1.logger.info("Started api with path " + context.properties.path);
                         ctx.iesContext = context;
                         init = Date.now();
                         // Roda o que precisa

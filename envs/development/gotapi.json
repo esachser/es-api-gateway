@@ -1,0 +1,28 @@
+{
+    "transports": [
+        {
+            "type": "EsHttpTransport",
+            "id": "http",
+            "parameters": {
+                "routeContext": "/api/v3/teste/",
+                "routes": {
+                    "/": [
+                        "GET"
+                    ],
+                    "/healthz": [
+                        "GET"
+                    ]
+                }
+            },
+            "mids": []
+        }
+    ],
+    "execution": [
+        {
+            "type": "EsHttpRequestMiddleware",
+            "data": {
+                "runAfter": false
+            }
+        }
+    ]
+}

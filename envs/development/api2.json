@@ -54,7 +54,7 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",
-                        "expression": "props.metrics.timems",
+                        "expression": "ctx.properties.metrics.timems",
                         "runAfter": true
                     }
                 },
@@ -68,7 +68,7 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.body",
-                        "expression": "{ 'var': props.var3 }",
+                        "expression": "{ 'var': ctx.properties.var3 }",
                         "runAfter": true
                     }
                 },
@@ -101,7 +101,7 @@
                             "type": "EsPropertyMiddleware",
                             "data": {
                                 "name": "var2",
-                                "expression": "(props.var1 || 0) * (props.var4 || 1)",
+                                "expression": "(ctx.properties.var1 || 0) * (ctx.properties.var4 || 1)",
                                 "runAfter": true
                             }
                         },
@@ -118,7 +118,7 @@
                         "type": "EsPropertyMiddleware",
                         "data": {
                             "name": "var3",
-                            "expression": "(props.var2 || 0) * 2",
+                            "expression": "(ctx.properties.var2 || 0) * 2",
                             "runAfter": false
                         }
                     }

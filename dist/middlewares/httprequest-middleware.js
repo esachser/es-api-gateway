@@ -39,55 +39,51 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddleware = void 0;
 var lodash_1 = __importDefault(require("lodash"));
-var vm2_1 = require("vm2");
 var logger_1 = require("../util/logger");
-var stringify_object_1 = __importDefault(require("stringify-object"));
-var vm = new vm2_1.NodeVM();
-var EsPropertyMiddleware = /** @class */ (function () {
+var got_1 = __importDefault(require("got"));
+var EsHttpRequestMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    function EsPropertyMiddleware(values, nextMiddleware) {
+    function EsHttpRequestMiddleware(values, nextMiddleware) {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
-        // Se for uma expressão, prepara VMScript para rodar.
-        var script = '';
-        if (values['value'] === undefined &&
-            values['expression'] !== undefined) {
-            script += "module.exports=function(ctx){ try { return " + values['expression'] + ";} catch(err) { return undefined; } }";
-        }
-        // Senão, prepara VMScript para somente devolver o valor
-        else {
-            script += "module.exports=function(ctx){ try { return " + stringify_object_1.default(values['value']) + ";} catch(err) { return undefined; } }";
-        }
-        try {
-            this.vmScript = new vm2_1.VMScript(script).compile();
-        }
-        catch (err) {
-            logger_1.logger.error({ error: err, script: script });
-            this.vmScript = new vm2_1.VMScript('module.exports=() => undefined').compile();
-        }
     }
-    EsPropertyMiddleware.prototype.runInternal = function (context) {
+    EsHttpRequestMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
+            var res;
             return __generator(this, function (_a) {
-                lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, got_1.default({
+                            url: 'http://localhost:5000/api/bla' + context.properties.path,
+                            method: context.properties.method,
+                            body: context.properties.body,
+                            headers: context.properties.headers,
+                            throwHttpErrors: false
+                        }).catch(function (err) {
+                            logger_1.logger.error(err);
+                            return undefined;
+                        })];
+                    case 1:
+                        res = _a.sent();
+                        lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
+                        lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
+                        lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);
+                        return [2 /*return*/];
+                }
             });
         });
     };
-    EsPropertyMiddleware.prototype.execute = function (context) {
+    EsHttpRequestMiddleware.prototype.execute = function (context) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var runAfter, rAfter;
+            var rAfter;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        runAfter = Boolean(lodash_1.default.get(this.values, 'runAfter'));
-                        vm.freeze(context, 'ctx');
                         rAfter = Boolean(this.values['runAfter']);
                         if (!rAfter) return [3 /*break*/, 3];
                         return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
@@ -109,47 +105,16 @@ var EsPropertyMiddleware = /** @class */ (function () {
             });
         });
     };
-    EsPropertyMiddleware.isInOut = true;
-    return EsPropertyMiddleware;
+    EsHttpRequestMiddleware.isInOut = true;
+    return EsHttpRequestMiddleware;
 }());
-exports.EsPropertyMiddleware = EsPropertyMiddleware;
+exports.EsHttpRequestMiddleware = EsHttpRequestMiddleware;
 ;
-exports.MiddlewareCtor = EsPropertyMiddleware;
+exports.MiddlewareCtor = EsHttpRequestMiddleware;
 exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsPropertyMiddleware",
-    "title": "Property Middleware",
-    "type": "object",
-    "additionalProperties": false,
-    "required": [
-        "name",
-        "runAfter"
-    ],
-    "properties": {
-        "name": {
-            "type": "string"
-        },
-        "value": {
-            "type": ["object", "number", "boolean", "string", "null"]
-        },
-        "expression": {
-            "type": "string"
-        },
-        "runAfter": {
-            "type": "boolean"
-        }
-    },
-    "oneOf": [
-        {
-            "required": [
-                "value"
-            ]
-        },
-        {
-            "required": [
-                "expression"
-            ]
-        }
-    ]
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsHttpRequestMiddleware",
+    "title": "HttpRequest Middleware",
+    "type": "object"
 };
-//# sourceMappingURL=property-middleware.js.map
+//# sourceMappingURL=httprequest-middleware.js.map

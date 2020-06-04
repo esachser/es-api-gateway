@@ -15,7 +15,7 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",
-                        "expression": "props.metrics.timems",
+                        "expression": "ctx.properties.metrics.timems",
                         "runAfter": true
                     }
                 },

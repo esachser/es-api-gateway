@@ -9,6 +9,7 @@ import { MiddlewareCtor as EsMetricsMiddlewareContructor, MiddlewareSchema as Es
 import { MiddlewareCtor as EsParallelMiddlewareContructor, MiddlewareSchema as EsParallelSchema } from './parallel-middleware';
 import { MiddlewareCtor as EsSequenceMiddlewareContructor, MiddlewareSchema as EsSequenceSchema } from './sequence-middleware';
 import { MiddlewareCtor as EsConditionMiddlewareContructor, MiddlewareSchema as EsConditionSchema } from './condition-middleware';
+import { MiddlewareCtor as EsHttpRequestMiddlewareContructor, MiddlewareSchema as EsHttpRequestSchema } from './httprequest-middleware';
 import { addNewSchema } from '../core/schemas';
 
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
@@ -46,6 +47,10 @@ export function loadMiddlewares() {
     logger.info('Loading Condition Middleware');
     mids['EsConditionMiddleware'] = EsConditionMiddlewareContructor;
     addNewSchema('EsConditionMiddleware', EsConditionSchema);
+
+    logger.info('Loading HttpRequest Middleware');
+    mids['EsHttpRequestMiddleware'] = EsHttpRequestMiddlewareContructor;
+    addNewSchema('EsHttpRequestMiddleware', EsHttpRequestSchema);
 };
 
 export function loadCustomMiddlewares() {

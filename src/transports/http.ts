@@ -45,18 +45,28 @@ export class EsHttpTransport implements IEsTransport {
             this.routeContext += '/';
         }
 
+        const routeContextSize = this.routeContext.length-1;
+
         httpRouter.use(this.routeContext, async (ctx, next) => {
             // Prepara a chamada
+            let allPath = ctx.path;
+            if (!allPath.endsWith('/')) {
+                allPath += '/';
+            }
             const context: IEsContext = {
                 properties: {
                     httpctx: ctx,
                     headers: ctx.request.headers,
                     params: ctx.params,
-                    query: ctx.query
+                    query: ctx.query,
+                    path: allPath.substr(routeContextSize),
+                    method: ctx.method,
                 },
                 parsedbody: ctx.request.body,
                 rawbody: ctx.request.rawBody
             };
+
+            logger.info(`Started api with path ${context.properties.path}`);
 
             ctx.iesContext = context;
 
