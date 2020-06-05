@@ -1,7 +1,7 @@
 import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
-import got from 'got';
+import got, { Got } from 'got';
 
 export class EsHttpRequestMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
@@ -9,7 +9,6 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     values: any;
 
     next?: IEsMiddleware;
-
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -21,11 +20,16 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
-        const res = await got({
-            url: 'http://localhost:5000/api/bla' + context.properties.path,
-            method: context.properties.method,
-            body: context.properties.body,
-            headers: context.properties.headers,
+        const method = lodash.get(context.properties, 'request.method');
+        const path = lodash.get(context.properties, 'request.path') || '/';
+        const body = lodash.get(context.properties, 'request.body');
+        const headers = lodash.get(context.properties, 'request.headers');
+
+        const res = await got(path.substr(1), {
+            prefixUrl: 'http://localhost:5000/api/bla',
+            method,
+            body,
+            headers,
             throwHttpErrors: false
         }).catch(err => {
             logger.error(err);

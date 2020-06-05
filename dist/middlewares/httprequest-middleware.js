@@ -51,22 +51,30 @@ var EsHttpRequestMiddleware = /** @class */ (function () {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
+        this.httpClient = got_1.default.extend({
+            prefixUrl: 'http://localhost:5000/api/bla'
+        });
     }
     EsHttpRequestMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
-            var res;
+            var method, path, body, headers, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, got_1.default({
-                            url: 'http://localhost:5000/api/bla' + context.properties.path,
-                            method: context.properties.method,
-                            body: context.properties.body,
-                            headers: context.properties.headers,
-                            throwHttpErrors: false
-                        }).catch(function (err) {
-                            logger_1.logger.error(err);
-                            return undefined;
-                        })];
+                    case 0:
+                        method = lodash_1.default.get(context.properties, 'request.method');
+                        path = lodash_1.default.get(context.properties, 'request.path') || '/';
+                        body = lodash_1.default.get(context.properties, 'request.body');
+                        headers = lodash_1.default.get(context.properties, 'request.headers');
+                        return [4 /*yield*/, got_1.default(path.substr(1), {
+                                prefixUrl: 'http://localhost:5000/api/bla',
+                                method: method,
+                                body: body,
+                                headers: headers,
+                                throwHttpErrors: false
+                            }).catch(function (err) {
+                                logger_1.logger.error(err);
+                                return undefined;
+                            })];
                     case 1:
                         res = _a.sent();
                         lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});

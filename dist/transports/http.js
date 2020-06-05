@@ -76,17 +76,19 @@ var EsHttpTransport = /** @class */ (function () {
                         }
                         context = {
                             properties: {
-                                httpctx: ctx,
-                                headers: ctx.request.headers,
-                                params: ctx.params,
-                                query: ctx.query,
-                                path: allPath.substr(routeContextSize),
-                                method: ctx.method,
+                                request: {
+                                    httpctx: ctx,
+                                    headers: ctx.request.headers,
+                                    params: ctx.params,
+                                    query: ctx.query,
+                                    path: allPath.substr(routeContextSize),
+                                    method: ctx.method,
+                                }
                             },
                             parsedbody: ctx.request.body,
                             rawbody: ctx.request.rawBody
                         };
-                        logger_1.logger.info("Started api with path " + context.properties.path);
+                        logger_1.logger.info("Started api with path " + context.properties.request.path);
                         ctx.iesContext = context;
                         init = Date.now();
                         // Roda o que precisa
@@ -98,7 +100,7 @@ var EsHttpTransport = /** @class */ (function () {
                         ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                         ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                         diff = Date.now() - init;
-                        logger_1.logger.debug("Call " + ctx.iesContext.properties.httpctx.path + " ended in " + diff + "ms");
+                        logger_1.logger.debug("Call " + ctx.iesContext.properties.request.httpctx.path + " ended in " + diff + "ms");
                         return [2 /*return*/];
                 }
             });

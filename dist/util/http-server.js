@@ -87,6 +87,9 @@ function loadHttpServer() {
         var port = server.address().port;
         logger_1.logger.info("Http Server running on port " + port);
     });
+    app.on('error', function (err, ctx) {
+        logger_1.logger.error('Erro no servidor HTTP', err);
+    });
 }
 exports.loadHttpServer = loadHttpServer;
 //# sourceMappingURL=http-server.js.map

@@ -55,18 +55,20 @@ export class EsHttpTransport implements IEsTransport {
             }
             const context: IEsContext = {
                 properties: {
-                    httpctx: ctx,
-                    headers: ctx.request.headers,
-                    params: ctx.params,
-                    query: ctx.query,
-                    path: allPath.substr(routeContextSize),
-                    method: ctx.method,
+                    request: {
+                        httpctx: ctx,
+                        headers: ctx.request.headers,
+                        params: ctx.params,
+                        query: ctx.query,
+                        path: allPath.substr(routeContextSize),
+                        method: ctx.method,
+                    }                    
                 },
                 parsedbody: ctx.request.body,
                 rawbody: ctx.request.rawBody
             };
 
-            logger.info(`Started api with path ${context.properties.path}`);
+            logger.info(`Started api with path ${context.properties.request.path}`);
 
             ctx.iesContext = context;
 
@@ -81,7 +83,7 @@ export class EsHttpTransport implements IEsTransport {
             ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
             
             let diff = Date.now() - init;
-            logger.debug(`Call ${ctx.iesContext.properties.httpctx.path} ended in ${diff}ms`);
+            logger.debug(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
         });
 
         Object.keys(params.routes).forEach(path => {

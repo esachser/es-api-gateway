@@ -37,4 +37,8 @@ export function loadHttpServer() {
         const { port } = server.address() as import('net').AddressInfo;
         logger.info(`Http Server running on port ${port}`);
     });
+
+    app.on('error', (err, ctx) => {
+        logger.error('Erro no servidor HTTP', err);
+    });
 }
