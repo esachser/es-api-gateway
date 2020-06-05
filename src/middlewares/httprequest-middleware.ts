@@ -1,7 +1,7 @@
 import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
-import got, { Got } from 'got';
+import got from 'got';
 
 export class EsHttpRequestMiddleware implements IEsMiddleware {
     static readonly isInOut = true;

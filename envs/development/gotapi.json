@@ -14,7 +14,14 @@
                     ]
                 }
             },
-            "mids": []
+            "mids": [
+                {
+                    "type": "EsMetricsMiddleware",
+                    "data":{
+                        "prop": "response.headers.timems"
+                    }
+                }
+            ]
         }
     ],
     "execution": [

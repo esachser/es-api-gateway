@@ -51,9 +51,6 @@ var EsHttpRequestMiddleware = /** @class */ (function () {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
-        this.httpClient = got_1.default.extend({
-            prefixUrl: 'http://localhost:5000/api/bla'
-        });
     }
     EsHttpRequestMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
