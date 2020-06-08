@@ -79,7 +79,7 @@ export class EsHttpTransport implements IEsTransport {
             await next();
             
             ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
-            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status');
+            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status') || 404;
             ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
             
             let diff = Date.now() - init;

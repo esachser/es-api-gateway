@@ -43,6 +43,7 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddlew
 var lodash_1 = __importDefault(require("lodash"));
 var logger_1 = require("../util/logger");
 var got_1 = __importDefault(require("got"));
+var keyv_1 = __importDefault(require("keyv"));
 var EsHttpRequestMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -51,33 +52,54 @@ var EsHttpRequestMiddleware = /** @class */ (function () {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
+        var cacheEnabled = Boolean(lodash_1.default.get(values, 'cache.enabled'));
+        if (cacheEnabled) {
+            var cacheMaxAge = lodash_1.default.get(values, 'cache.maxAge', 1000);
+            var cacheMaxSize = lodash_1.default.get(values, 'cache.maxSize', 100);
+            this.cache = new keyv_1.default({
+                maxSize: cacheMaxSize,
+                ttl: cacheMaxAge
+            });
+        }
     }
     EsHttpRequestMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
-            var method, path, body, headers, res;
+            var method, path, body, headers, prefixUrl, res, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        method = lodash_1.default.get(context.properties, 'request.method');
-                        path = lodash_1.default.get(context.properties, 'request.path') || '/';
-                        body = lodash_1.default.get(context.properties, 'request.body');
-                        headers = lodash_1.default.get(context.properties, 'request.headers');
-                        return [4 /*yield*/, got_1.default(path.substr(1), {
-                                prefixUrl: 'http://localhost:5000/api/bla',
+                        method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
+                        path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.path'), '');
+                        body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.body'));
+                        headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.headers'));
+                        logger_1.logger.info(lodash_1.default.get(this.values, 'prefixUrl'));
+                        prefixUrl = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'prefixUrl'), '');
+                        logger_1.logger.info("prefixUrl: " + prefixUrl);
+                        if (path.startsWith('/')) {
+                            path = path.substr(1);
+                        }
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, got_1.default(path, {
+                                prefixUrl: prefixUrl,
                                 method: method,
                                 body: body,
                                 headers: headers,
-                                throwHttpErrors: false
-                            }).catch(function (err) {
-                                logger_1.logger.error(err);
-                                return undefined;
+                                throwHttpErrors: false,
+                                cache: this.cache
                             })];
-                    case 1:
+                    case 2:
                         res = _a.sent();
                         lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
                         lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
                         lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        err_1 = _a.sent();
+                        logger_1.logger.error('Error calling HTTP endpoint', err_1);
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
@@ -120,6 +142,65 @@ exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsHttpRequestMiddleware",
     "title": "HttpRequest Middleware",
-    "type": "object"
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "runAfter": {
+            "type": "boolean"
+        },
+        "url": {
+            "type": "string"
+        },
+        "prefixUrl": {
+            "type": "string"
+        },
+        "method": {
+            "type": "string"
+        },
+        "query": {
+            "type": "string"
+        },
+        "headers": {
+            "type": "string"
+        },
+        "body": {
+            "type": "string"
+        },
+        "encoding": {
+            "type": "string"
+        },
+        "timeout": {
+            "type": "string"
+        },
+        "retry": {
+            "type": "string"
+        },
+        "followRedirect": {
+            "type": "boolean"
+        },
+        "maxRedirects": {
+            "type": "string"
+        },
+        "cache": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "enabled",
+                "maxAge",
+                "maxSize"
+            ],
+            "properties": {
+                "maxAge": {
+                    "type": "number"
+                },
+                "maxSize": {
+                    "type": "number"
+                },
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
 };
 //# sourceMappingURL=httprequest-middleware.js.map

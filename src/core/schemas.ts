@@ -100,12 +100,12 @@ export async function validateObject(schemaName:string, obj:any): Promise<boolea
     try{
         const v = await ajv.validate(schemaName, obj);
         if (!v) {
-            logger.error(ajv.errorsText(ajv.errors));
+            logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`);
         }
         return v;
     }
     catch (err) {
-        logger.error(ajv.errorsText(ajv.errors), err);
+        logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`, err);
     }
     return false;    
 }

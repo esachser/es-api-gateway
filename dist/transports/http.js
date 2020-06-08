@@ -97,7 +97,7 @@ var EsHttpTransport = /** @class */ (function () {
                         // Roda o que precisa
                         _a.sent();
                         ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
-                        ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                        ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status') || 404;
                         ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                         diff = Date.now() - init;
                         logger_1.logger.debug("Call " + ctx.iesContext.properties.request.httpctx.path + " ended in " + diff + "ms");

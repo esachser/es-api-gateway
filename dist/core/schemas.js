@@ -144,12 +144,12 @@ function validateObject(schemaName, obj) {
                 case 1:
                     v = _a.sent();
                     if (!v) {
-                        logger_1.logger.error(ajv.errorsText(ajv.errors));
+                        logger_1.logger.error("Schema " + schemaName + " with errors: " + ajv.errorsText(ajv.errors));
                     }
                     return [2 /*return*/, v];
                 case 2:
                     err_1 = _a.sent();
-                    logger_1.logger.error(ajv.errorsText(ajv.errors), err_1);
+                    logger_1.logger.error("Schema " + schemaName + " with errors: " + ajv.errorsText(ajv.errors), err_1);
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/, false];
             }
