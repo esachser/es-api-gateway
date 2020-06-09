@@ -44,6 +44,7 @@ var lodash_1 = __importDefault(require("lodash"));
 var logger_1 = require("../util/logger");
 var got_1 = __importDefault(require("got"));
 var keyv_1 = __importDefault(require("keyv"));
+var nanoid_1 = require("nanoid");
 var EsHttpRequestMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -56,38 +57,51 @@ var EsHttpRequestMiddleware = /** @class */ (function () {
         if (cacheEnabled) {
             var cacheMaxAge = lodash_1.default.get(values, 'cache.maxAge', 1000);
             var cacheMaxSize = lodash_1.default.get(values, 'cache.maxSize', 100);
-            this.cache = new keyv_1.default({
+            this.cache = new keyv_1.default('redis://localhost:6379', {
                 maxSize: cacheMaxSize,
-                ttl: cacheMaxAge
+                ttl: cacheMaxAge,
+                namespace: "gotcache:" + nanoid_1.nanoid(12)
             });
         }
+        this.got = got_1.default.extend({
+            throwHttpErrors: false,
+            cache: this.cache
+        });
     }
     EsHttpRequestMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
-            var method, path, body, headers, prefixUrl, res, err_1;
+            var method, path, body, headers, query, prefixUrl, encoding, timeout, retry, followRedirect, maxRedirects, res, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
-                        path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.path'), '');
-                        body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.body'));
-                        headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.headers'));
-                        logger_1.logger.info(lodash_1.default.get(this.values, 'prefixUrl'));
+                        path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
+                        body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.body'));
+                        headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'headers', 'request.headers'));
+                        query = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'query', 'request.query'), {});
                         prefixUrl = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'prefixUrl'), '');
-                        logger_1.logger.info("prefixUrl: " + prefixUrl);
+                        encoding = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'encoding'), undefined);
+                        timeout = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'timeout'), 10000);
+                        retry = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'retry'), undefined);
+                        followRedirect = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'followRedirect'), false);
+                        maxRedirects = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'maxRedirects'), 5);
                         if (path.startsWith('/')) {
                             path = path.substr(1);
                         }
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, got_1.default(path, {
+                        return [4 /*yield*/, this.got(path, {
                                 prefixUrl: prefixUrl,
                                 method: method,
                                 body: body,
                                 headers: headers,
-                                throwHttpErrors: false,
-                                cache: this.cache
+                                searchParams: query,
+                                encoding: encoding,
+                                timeout: timeout,
+                                retry: retry,
+                                followRedirect: followRedirect,
+                                maxRedirects: maxRedirects
                             })];
                     case 2:
                         res = _a.sent();

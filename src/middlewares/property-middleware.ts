@@ -4,7 +4,14 @@ import { NodeVM, VMScript } from 'vm2';
 import { logger } from '../util/logger';
 import stringifyObject from 'stringify-object';
 
-const vm = new NodeVM();
+const vm = new NodeVM({
+    console: 'inherit',
+    sandbox: {},
+    require: {
+        external: true,
+        root: "./"
+    }
+});
 
 export class EsPropertyMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
@@ -27,25 +34,29 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         let script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-
-            script += `module.exports=function(ctx){ try { return ${values['expression']};} catch(err) { return undefined; } }`;
+            script = `const lodash=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script += `module.exports=function(ctx){ try { return ${stringifyObject(values['value'])};} catch(err) { return undefined; } }`;
+            script = `const lodash=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
         }
 
         try {
             this.vmScript = new VMScript(script).compile();
         }
         catch (err) {
-            logger.error({ error: err, script });
+            logger.error('Error compiling script', { error: err, script });
             this.vmScript = new VMScript('module.exports=() => undefined').compile();
         }
     }
 
     async runInternal(context: IEsContext) {
-        lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+        try {
+            lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+        }
+        catch (err) {
+            logger.error('Error while setting property', err);
+        }
     }
 
     async execute(context: IEsContext) {

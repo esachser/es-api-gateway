@@ -1,8 +1,9 @@
 import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
-import got from 'got';
+import got, { Got } from 'got';
 import Keyv  from 'keyv';
+import { nanoid } from 'nanoid';
 
 export class EsHttpRequestMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
@@ -12,6 +13,7 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     next?: IEsMiddleware;
 
     readonly cache: Keyv | undefined;
+    readonly got: Got;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -25,35 +27,49 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
         if (cacheEnabled) {
             const cacheMaxAge = lodash.get(values, 'cache.maxAge', 1000);
             const cacheMaxSize = lodash.get(values, 'cache.maxSize', 100);
-            this.cache = new Keyv({
+            this.cache = new Keyv('redis://localhost:6379', {
                 maxSize: cacheMaxSize,
-                ttl: cacheMaxAge
+                ttl: cacheMaxAge,
+                namespace: `gotcache:${nanoid(12)}`
             });
         }
+        this.got = got.extend({
+            throwHttpErrors: false,
+            cache: this.cache
+        });
     }
 
     async runInternal(context: IEsContext) {
         const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
-        let path = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.path'), '');
-        const body = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.body'));
-        const headers = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.headers'));
-        logger.info(lodash.get(this.values, 'prefixUrl'));
+        let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
+        const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.body'));
+        const headers = lodash.get(context.properties, lodash.get(this.values, 'headers', 'request.headers'));
+        const query = lodash.get(context.properties, lodash.get(this.values, 'query', 'request.query'), {});
         const prefixUrl = lodash.get(context.properties, lodash.get(this.values, 'prefixUrl'), '');
-        logger.info(`prefixUrl: ${prefixUrl}`);
+
+        // Leitura de opcionais
+        const encoding = lodash.get(context.properties, lodash.get(this.values, 'encoding'), undefined);
+        const timeout = lodash.get(context.properties, lodash.get(this.values, 'timeout'), 10000);
+        const retry = lodash.get(context.properties, lodash.get(this.values, 'retry'), undefined);
+        const followRedirect = lodash.get(context.properties, lodash.get(this.values, 'followRedirect'), false);
+        const maxRedirects = lodash.get(context.properties, lodash.get(this.values, 'maxRedirects'), 5);
 
         if (path.startsWith('/')) {
             path = path.substr(1);
         }
-        //'http://localhost:5000/api/bla'
 
         try {
-            const res = await got(path, {
+            const res = await this.got(path, {
                 prefixUrl,
                 method,
                 body,
                 headers,
-                throwHttpErrors: false,
-                cache: this.cache
+                searchParams: query,
+                encoding,
+                timeout,
+                retry,
+                followRedirect,
+                maxRedirects
             });
 
             lodash.set(context.properties, 'response.headers', res?.headers || {});

@@ -1,0 +1,63 @@
+{
+    "transports": [
+        {
+            "type": "EsHttpTransport",
+            "id": "http",
+            "parameters": {
+                "routeContext": "/api/v4/teste/",
+                "routes": {
+                    "/": [
+                        "GET"
+                    ]
+                }
+            },
+            "mids": [
+                {
+                    "type": "EsMetricsMiddleware",
+                    "data":{
+                        "prop": "response.headers.timems"
+                    }
+                }
+            ]
+        }
+    ],
+    "execution": [
+        {
+            "type": "EsPropertyMiddleware",
+            "data": {
+                "runAfter": false,
+                "name": "request.prefixUrl",
+                "value": "http://httpbin.org"
+            }
+        },
+        {
+            "type": "EsPropertyMiddleware",
+            "data": {
+                "runAfter": false,
+                "name": "urlRequest",
+                "expression": "String(ctx.properties.request?.method).toLowerCase()"
+            }
+        },
+        {
+            "type": "EsPropertyMiddleware",
+            "data": {
+                "runAfter": false,
+                "name": "urlRequest2",
+                "expression": "lodash.toLower(lodash.toString(lodash.get(ctx.properties, 'request.method', '')))"
+            }
+        },
+        {
+            "type": "EsHttpRequestMiddleware",
+            "data": {
+                "runAfter": false,
+                "cache": {
+                    "enabled": true,
+                    "maxAge": 100000,
+                    "maxSize": 10000
+                },
+                "prefixUrl": "request.prefixUrl",
+                "url": "urlRequest2"
+            }
+        }
+    ]
+}

@@ -1,10 +1,12 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { Got } from 'got';
 import Keyv from 'keyv';
 export declare class EsHttpRequestMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
     values: any;
     next?: IEsMiddleware;
     readonly cache: Keyv | undefined;
+    readonly got: Got;
     /**
      * Constrói o middleware a partir dos parâmetros
      */

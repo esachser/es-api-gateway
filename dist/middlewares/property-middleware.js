@@ -44,7 +44,14 @@ var lodash_1 = __importDefault(require("lodash"));
 var vm2_1 = require("vm2");
 var logger_1 = require("../util/logger");
 var stringify_object_1 = __importDefault(require("stringify-object"));
-var vm = new vm2_1.NodeVM();
+var vm = new vm2_1.NodeVM({
+    console: 'inherit',
+    sandbox: {},
+    require: {
+        external: true,
+        root: "./"
+    }
+});
 var EsPropertyMiddleware = /** @class */ (function () {
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -57,24 +64,29 @@ var EsPropertyMiddleware = /** @class */ (function () {
         var script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-            script += "module.exports=function(ctx){ try { return " + values['expression'] + ";} catch(err) { return undefined; } }";
+            script = "const lodash=require('lodash');module.exports=function(ctx){ return " + values['expression'] + "; }";
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script += "module.exports=function(ctx){ try { return " + stringify_object_1.default(values['value']) + ";} catch(err) { return undefined; } }";
+            script = "const lodash=require('lodash');module.exports=function(ctx){ return " + stringify_object_1.default(values['value']) + "; }";
         }
         try {
             this.vmScript = new vm2_1.VMScript(script).compile();
         }
         catch (err) {
-            logger_1.logger.error({ error: err, script: script });
+            logger_1.logger.error('Error compiling script', { error: err, script: script });
             this.vmScript = new vm2_1.VMScript('module.exports=() => undefined').compile();
         }
     }
     EsPropertyMiddleware.prototype.runInternal = function (context) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+                try {
+                    lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+                }
+                catch (err) {
+                    logger_1.logger.error('Error while setting property', err);
+                }
                 return [2 /*return*/];
             });
         });
