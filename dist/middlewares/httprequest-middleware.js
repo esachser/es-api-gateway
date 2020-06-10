@@ -76,7 +76,7 @@ var EsHttpRequestMiddleware = /** @class */ (function () {
                     case 0:
                         method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
                         path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
-                        body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.body'));
+                        body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.rawbody'));
                         headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'headers', 'request.headers'));
                         query = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'query', 'request.query'), {});
                         prefixUrl = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'prefixUrl'), '');

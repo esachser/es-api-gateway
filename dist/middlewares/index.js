@@ -13,6 +13,7 @@ var parallel_middleware_1 = require("./parallel-middleware");
 var sequence_middleware_1 = require("./sequence-middleware");
 var condition_middleware_1 = require("./condition-middleware");
 var httprequest_middleware_1 = require("./httprequest-middleware");
+var openapiverify_middleware_1 = require("./openapiverify-middleware");
 var schemas_1 = require("../core/schemas");
 var mids = {};
 function readDirectoryProjects(dir) {
@@ -43,6 +44,9 @@ function loadMiddlewares() {
     logger_1.logger.info('Loading HttpRequest Middleware');
     mids['EsHttpRequestMiddleware'] = httprequest_middleware_1.MiddlewareCtor;
     schemas_1.addNewSchema('EsHttpRequestMiddleware', httprequest_middleware_1.MiddlewareSchema);
+    logger_1.logger.info('Loading OpenApiVerify Middleware');
+    mids['EsOpenApiVerifyMiddleware'] = openapiverify_middleware_1.MiddlewareCtor;
+    schemas_1.addNewSchema('EsOpenApiVerifyMiddleware', openapiverify_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

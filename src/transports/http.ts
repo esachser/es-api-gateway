@@ -62,7 +62,10 @@ export class EsHttpTransport implements IEsTransport {
                         query: ctx.query,
                         path: allPath.substr(routeContextSize),
                         method: ctx.method,
-                    }                    
+                        body: ctx.request.body,
+                        rawbody: ctx.request.rawBody,
+                        routePrefix: this.routeContext
+                    }
                 },
                 parsedbody: ctx.request.body,
                 rawbody: ctx.request.rawBody
@@ -78,8 +81,9 @@ export class EsHttpTransport implements IEsTransport {
             // Roda o que precisa
             await next();
             
-            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers') || {});
-            ctx.status = lodash.get(ctx.iesContext.properties, 'response.status') || 404;
+            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers', {}));
+            const statusCode = lodash.get(ctx.iesContext.properties, 'response.status');
+            ctx.status = lodash.isNumber(statusCode) ? statusCode : 404;
             ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
             
             let diff = Date.now() - init;

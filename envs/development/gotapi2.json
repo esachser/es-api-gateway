@@ -7,14 +7,15 @@
                 "routeContext": "/api/v4/teste/",
                 "routes": {
                     "/": [
-                        "GET"
+                        "GET",
+                        "POST"
                     ]
                 }
             },
             "mids": [
                 {
                     "type": "EsMetricsMiddleware",
-                    "data":{
+                    "data": {
                         "prop": "response.headers.timems"
                     }
                 }
@@ -22,6 +23,101 @@
         }
     ],
     "execution": [
+        {
+            "type": "EsOpenApiVerifyMiddleware",
+            "data": {
+                "after": false,
+                "oas": {
+                    "openapi": "3.0.2",
+                    "info": {
+                        "title": "OpenAPI GotAPI",
+                        "description": "Got API com OpenAPI Spec",
+                        "contact": {
+                            "email": "eduardo.sachser@gmail.com"
+                        },
+                        "license": {
+                            "name": "Apache 2.0",
+                            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+                        },
+                        "version": "1.0.0"
+                    },
+                    "externalDocs": {
+                        "description": "Find out more about Swagger",
+                        "url": "http://swagger.io"
+                    },
+                    "servers": [
+                        {
+                            "url": "http://localhost:4000/api/v4/teste"
+                        }
+                    ],
+                    "tags": [
+                        {
+                            "name": "Chamadas",
+                            "description": "Chama httpbin com o método escolhido"
+                        }
+                    ],
+                    "paths": {
+                        "/": {
+                            "get": {
+                                "tags": [
+                                    "Chamadas"
+                                ],
+                                "summary": "Get something",
+                                "operationId": "getAnything",
+                                "responses": {
+                                    "400": {
+                                        "description": "Invalid ID supplied",
+                                        "content": {}
+                                    },
+                                    "404": {
+                                        "description": "Pet not found",
+                                        "content": {}
+                                    },
+                                    "405": {
+                                        "description": "Validation exception",
+                                        "content": {}
+                                    }
+                                }
+                            },
+                            "post": {
+                                "tags": [
+                                    "pet"
+                                ],
+                                "summary": "Post something",
+                                "operationId": "postAnything",
+                                "requestBody": {
+                                    "description": "ok object",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "additionalProperties": false,
+                                                "required": [
+                                                    "ok"
+                                                ],
+                                                "properties": {
+                                                    "ok": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": true
+                                },
+                                "responses": {
+                                    "200": {
+                                        "description": "Sucesso",
+                                        "content": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         {
             "type": "EsPropertyMiddleware",
             "data": {

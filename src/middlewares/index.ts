@@ -10,6 +10,7 @@ import { MiddlewareCtor as EsParallelMiddlewareContructor, MiddlewareSchema as E
 import { MiddlewareCtor as EsSequenceMiddlewareContructor, MiddlewareSchema as EsSequenceSchema } from './sequence-middleware';
 import { MiddlewareCtor as EsConditionMiddlewareContructor, MiddlewareSchema as EsConditionSchema } from './condition-middleware';
 import { MiddlewareCtor as EsHttpRequestMiddlewareContructor, MiddlewareSchema as EsHttpRequestSchema } from './httprequest-middleware';
+import { MiddlewareCtor as EsOpenApiVerifyMiddlewareContructor, MiddlewareSchema as EsOpenApiVerifySchema } from './openapiverify-middleware';
 import { addNewSchema } from '../core/schemas';
 
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
@@ -51,6 +52,10 @@ export function loadMiddlewares() {
     logger.info('Loading HttpRequest Middleware');
     mids['EsHttpRequestMiddleware'] = EsHttpRequestMiddlewareContructor;
     addNewSchema('EsHttpRequestMiddleware', EsHttpRequestSchema);
+
+    logger.info('Loading OpenApiVerify Middleware');
+    mids['EsOpenApiVerifyMiddleware'] = EsOpenApiVerifyMiddlewareContructor;
+    addNewSchema('EsOpenApiVerifyMiddleware', EsOpenApiVerifySchema);
 };
 
 export function loadCustomMiddlewares() {

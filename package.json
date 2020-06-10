@@ -17,6 +17,7 @@
   "author": "Eduardo Sachser",
   "license": "ISC",
   "dependencies": {
+    "@apidevtools/swagger-parser": "^9.0.1",
     "@keyv/redis": "^2.1.2",
     "ajv": "^6.12.2",
     "decache": "^4.6.0",
@@ -28,6 +29,7 @@
     "koa-mount": "^4.0.0",
     "koa-router": "^8.0.8",
     "nanoid": "^3.1.9",
+    "oas3-chow-chow": "^1.1.0",
     "stringify-object": "^3.3.0",
     "vm2": "^3.9.2",
     "winston": "^3.2.1",

@@ -42,7 +42,7 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     async runInternal(context: IEsContext) {
         const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
         let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
-        const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.body'));
+        const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.rawbody'));
         const headers = lodash.get(context.properties, lodash.get(this.values, 'headers', 'request.headers'));
         const query = lodash.get(context.properties, lodash.get(this.values, 'query', 'request.query'), {});
         const prefixUrl = lodash.get(context.properties, lodash.get(this.values, 'prefixUrl'), '');

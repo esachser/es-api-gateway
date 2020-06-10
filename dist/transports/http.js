@@ -66,7 +66,7 @@ var EsHttpTransport = /** @class */ (function () {
         }
         var routeContextSize = this.routeContext.length - 1;
         http_server_1.httpRouter.use(this.routeContext, function (ctx, next) { return __awaiter(_this, void 0, void 0, function () {
-            var allPath, context, init, diff;
+            var allPath, context, init, statusCode, diff;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -83,6 +83,9 @@ var EsHttpTransport = /** @class */ (function () {
                                     query: ctx.query,
                                     path: allPath.substr(routeContextSize),
                                     method: ctx.method,
+                                    body: ctx.request.body,
+                                    rawbody: ctx.request.rawBody,
+                                    routePrefix: this.routeContext
                                 }
                             },
                             parsedbody: ctx.request.body,
@@ -96,8 +99,9 @@ var EsHttpTransport = /** @class */ (function () {
                     case 1:
                         // Roda o que precisa
                         _a.sent();
-                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers') || {});
-                        ctx.status = lodash_1.default.get(ctx.iesContext.properties, 'response.status') || 404;
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
+                        statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                        ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
                         ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                         diff = Date.now() - init;
                         logger_1.logger.debug("Call " + ctx.iesContext.properties.request.httpctx.path + " ended in " + diff + "ms");
