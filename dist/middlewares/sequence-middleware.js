@@ -46,7 +46,7 @@ var EsSequenceMiddleware = /** @class */ (function () {
         var _this = this;
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['runAfter'] = values['runAfter'];
+        this.values['after'] = values['after'];
         this.values['mids'] = [];
         this.next = nextMiddleware;
         if (Array.isArray(values['mids'])) {
@@ -82,7 +82,7 @@ var EsSequenceMiddleware = /** @class */ (function () {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        rAfter = Boolean(this.values['runAfter']);
+                        rAfter = Boolean(this.values['after']);
                         if (!!rAfter) return [3 /*break*/, 4];
                         if (!Array.isArray(this.values['mids'])) return [3 /*break*/, 4];
                         i = 0;
@@ -131,7 +131,7 @@ exports.MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "mids",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "mids": {
@@ -150,7 +150,7 @@ exports.MiddlewareSchema = {
                 ]
             }
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     }

@@ -18,7 +18,7 @@ export class EsConditionMiddleware implements IEsMiddleware {
     constructor(values: any, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['runAfter'] = values['runAfter'];
+        this.values['after'] = values['after'];
         this.values['conditions'] = [];
         this.next = nextMiddleware;
 
@@ -51,7 +51,7 @@ export class EsConditionMiddleware implements IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['runAfter']);
+        const rAfter = Boolean(this.values['after']);
         if (rAfter) {
             await this.next?.execute(context);
             await this.runInternal(context);
@@ -73,7 +73,7 @@ export const MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "conditions",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "conditions": {
@@ -98,7 +98,7 @@ export const MiddlewareSchema = {
                 }
             }
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     }

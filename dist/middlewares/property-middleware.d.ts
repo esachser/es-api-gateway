@@ -30,7 +30,7 @@ export declare const MiddlewareSchema: {
         expression: {
             type: string;
         };
-        runAfter: {
+        after: {
             type: string;
         };
     };

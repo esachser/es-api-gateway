@@ -46,7 +46,7 @@ var EsParallelMiddleware = /** @class */ (function () {
         var _this = this;
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['runAfter'] = values['runAfter'];
+        this.values['after'] = values['after'];
         this.values['mids'] = [];
         this.next = nextMiddleware;
         if (Array.isArray(values['mids'])) {
@@ -75,7 +75,7 @@ var EsParallelMiddleware = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        rAfter = Boolean(this.values['runAfter']);
+                        rAfter = Boolean(this.values['after']);
                         if (!!rAfter) return [3 /*break*/, 2];
                         return [4 /*yield*/, Promise.all(this.values['mids'].map(function (m) { return m === null || m === void 0 ? void 0 : m.execute(context); }))];
                     case 1:
@@ -108,7 +108,7 @@ exports.MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "mids",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "mids": {
@@ -120,7 +120,7 @@ exports.MiddlewareSchema = {
                 }
             }
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     }

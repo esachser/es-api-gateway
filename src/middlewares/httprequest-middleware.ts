@@ -82,7 +82,7 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['runAfter']);
+        const rAfter = Boolean(this.values['after']);
         if (rAfter) {
             await this.next?.execute(context);
             await this.runInternal(context);
@@ -103,7 +103,7 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "runAfter": {
+        "after": {
             "type": "boolean"
         },
         "url": {

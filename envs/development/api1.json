@@ -16,7 +16,7 @@
                     "data": {
                         "name": "response.headers.responsetime",
                         "expression": "ctx.properties.metrics.timems",
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -35,7 +35,7 @@
                                     "data": {
                                         "name": "response.headers.pa",
                                         "expression": "Date.now()",
-                                        "runAfter": true
+                                        "after": true
                                     }
                                 }
                             ],
@@ -45,12 +45,12 @@
                                     "data": {
                                         "name": "response.headers.pb",
                                         "expression": "Date.now()",
-                                        "runAfter": true
+                                        "after": true
                                     }
                                 }
                             ]
                         ],
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -58,7 +58,7 @@
                     "data": {
                         "name": "response.headers.responsetest",
                         "value": "testandoResposta",
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -68,7 +68,7 @@
                         "value": {
                             "ok": true
                         },
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -76,7 +76,7 @@
                     "data": {
                         "name": "response.status",
                         "value": 200,
-                        "runAfter": true
+                        "after": true
                     }
                 }
             ]
@@ -88,7 +88,7 @@
             "data": {
                 "name": "headers.test",
                 "value": "testando",
-                "runAfter": false
+                "after": false
             }
         }
     ]

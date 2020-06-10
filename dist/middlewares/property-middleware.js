@@ -94,13 +94,13 @@ var EsPropertyMiddleware = /** @class */ (function () {
     EsPropertyMiddleware.prototype.execute = function (context) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var runAfter, rAfter;
+            var after, rAfter;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        runAfter = Boolean(lodash_1.default.get(this.values, 'runAfter'));
+                        after = Boolean(lodash_1.default.get(this.values, 'after'));
                         vm.freeze(context, 'ctx');
-                        rAfter = Boolean(this.values['runAfter']);
+                        rAfter = Boolean(this.values['after']);
                         if (!rAfter) return [3 /*break*/, 3];
                         return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
                     case 1:
@@ -135,7 +135,7 @@ exports.MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "name",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "name": {
@@ -147,7 +147,7 @@ exports.MiddlewareSchema = {
         "expression": {
             "type": "string"
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     },

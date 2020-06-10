@@ -25,7 +25,7 @@
         {
             "type": "EsPropertyMiddleware",
             "data": {
-                "runAfter": false,
+                "after": false,
                 "name": "request.prefixUrl",
                 "value": "http://httpbin.org"
             }
@@ -33,7 +33,7 @@
         {
             "type": "EsPropertyMiddleware",
             "data": {
-                "runAfter": false,
+                "after": false,
                 "name": "urlRequest",
                 "expression": "String(ctx.properties.request?.method).toLowerCase()"
             }
@@ -41,7 +41,7 @@
         {
             "type": "EsPropertyMiddleware",
             "data": {
-                "runAfter": false,
+                "after": false,
                 "name": "urlRequest2",
                 "expression": "lodash.toLower(lodash.toString(lodash.get(ctx.properties, 'request.method', '')))"
             }
@@ -49,7 +49,7 @@
         {
             "type": "EsHttpRequestMiddleware",
             "data": {
-                "runAfter": false,
+                "after": false,
                 "cache": {
                     "enabled": true,
                     "maxAge": 100000,

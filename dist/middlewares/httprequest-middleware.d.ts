@@ -22,7 +22,7 @@ export declare const MiddlewareSchema: {
     type: string;
     additionalProperties: boolean;
     properties: {
-        runAfter: {
+        after: {
             type: string;
         };
         url: {

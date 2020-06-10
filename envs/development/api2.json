@@ -19,7 +19,7 @@
                 {
                     "type": "EsConditionMiddleware",
                     "data": {
-                        "runAfter": true,
+                        "after": true,
                         "conditions": [
                             {
                                 "conditionExpression": "ctx.properties.metrics.timems < 3",
@@ -29,7 +29,7 @@
                                         "data": {
                                             "name": "response.headers.timemsg",
                                             "value": "Rápido, muito rápido",
-                                            "runAfter": true
+                                            "after": true
                                         }
                                     }
                                 ]
@@ -42,7 +42,7 @@
                                         "data": {
                                             "name": "response.headers.timemsg",
                                             "value": "Demorou, hein",
-                                            "runAfter": true
+                                            "after": true
                                         }
                                     }
                                 ]
@@ -55,7 +55,7 @@
                     "data": {
                         "name": "response.headers.responsetime",
                         "expression": "ctx.properties.metrics.timems",
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -69,7 +69,7 @@
                     "data": {
                         "name": "response.body",
                         "expression": "{ 'var': ctx.properties.var3 }",
-                        "runAfter": true
+                        "after": true
                     }
                 },
                 {
@@ -77,7 +77,7 @@
                     "data": {
                         "name": "response.status",
                         "value": 200,
-                        "runAfter": true
+                        "after": true
                     }
                 }
             ]
@@ -93,7 +93,7 @@
                         "data": {
                             "name": "var1",
                             "expression": "1",
-                            "runAfter": true
+                            "after": true
                         }
                     },
                     [
@@ -102,7 +102,7 @@
                             "data": {
                                 "name": "var2",
                                 "expression": "(ctx.properties.var1 || 0) * (ctx.properties.var4 || 1)",
-                                "runAfter": true
+                                "after": true
                             }
                         },
                         {
@@ -110,7 +110,7 @@
                             "data": {
                                 "name": "var4",
                                 "expression": "3",
-                                "runAfter": false
+                                "after": false
                             }
                         }
                     ],
@@ -119,11 +119,11 @@
                         "data": {
                             "name": "var3",
                             "expression": "(ctx.properties.var2 || 0) * 2",
-                            "runAfter": false
+                            "after": false
                         }
                     }
                 ],
-                "runAfter": false
+                "after": false
             }
         }
     ]

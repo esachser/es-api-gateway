@@ -15,7 +15,7 @@ export class EsSequenceMiddleware implements IEsMiddleware {
     constructor(values: any, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['runAfter'] = values['runAfter'];
+        this.values['after'] = values['after'];
         this.values['mids'] = [];
         this.next = nextMiddleware;
 
@@ -32,7 +32,7 @@ export class EsSequenceMiddleware implements IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['runAfter'])
+        const rAfter = Boolean(this.values['after'])
         if(!rAfter) {
             if (Array.isArray(this.values['mids'])) {
                 for (let i = 0; i < this.values['mids'].length; i++) {
@@ -61,7 +61,7 @@ export const MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "mids",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "mids": {
@@ -80,7 +80,7 @@ export const MiddlewareSchema = {
                 ]
             }
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     }

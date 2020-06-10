@@ -48,7 +48,7 @@ var EsConditionMiddleware = /** @class */ (function () {
         var _this = this;
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['runAfter'] = values['runAfter'];
+        this.values['after'] = values['after'];
         this.values['conditions'] = [];
         this.next = nextMiddleware;
         if (Array.isArray(values['conditions'])) {
@@ -98,7 +98,7 @@ var EsConditionMiddleware = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        rAfter = Boolean(this.values['runAfter']);
+                        rAfter = Boolean(this.values['after']);
                         if (!rAfter) return [3 /*break*/, 3];
                         return [4 /*yield*/, ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context))];
                     case 1:
@@ -133,7 +133,7 @@ exports.MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "conditions",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "conditions": {
@@ -158,7 +158,7 @@ exports.MiddlewareSchema = {
                 }
             }
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     }

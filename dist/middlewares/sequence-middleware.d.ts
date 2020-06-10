@@ -34,7 +34,7 @@ export declare const MiddlewareSchema: {
                 })[];
             };
         };
-        runAfter: {
+        after: {
             type: string;
         };
     };

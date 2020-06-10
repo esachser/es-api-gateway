@@ -60,10 +60,10 @@ export class EsPropertyMiddleware implements IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
-        const runAfter = Boolean(lodash.get(this.values, 'runAfter'));
+        const after = Boolean(lodash.get(this.values, 'after'));
         vm.freeze(context, 'ctx');
         
-        const rAfter = Boolean(this.values['runAfter']);
+        const rAfter = Boolean(this.values['after']);
         if (rAfter) {
             await this.next?.execute(context);
             await this.runInternal(context);
@@ -85,7 +85,7 @@ export const MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "name",
-        "runAfter"
+        "after"
     ],
     "properties": {
         "name": {
@@ -97,7 +97,7 @@ export const MiddlewareSchema = {
         "expression": {
             "type": "string"
         },
-        "runAfter": {
+        "after": {
             "type": "boolean"
         }
     },
