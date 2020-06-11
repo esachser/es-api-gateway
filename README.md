@@ -24,7 +24,6 @@ Aspectos que devem ser vistos:
 - Criar Catch Error Middleware
 - OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware
-  - dkjf
   - Inspect ou JWKS
   - Escopos via propriedade
 - Parsers de entrada e saída
