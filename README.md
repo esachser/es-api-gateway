@@ -24,3 +24,5 @@ Aspectos que devem ser vistos:
   - **Entrada**: Executar transformação de Buffer para JSON
   - **Saída**: Executar transformação de JSON para BUffer
   - Sempre obedecendo um media-type
+- Não permitir criação da API em caso de erro em qualquer parte da criação
+- Verificar se o prefixo já não está utilizado no transporte http
