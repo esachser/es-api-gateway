@@ -11,9 +11,7 @@ import { MiddlewareCtor as EsSequenceMiddlewareContructor, MiddlewareSchema as E
 import { MiddlewareCtor as EsConditionMiddlewareContructor, MiddlewareSchema as EsConditionSchema } from './condition-middleware';
 import { MiddlewareCtor as EsHttpRequestMiddlewareContructor, MiddlewareSchema as EsHttpRequestSchema } from './httprequest-middleware';
 import { MiddlewareCtor as EsOpenApiVerifyMiddlewareContructor, MiddlewareSchema as EsOpenApiVerifySchema } from './openapiverify-middleware';
-import { addNewSchema } from '../core/schemas';
-
-const mids: {[id:string]:IEsMiddlewareConstructor} = {};
+import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
     const finfos = fs.readdirSync(dir, { withFileTypes: true });
@@ -28,45 +26,20 @@ function readDirectoryProjects(dir: string) {
 
 export function loadMiddlewares() {
     //readDirectoryProjects(path.resolve(baseDirectory, 'middlewares'));
-
-    logger.info('Loading Property Middleware');
-    mids['EsPropertyMiddleware'] = EsPropertyMiddlewareContructor;
-    addNewSchema('EsPropertyMiddleware', EsPropertySchema);
-
-    logger.info('Loading Metrics Middleware');
-    mids['EsMetricsMiddleware'] = EsMetricsMiddlewareContructor;
-    addNewSchema('EsMetricsMiddleware', EsMetricsSchema);
-
-    logger.info('Loading Parallel Middleware');
-    mids['EsParallelMiddleware'] = EsParallelMiddlewareContructor;
-    addNewSchema('EsParallelMiddleware', EsParallelSchema);
-
-    logger.info('Loading Sequence Middleware');
-    mids['EsSequenceMiddleware'] = EsSequenceMiddlewareContructor;
-    addNewSchema('EsSequenceMiddleware', EsSequenceSchema);
-
-    logger.info('Loading Condition Middleware');
-    mids['EsConditionMiddleware'] = EsConditionMiddlewareContructor;
-    addNewSchema('EsConditionMiddleware', EsConditionSchema);
-
-    logger.info('Loading HttpRequest Middleware');
-    mids['EsHttpRequestMiddleware'] = EsHttpRequestMiddlewareContructor;
-    addNewSchema('EsHttpRequestMiddleware', EsHttpRequestSchema);
-
-    logger.info('Loading OpenApiVerify Middleware');
-    mids['EsOpenApiVerifyMiddleware'] = EsOpenApiVerifyMiddlewareContructor;
-    addNewSchema('EsOpenApiVerifyMiddleware', EsOpenApiVerifySchema);
+    addMiddleware('EsPropertyMiddleware', EsPropertyMiddlewareContructor, EsPropertySchema);
+    addMiddleware('EsMetricsMiddleware', EsMetricsMiddlewareContructor, EsMetricsSchema);
+    addMiddleware('EsParallelMiddleware', EsParallelMiddlewareContructor, EsParallelSchema);
+    addMiddleware('EsSequenceMiddleware', EsSequenceMiddlewareContructor, EsSequenceSchema);
+    addMiddleware('EsConditionMiddleware', EsConditionMiddlewareContructor, EsConditionSchema);
+    addMiddleware('EsHttpRequestMiddleware', EsHttpRequestMiddlewareContructor, EsHttpRequestSchema);
+    addMiddleware('EsOpenApiVerifyMiddleware', EsOpenApiVerifyMiddlewareContructor, EsOpenApiVerifySchema);
 };
 
 export function loadCustomMiddlewares() {
     // Limpa cache dos custom
-    logger.info('Removing all ');
+    logger.info('Removing all custom middlewares');
     Object.keys(require.cache).filter(s => s.startsWith('./custom/middlewares/')).forEach(k => {
         logger.info(`Removing cache entry ${k}`);
         decache(k);
     });
 };
-
-export function getMiddlewareConstructor(name: string): IEsMiddlewareConstructor | undefined {
-    return mids[name];
-}

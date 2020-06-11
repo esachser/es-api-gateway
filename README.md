@@ -10,7 +10,8 @@
 
 Aspectos que devem ser vistos:
 
-- Verificar se o prefixo já não está utilizado no transporte http
+- [**OK**] Carga dos middlewares e transportes no core
+- [] Verificar se o prefixo já não está utilizado no transporte http
 - Não permitir criação da API em caso de erro em qualquer parte da criação
 - Refatorar middleware base para classes abstratas
   - **after** deve ser padrão na definição

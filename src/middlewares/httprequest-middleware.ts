@@ -1,4 +1,4 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
+import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 import got, { Got } from 'got';

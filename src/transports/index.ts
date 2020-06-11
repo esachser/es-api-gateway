@@ -6,8 +6,8 @@ import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
 import { TransportContructor as EsHttpTransportContructor, TransportSchema as EsHttpTransportSchema } from './http';
 import { addNewSchema } from '../core/schemas';
+import { addTransport } from '../core/transports';
 
-const transports: {[id:string]:IEsTranportConstructor} = {};
 
 function readDirectoryProjects(dir: string) {
     const finfos = fs.readdirSync(dir, { withFileTypes: true });
@@ -21,9 +21,7 @@ function readDirectoryProjects(dir: string) {
 }
 
 export function loadTransports() {
-    logger.info('Loading Http Tranport');
-    transports['EsHttpTransport'] = EsHttpTransportContructor;
-    addNewSchema('EsHttpTransport', EsHttpTransportSchema);
+    addTransport('EsHttpTransport', EsHttpTransportContructor, EsHttpTransportSchema);
 };
 
 export function loadCustomTransports() {
@@ -35,7 +33,3 @@ export function loadCustomTransports() {
     });
 };
 
-
-export function getTransportConstructor(name: string): IEsTranportConstructor | undefined {
-    return transports[name];
-}

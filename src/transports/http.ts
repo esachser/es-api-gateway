@@ -1,4 +1,4 @@
-import { IEsTransport, EsParameters, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
+import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import { httpRouter } from '../util/http-server';
 import lodash from 'lodash';
 import Router from 'koa-router';
@@ -20,17 +20,14 @@ declare module 'koa' {
 
 
 export class EsHttpTransport implements IEsTransport {
-    parameters: EsParameters = {
-        'routeContext': {
-            type: 'string',
-            optional: false
-        }
-    };
+
     middleware: IEsMiddleware | undefined;
 
     routeContext: string;
 
     router: Router;
+
+    static baseRoutesUsed: Set<string> = new Set<string>();
 
     /**
      *
@@ -40,7 +37,7 @@ export class EsHttpTransport implements IEsTransport {
         this.middleware = middleware;
         this.routeContext = params.routeContext;
         this.router = new Router();
-
+        
         if (!this.routeContext.endsWith('/')) {
             this.routeContext += '/';
         }

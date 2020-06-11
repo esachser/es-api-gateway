@@ -1,4 +1,4 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, IEsMiddlewareParams } from '../core';
+import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { NodeVM, VMScript } from 'vm2';
 import { logger } from '../util/logger';

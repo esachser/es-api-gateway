@@ -42,8 +42,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTransport = exports.connectMiddlewares = exports.connect2Mids = exports.createMiddleware = exports.applyMixins = void 0;
 // import workerpool from 'workerpool';
 var lodash_1 = __importDefault(require("lodash"));
-var middlewares_1 = require("../middlewares");
-var transports_1 = require("../transports");
+var middlewares_1 = require("./middlewares");
+var transports_1 = require("./transports");
 var schemas_1 = require("./schemas");
 function applyMixins(derivedCtor, baseCtors) {
     baseCtors.forEach(function (baseCtor) {

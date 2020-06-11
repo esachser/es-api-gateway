@@ -28,10 +28,6 @@ export interface IEsMiddleware {
     next?: IEsMiddleware;
     execute(context: IEsContext): void;
 }
-export interface IEsMiddlewareParams {
-    parameters: EsParameters;
-    isInOut: boolean;
-}
 export interface IEsTranportConstructor {
     new (params: any, middleware?: IEsMiddleware): IEsTransport;
 }

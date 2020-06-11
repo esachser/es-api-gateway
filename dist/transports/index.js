@@ -3,13 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTransportConstructor = exports.loadCustomTransports = exports.loadTransports = void 0;
+exports.loadCustomTransports = exports.loadTransports = void 0;
 var decache_1 = __importDefault(require("decache"));
 var fs_1 = __importDefault(require("fs"));
 var logger_1 = require("../util/logger");
 var http_1 = require("./http");
-var schemas_1 = require("../core/schemas");
-var transports = {};
+var transports_1 = require("../core/transports");
 function readDirectoryProjects(dir) {
     var finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
     finfos.forEach(function (finfo) {
@@ -19,9 +18,7 @@ function readDirectoryProjects(dir) {
     });
 }
 function loadTransports() {
-    logger_1.logger.info('Loading Http Tranport');
-    transports['EsHttpTransport'] = http_1.TransportContructor;
-    schemas_1.addNewSchema('EsHttpTransport', http_1.TransportSchema);
+    transports_1.addTransport('EsHttpTransport', http_1.TransportContructor, http_1.TransportSchema);
 }
 exports.loadTransports = loadTransports;
 ;
@@ -35,8 +32,4 @@ function loadCustomTransports() {
 }
 exports.loadCustomTransports = loadCustomTransports;
 ;
-function getTransportConstructor(name) {
-    return transports[name];
-}
-exports.getTransportConstructor = getTransportConstructor;
 //# sourceMappingURL=index.js.map

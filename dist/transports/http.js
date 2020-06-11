@@ -46,6 +46,7 @@ var koa_router_1 = __importDefault(require("koa-router"));
 var logger_1 = require("../util/logger");
 ;
 var EsHttpTransport = /** @class */ (function () {
+    //static baseRoutesUsed:
     /**
      *
      */

@@ -1,9 +1,8 @@
 // import workerpool from 'workerpool';
 import lodash from 'lodash';
-import { getMiddlewareConstructor } from '../middlewares';
-import { getTransportConstructor } from '../transports';
+import { getMiddlewareConstructor } from './middlewares';
+import { getTransportConstructor } from './transports';
 import { validateObject } from './schemas';
-
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
@@ -27,12 +26,6 @@ export interface IEsContext {
     parsedbody?: any
 }
 
-export type EsObjectSchema = { type: 'object', optional: boolean, schema: EsObjectSchema, defaultValue?: any };
-export type EsOtherSchema = { type: 'string' | 'number' | 'boolean' | 'any' | 'array', optional: boolean, defaultValue?: any };
-
-export type EsSchema = EsObjectSchema | EsOtherSchema;
-export type EsParameters = { [id:string] : EsSchema };
-
 export interface IEsMiddlewareConstructor {
     new(values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware
 }
@@ -42,9 +35,23 @@ export interface IEsMiddleware {
     execute(context: IEsContext): void
 }
 
-export interface IEsMiddlewareParams {
-    parameters: EsParameters
-    isInOut: boolean
+export abstract class EsMiddleware implements IEsMiddleware {
+    next?: IEsMiddleware
+
+    abstract after: boolean
+
+    abstract async runInternal(context: IEsContext): Promise<void>
+
+    async execute(context: IEsContext) {
+        if (this.after) {
+            await this.next?.execute(context);
+            await this.runInternal(context);
+        }
+        else {
+            await this.runInternal(context);
+            await this.next?.execute(context);
+        }
+    }
 }
 
 export interface IEsTranportConstructor {
@@ -52,7 +59,6 @@ export interface IEsTranportConstructor {
 }
 
 export interface IEsTransport {
-    parameters: EsParameters
     middleware: IEsMiddleware | undefined
     clear(): void
 }

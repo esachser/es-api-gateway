@@ -5,8 +5,6 @@ import lodash from 'lodash';
 import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
-import { getMiddlewareConstructor } from '../middlewares';
-import { getTransportConstructor } from '../transports';
 import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
 
