@@ -1,14 +1,12 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsConditionMiddleware implements IEsMiddleware {
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+export declare class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
-    next?: IEsMiddleware;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
     runInternal(context: IEsContext): Promise<void>;
-    execute(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -37,9 +35,6 @@ export declare const MiddlewareSchema: {
                     };
                 };
             };
-        };
-        after: {
-            type: string;
         };
     };
 };

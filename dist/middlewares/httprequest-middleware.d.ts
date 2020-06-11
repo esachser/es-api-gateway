@@ -1,18 +1,16 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import { Got } from 'got';
 import Keyv from 'keyv';
-export declare class EsHttpRequestMiddleware implements IEsMiddleware {
+export declare class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
-    next?: IEsMiddleware;
     readonly cache: Keyv | undefined;
     readonly got: Got;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
     runInternal(context: IEsContext): Promise<void>;
-    execute(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -22,9 +20,6 @@ export declare const MiddlewareSchema: {
     type: string;
     additionalProperties: boolean;
     properties: {
-        after: {
-            type: string;
-        };
         url: {
             type: string;
         };

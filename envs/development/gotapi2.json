@@ -4,7 +4,7 @@
             "type": "EsHttpTransport",
             "id": "http",
             "parameters": {
-                "routeContext": "/api/v3/",
+                "routeContext": "/api/v4/teste",
                 "routes": {
                     "/": [
                         "GET",
@@ -25,8 +25,8 @@
     "execution": [
         {
             "type": "EsOpenApiVerifyMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "oas": {
                     "openapi": "3.0.2",
                     "info": {
@@ -120,32 +120,32 @@
         },
         {
             "type": "EsPropertyMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "name": "request.prefixUrl",
                 "value": "http://httpbin.org"
             }
         },
         {
             "type": "EsPropertyMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "name": "urlRequest",
                 "expression": "String(ctx.properties.request?.method).toLowerCase()"
             }
         },
         {
             "type": "EsPropertyMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "name": "urlRequest2",
                 "expression": "lodash.toLower(lodash.toString(lodash.get(ctx.properties, 'request.method', '')))"
             }
         },
         {
             "type": "EsHttpRequestMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "cache": {
                     "enabled": true,
                     "maxAge": 100000,

@@ -13,20 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsOpenApiVerifyMiddleware = void 0;
+const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const swagger_parser_1 = __importDefault(require("@apidevtools/swagger-parser"));
 const oas3_chow_chow_1 = __importDefault(require("oas3-chow-chow"));
 let EsOpenApiVerifyMiddleware = /** @class */ (() => {
-    class EsOpenApiVerifyMiddleware {
+    class EsOpenApiVerifyMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
+            super(after, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = {};
-            this.values['after'] = values['after'];
-            this.next = nextMiddleware;
             const oas = lodash_1.default.get(values, 'oas', {});
             swagger_parser_1.default.validate(oas)
                 .then(api => {
@@ -39,7 +39,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                 logger_1.logger.error('Error validating OpenAPI Spec', err);
             });
         }
-        runIntenal(context) {
+        runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (this.oasValidator !== undefined) {
                     const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
@@ -58,19 +58,6 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                 }
             });
         }
-        execute(context) {
-            var _a;
-            return __awaiter(this, void 0, void 0, function* () {
-                const rAfter = Boolean(this.values['after']);
-                if (!rAfter) {
-                    yield this.runIntenal(context);
-                }
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                if (rAfter) {
-                    yield this.runIntenal(context);
-                }
-            });
-        }
     }
     EsOpenApiVerifyMiddleware.isInOut = true;
     return EsOpenApiVerifyMiddleware;
@@ -85,13 +72,9 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "after",
         "oas"
     ],
     "properties": {
-        "after": {
-            "type": "boolean"
-        },
         "oas": {
             "type": "object"
         }

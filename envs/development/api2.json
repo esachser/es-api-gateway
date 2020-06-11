@@ -18,8 +18,8 @@
             "mids": [
                 {
                     "type": "EsConditionMiddleware",
+                    "after": true,
                     "data": {
-                        "after": true,
                         "conditions": [
                             {
                                 "conditionExpression": "ctx.properties.metrics.timems < 3",
@@ -28,9 +28,9 @@
                                         "type": "EsPropertyMiddleware",
                                         "data": {
                                             "name": "response.headers.timemsg",
-                                            "value": "Rápido, muito rápido",
-                                            "after": true
-                                        }
+                                            "value": "Rápido, muito rápido"
+                                        },
+                                        "after": true
                                     }
                                 ]
                             },
@@ -41,9 +41,9 @@
                                         "type": "EsPropertyMiddleware",
                                         "data": {
                                             "name": "response.headers.timemsg",
-                                            "value": "Demorou, hein",
-                                            "after": true
-                                        }
+                                            "value": "Demorou, hein"
+                                        },
+                                        "after": true
                                     }
                                 ]
                             }
@@ -54,9 +54,9 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",
-                        "expression": "ctx.properties.metrics.timems",
-                        "after": true
-                    }
+                        "expression": "ctx.properties.metrics.timems"
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsMetricsMiddleware",
@@ -68,17 +68,17 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.body",
-                        "expression": "{ 'var': ctx.properties.var3 }",
-                        "after": true
-                    }
+                        "expression": "{ 'var': ctx.properties.var3 }"
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.status",
-                        "value": 200,
-                        "after": true
-                    }
+                        "value": 200
+                    },
+                    "after": true
                 }
             ]
         }
@@ -92,39 +92,39 @@
                         "type": "EsPropertyMiddleware",
                         "data": {
                             "name": "var1",
-                            "expression": "1",
-                            "after": true
-                        }
+                            "expression": "1"
+                        },
+                        "after": true
                     },
                     [
                         {
                             "type": "EsPropertyMiddleware",
                             "data": {
                                 "name": "var2",
-                                "expression": "(ctx.properties.var1 || 0) * (ctx.properties.var4 || 1)",
-                                "after": true
-                            }
+                                "expression": "(ctx.properties.var1 || 0) * (ctx.properties.var4 || 1)"
+                            },
+                            "after": true
                         },
                         {
                             "type": "EsPropertyMiddleware",
                             "data": {
                                 "name": "var4",
-                                "expression": "3",
-                                "after": false
-                            }
+                                "expression": "3"
+                            },
+                            "after": false
                         }
                     ],
                     {
                         "type": "EsPropertyMiddleware",
                         "data": {
                             "name": "var3",
-                            "expression": "(ctx.properties.var2 || 0) * 2",
-                            "after": false
-                        }
+                            "expression": "(ctx.properties.var2 || 0) * 2"
+                        },
+                        "after": false
                     }
-                ],
-                "after": false
-            }
+                ]
+            },
+            "after": false
         }
     ]
 }

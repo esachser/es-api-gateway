@@ -25,14 +25,18 @@ const configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.
 function loadConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Reloading global config file');
-        const text = yield promises_1.default.readFile(configFileName);
+        const text = yield promises_1.default.readFile(configFileName).catch(e => { throw e; });
         exports.configuration = JSON.parse(text.toString());
         logger_1.logger.level = exports.configuration.logLevel || 'info';
     });
 }
 exports.loadConfig = loadConfig;
 fs_1.default.watch(configFileName, (event, fname) => __awaiter(void 0, void 0, void 0, function* () {
-    yield loadConfig();
-    yield envs_1.loadEnv(exports.configuration.env);
+    yield loadConfig().catch(e => {
+        logger_1.logger.error('Error loading config', e);
+    });
+    yield envs_1.loadEnv(exports.configuration.env).catch(e => {
+        logger_1.logger.error('Error loading APIs', e);
+    });
 }));
 //# sourceMappingURL=config.js.map

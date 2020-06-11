@@ -32,16 +32,20 @@ function applyMixins(derivedCtor, baseCtors) {
 exports.applyMixins = applyMixins;
 ;
 class EsMiddleware {
+    constructor(after, nextMiddleware) {
+        this.after = after;
+        this.next = nextMiddleware;
+    }
     execute(context) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             if (this.after) {
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                yield this.runInternal(context);
+                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context).catch(e => { throw e; }));
+                yield this.runInternal(context).catch(e => { throw e; });
             }
             else {
-                yield this.runInternal(context);
-                yield ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context));
+                yield this.runInternal(context).catch(e => { throw e; });
+                yield ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context).catch(e => { throw e; }));
             }
         });
     }
@@ -54,12 +58,13 @@ function createMiddleware(arr, idx) {
         }
         const type = lodash_1.default.get(arr[idx], 'type');
         const data = lodash_1.default.get(arr[idx], 'data');
+        const after = lodash_1.default.get(arr[idx], 'after', false);
         const ctor = middlewares_1.getMiddlewareConstructor(type);
-        const v = yield schemas_1.validateObject(type, data);
+        const v = yield schemas_1.validateObject(type, data).catch(e => { throw e; });
         if (ctor !== undefined && v) {
-            return new ctor(data, yield createMiddleware(arr, idx + 1));
+            return new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1).catch(e => { throw e; }));
         }
-        return yield createMiddleware(arr, idx + 1);
+        return createMiddleware(arr, idx + 1).catch(e => { throw e; });
     });
 }
 exports.createMiddleware = createMiddleware;
@@ -92,7 +97,7 @@ exports.connectMiddlewares = connectMiddlewares;
 function createTransport(type, parameters, middleware) {
     return __awaiter(this, void 0, void 0, function* () {
         const ctor = transports_1.getTransportConstructor(type);
-        const v = yield schemas_1.validateObject(type, parameters);
+        const v = yield schemas_1.validateObject(type, parameters).catch(e => { throw e; });
         if (ctor !== undefined && v) {
             return new ctor(parameters, middleware);
         }

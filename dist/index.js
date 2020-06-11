@@ -18,14 +18,14 @@ const http_server_1 = require("./util/http-server");
 const schemas_1 = require("./core/schemas");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield config_1.loadConfig();
+        yield config_1.loadConfig().catch(e => { throw e; });
         middlewares_1.loadMiddlewares();
         middlewares_1.loadCustomMiddlewares();
         transports_1.loadTransports();
         transports_1.loadCustomTransports();
         http_server_1.loadHttpServer();
         schemas_1.loadJsonSchemaValidator();
-        yield envs_1.loadEnv(config_1.configuration.env);
+        yield envs_1.loadEnv(config_1.configuration.env).catch(e => { throw e; });
     });
 }
 start().catch(e => {

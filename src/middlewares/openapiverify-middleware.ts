@@ -64,13 +64,9 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "after",
         "oas"
     ],
     "properties": {
-        "after": {
-            "type": "boolean"
-        },
         "oas": {
             "type": "object"
         }

@@ -89,9 +89,6 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "after": {
-            "type": "boolean"
-        },
         "url": {
             "type": "string"
         },

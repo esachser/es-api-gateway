@@ -6,7 +6,7 @@ export declare class EsMetricsMiddleware implements IEsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
     execute(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;

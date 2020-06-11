@@ -20,7 +20,7 @@ let EsMetricsMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
             // Verifica values contra o esquema.
             this.values = values;
             this.next = nextMiddleware;
@@ -29,7 +29,7 @@ let EsMetricsMiddleware = /** @class */ (() => {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
                 let init = new Date().valueOf();
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
+                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context).catch(e => { throw e; }));
                 let end = new Date().valueOf();
                 let diff = end - init;
                 logger_1.logger.info(`Duration: ${diff}ms`);

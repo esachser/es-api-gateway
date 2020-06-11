@@ -1,13 +1,13 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsSequenceMiddleware implements IEsMiddleware {
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+export declare class EsSequenceMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
     next?: IEsMiddleware;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
-    execute(context: IEsContext): Promise<void>;
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -33,9 +33,6 @@ export declare const MiddlewareSchema: {
                     $ref?: undefined;
                 })[];
             };
-        };
-        after: {
-            type: string;
         };
     };
 };

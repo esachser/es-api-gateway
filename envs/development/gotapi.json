@@ -27,16 +27,16 @@
     "execution": [
         {
             "type": "EsPropertyMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "name": "request.prefixUrl",
                 "value": "http://localhost:5000/api/bla"
             }
         },
         {
             "type": "EsHttpRequestMiddleware",
+            "after": false,
             "data": {
-                "after": false,
                 "cache": {
                     "enabled": true,
                     "maxAge": 10000,

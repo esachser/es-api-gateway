@@ -7,16 +7,17 @@ export interface IEsContext {
     parsedbody?: any;
 }
 export interface IEsMiddlewareConstructor {
-    new (values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware;
+    new (values: any, after: boolean, nextMiddleware?: IEsMiddleware): IEsMiddleware;
 }
 export interface IEsMiddleware {
     next?: IEsMiddleware;
-    execute(context: IEsContext): void;
+    execute(context: IEsContext): Promise<void>;
 }
 export declare abstract class EsMiddleware implements IEsMiddleware {
     next?: IEsMiddleware;
-    abstract after: boolean;
+    after: boolean;
     abstract runInternal(context: IEsContext): Promise<void>;
+    constructor(after: boolean, nextMiddleware: IEsMiddleware | undefined);
     execute(context: IEsContext): Promise<void>;
 }
 export interface IEsTranportConstructor {

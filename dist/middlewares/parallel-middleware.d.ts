@@ -1,13 +1,13 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsParallelMiddleware implements IEsMiddleware {
+import { IEsMiddleware, EsMiddleware, IEsMiddlewareConstructor, IEsContext } from '../core';
+export declare class EsParallelMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
     next?: IEsMiddleware;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
-    execute(context: IEsContext): Promise<void>;
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -26,9 +26,6 @@ export declare const MiddlewareSchema: {
                     $ref: string;
                 };
             };
-        };
-        after: {
-            type: string;
         };
     };
 };

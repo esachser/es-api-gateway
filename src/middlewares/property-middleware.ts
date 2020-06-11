@@ -67,8 +67,7 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "name",
-        "after"
+        "name"
     ],
     "properties": {
         "name": {
@@ -79,9 +78,6 @@ export const MiddlewareSchema = {
         },
         "expression": {
             "type": "string"
-        },
-        "after": {
-            "type": "boolean"
         }
     },
     "oneOf": [

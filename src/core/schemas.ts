@@ -17,6 +17,9 @@ export const MIDDLEWARE_SCHEMA = {
         },
         "data": {
             "type": "object"
+        },
+        "after": {
+            "type": "boolean"
         }
     }
 };

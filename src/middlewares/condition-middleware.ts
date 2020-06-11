@@ -57,8 +57,7 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "conditions",
-        "after"
+        "conditions"
     ],
     "properties": {
         "conditions": {
@@ -82,9 +81,6 @@ export const MiddlewareSchema = {
                     }
                 }
             }
-        },
-        "after": {
-            "type": "boolean"
         }
     }
 };

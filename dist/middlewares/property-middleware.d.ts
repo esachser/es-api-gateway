@@ -1,16 +1,14 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import { VMScript } from 'vm2';
-export declare class EsPropertyMiddleware implements IEsMiddleware {
+export declare class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
-    next?: IEsMiddleware;
     readonly vmScript: VMScript;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
     runInternal(context: IEsContext): Promise<void>;
-    execute(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -28,9 +26,6 @@ export declare const MiddlewareSchema: {
             type: string[];
         };
         expression: {
-            type: string;
-        };
-        after: {
             type: string;
         };
     };

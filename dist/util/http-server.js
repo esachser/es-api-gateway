@@ -25,13 +25,13 @@ function loadHttpServer() {
     app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
         // Avaliando tempo de execução total da aplicação koa
         let init = Date.now();
-        yield next();
+        yield next().catch(e => { throw e; });
         let diff = Date.now() - init;
         logger_1.logger.debug(`Total app process time: ${diff}ms`);
     }));
     app.use(koa_helmet_1.default());
     app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
-        yield next();
+        yield next().catch(e => { throw e; });
         if (ctx.status === 404 && ctx.body === undefined) {
             ctx.body = {
                 error: 'Not Found'

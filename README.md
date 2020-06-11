@@ -11,9 +11,9 @@
 Aspectos que devem ser vistos:
 
 - [**OK**] Carga dos middlewares e transportes no core
-- [] Verificar se o prefixo já não está utilizado no transporte http
+- [**OK**] Verificar se o prefixo já não está utilizado no transporte http
 - Não permitir criação da API em caso de erro em qualquer parte da criação
-- Refatorar middleware base para classes abstratas
+- [**OK**] Refatorar middleware base para classes abstratas
   - **after** deve ser padrão na definição
   - **execute** deve seguir ou não o **after**
   - **runInternal** deve ser implementado

@@ -15,9 +15,9 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",
-                        "expression": "ctx.properties.metrics.timems",
-                        "after": true
-                    }
+                        "expression": "ctx.properties.metrics.timems"
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsMetricsMiddleware",
@@ -34,9 +34,9 @@
                                     "type": "EsPropertyMiddleware",
                                     "data": {
                                         "name": "response.headers.pa",
-                                        "expression": "Date.now()",
-                                        "after": true
-                                    }
+                                        "expression": "Date.now()"
+                                    },
+                                    "after": true
                                 }
                             ],
                             [
@@ -44,22 +44,22 @@
                                     "type": "EsPropertyMiddleware",
                                     "data": {
                                         "name": "response.headers.pb",
-                                        "expression": "Date.now()",
-                                        "after": true
-                                    }
+                                        "expression": "Date.now()"
+                                    },
+                                    "after": true
                                 }
                             ]
-                        ],
-                        "after": true
-                    }
+                        ]
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetest",
-                        "value": "testandoResposta",
-                        "after": true
-                    }
+                        "value": "testandoResposta"
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsPropertyMiddleware",
@@ -67,17 +67,17 @@
                         "name": "response.body",
                         "value": {
                             "ok": true
-                        },
-                        "after": true
-                    }
+                        }
+                    },
+                    "after": true
                 },
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.status",
-                        "value": 200,
-                        "after": true
-                    }
+                        "value": 200
+                    },
+                    "after": true
                 }
             ]
         }
@@ -87,9 +87,9 @@
             "type": "EsPropertyMiddleware",
             "data": {
                 "name": "headers.test",
-                "value": "testando",
-                "after": false
-            }
+                "value": "testando"
+            },
+            "after": false
         }
     ]
 }

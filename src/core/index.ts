@@ -75,13 +75,14 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
 
     const type = lodash.get(arr[idx], 'type');
     const data = lodash.get(arr[idx], 'data');
+    const after = lodash.get(arr[idx], 'after', false);
 
     const ctor = getMiddlewareConstructor(type);
 
     const v = await validateObject(type, data).catch(e => { throw e });
 
     if (ctor !== undefined && v) {
-        return new ctor(data, await createMiddleware(arr, idx + 1).catch(e => { throw e }));
+        return new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1).catch(e => { throw e }));
     }
     return createMiddleware(arr, idx + 1).catch(e => { throw e });
 }

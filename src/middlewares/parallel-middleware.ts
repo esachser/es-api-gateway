@@ -41,8 +41,7 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "mids",
-        "after"
+        "mids"
     ],
     "properties": {
         "mids": {
@@ -53,9 +52,6 @@ export const MiddlewareSchema = {
                     "$ref": "es-middleware"
                 }
             }
-        },
-        "after": {
-            "type": "boolean"
         }
     }
 };

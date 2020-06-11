@@ -31,6 +31,9 @@ exports.MIDDLEWARE_SCHEMA = {
         },
         "data": {
             "type": "object"
+        },
+        "after": {
+            "type": "boolean"
         }
     }
 };
@@ -109,7 +112,8 @@ exports.addNewSchema = addNewSchema;
 function validateObject(schemaName, obj) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const v = yield ajv.validate(schemaName, obj);
+            const av = ajv.validate(schemaName, obj);
+            const v = Boolean(av instanceof Promise ? yield av.catch((e) => { throw e; }) : av);
             if (!v) {
                 logger_1.logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`);
             }

@@ -13,20 +13,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddleware = void 0;
+const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
 let EsHttpRequestMiddleware = /** @class */ (() => {
-    class EsHttpRequestMiddleware {
+    class EsHttpRequestMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
+            super(after, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = values;
-            this.next = nextMiddleware;
             const cacheEnabled = Boolean(lodash_1.default.get(values, 'cache.enabled'));
             if (cacheEnabled) {
                 const cacheMaxAge = lodash_1.default.get(values, 'cache.maxAge', 1000);
@@ -71,27 +72,13 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         retry,
                         followRedirect,
                         maxRedirects
-                    });
+                    }).catch(e => { throw e; });
                     lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
                     lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
                     lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);
                 }
                 catch (err) {
                     logger_1.logger.error('Error calling HTTP endpoint', err);
-                }
-            });
-        }
-        execute(context) {
-            var _a, _b;
-            return __awaiter(this, void 0, void 0, function* () {
-                const rAfter = Boolean(this.values['after']);
-                if (rAfter) {
-                    yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                    yield this.runInternal(context);
-                }
-                else {
-                    yield this.runInternal(context);
-                    yield ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context));
                 }
             });
         }
@@ -109,9 +96,6 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "after": {
-            "type": "boolean"
-        },
         "url": {
             "type": "string"
         },

@@ -12,35 +12,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsParallelMiddleware = void 0;
 const core_1 = require("../core");
 let EsParallelMiddleware = /** @class */ (() => {
-    class EsParallelMiddleware {
+    class EsParallelMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
+            super(after, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = {};
-            this.values['after'] = values['after'];
             this.values['mids'] = [];
-            this.next = nextMiddleware;
             if (Array.isArray(values['mids'])) {
                 values['mids'].forEach((ms, i) => __awaiter(this, void 0, void 0, function* () {
                     if (Array.isArray(ms)) {
-                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0).catch(e => { throw e; });
                     }
                 }));
             }
         }
-        execute(context) {
-            var _a;
+        runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                const rAfter = Boolean(this.values['after']);
-                if (!rAfter) {
-                    yield Promise.all(this.values['mids'].map((m) => m === null || m === void 0 ? void 0 : m.execute(context)));
-                }
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                if (rAfter) {
-                    yield Promise.all(this.values['mids'].map((m) => m === null || m === void 0 ? void 0 : m.execute(context)));
-                }
+                Promise.all(this.values['mids'].map((m) => m === null || m === void 0 ? void 0 : m.execute(context).catch(e => { throw e; }))).catch(e => { throw e; });
             });
         }
     }
@@ -57,8 +48,7 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "mids",
-        "after"
+        "mids"
     ],
     "properties": {
         "mids": {
@@ -69,9 +59,6 @@ exports.MiddlewareSchema = {
                     "$ref": "es-middleware"
                 }
             }
-        },
-        "after": {
-            "type": "boolean"
         }
     }
 };

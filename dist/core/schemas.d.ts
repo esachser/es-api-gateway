@@ -12,6 +12,9 @@ export declare const MIDDLEWARE_SCHEMA: {
         data: {
             type: string;
         };
+        after: {
+            type: string;
+        };
     };
 };
 export declare const TRANSPORT_SCHEMA: {

@@ -1,16 +1,14 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import ChowChow from "oas3-chow-chow";
-export declare class EsOpenApiVerifyMiddleware implements IEsMiddleware {
+export declare class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     values: any;
-    next?: IEsMiddleware;
     oasValidator?: ChowChow;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware);
-    runIntenal(context: IEsContext): Promise<void>;
-    execute(context: IEsContext): Promise<void>;
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
 export declare const MiddlewareSchema: {
@@ -21,9 +19,6 @@ export declare const MiddlewareSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        after: {
-            type: string;
-        };
         oas: {
             type: string;
         };

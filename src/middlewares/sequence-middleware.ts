@@ -48,8 +48,7 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "mids",
-        "after"
+        "mids"
     ],
     "properties": {
         "mids": {
@@ -67,9 +66,6 @@ export const MiddlewareSchema = {
                     }
                 ]
             }
-        },
-        "after": {
-            "type": "boolean"
         }
     }
 };

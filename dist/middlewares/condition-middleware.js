@@ -14,16 +14,15 @@ const core_1 = require("../core");
 const vm2_1 = require("vm2");
 const vm = new vm2_1.NodeVM();
 let EsConditionMiddleware = /** @class */ (() => {
-    class EsConditionMiddleware {
+    class EsConditionMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
+            super(after, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = {};
-            this.values['after'] = values['after'];
             this.values['conditions'] = [];
-            this.next = nextMiddleware;
             if (Array.isArray(values['conditions'])) {
                 values['conditions'].forEach((condition, i) => {
                     if (Array.isArray(condition.mids)) {
@@ -45,25 +44,11 @@ let EsConditionMiddleware = /** @class */ (() => {
                         let condition = this.values['conditions'][i];
                         if (condition['conditionExpression'] instanceof vm2_1.VMScript) {
                             if (Boolean(vm.run(condition['conditionExpression'])(context))) {
-                                yield ((_a = condition['mids']) === null || _a === void 0 ? void 0 : _a.execute(context));
+                                yield ((_a = condition['mids']) === null || _a === void 0 ? void 0 : _a.execute(context).catch((e) => { throw e; }));
                                 return;
                             }
                         }
                     }
-                }
-            });
-        }
-        execute(context) {
-            var _a, _b;
-            return __awaiter(this, void 0, void 0, function* () {
-                const rAfter = Boolean(this.values['after']);
-                if (rAfter) {
-                    yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                    yield this.runInternal(context);
-                }
-                else {
-                    yield this.runInternal(context);
-                    yield ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context));
                 }
             });
         }
@@ -81,8 +66,7 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "conditions",
-        "after"
+        "conditions"
     ],
     "properties": {
         "conditions": {
@@ -106,9 +90,6 @@ exports.MiddlewareSchema = {
                     }
                 }
             }
-        },
-        "after": {
-            "type": "boolean"
         }
     }
 };

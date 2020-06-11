@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
+const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const vm2_1 = require("vm2");
 const logger_1 = require("../util/logger");
@@ -26,14 +27,14 @@ const vm = new vm2_1.NodeVM({
     }
 });
 let EsPropertyMiddleware = /** @class */ (() => {
-    class EsPropertyMiddleware {
+    class EsPropertyMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, nextMiddleware) {
+        constructor(values, after, nextMiddleware) {
+            super(after, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = values;
-            this.next = nextMiddleware;
             // Se for uma expressão, prepara VMScript para rodar.
             let script = '';
             if (values['value'] === undefined &&
@@ -62,22 +63,6 @@ let EsPropertyMiddleware = /** @class */ (() => {
                 }
             });
         }
-        execute(context) {
-            var _a, _b;
-            return __awaiter(this, void 0, void 0, function* () {
-                const after = Boolean(lodash_1.default.get(this.values, 'after'));
-                vm.freeze(context, 'ctx');
-                const rAfter = Boolean(this.values['after']);
-                if (rAfter) {
-                    yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
-                    yield this.runInternal(context);
-                }
-                else {
-                    yield this.runInternal(context);
-                    yield ((_b = this.next) === null || _b === void 0 ? void 0 : _b.execute(context));
-                }
-            });
-        }
     }
     EsPropertyMiddleware.isInOut = true;
     return EsPropertyMiddleware;
@@ -92,8 +77,7 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "name",
-        "after"
+        "name"
     ],
     "properties": {
         "name": {
@@ -104,9 +88,6 @@ exports.MiddlewareSchema = {
         },
         "expression": {
             "type": "string"
-        },
-        "after": {
-            "type": "boolean"
         }
     },
     "oneOf": [
