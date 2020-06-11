@@ -16,17 +16,17 @@ interface IEsApi {
 let apis: { [id: string]: IEsApi } = {};
 
 async function loadApiFile(fname: string) {
-    const apiJson = JSON.parse((await fsasync.readFile(fname)).toString());
+    const apiJson = JSON.parse((await fsasync.readFile(fname).catch(e => { throw e })).toString());
 
     logger.debug(apiJson);
 
-    if (!(await validateObject('es-api', apiJson))) {
+    if (!(await validateObject('es-api', apiJson).catch(e => { throw e }))) {
         return;
     }
 
     // Carrega Middlewares centrais.
     const executionJs = lodash.get(apiJson, 'execution') as any[];
-    const centralMid = await createMiddleware(executionJs, 0);
+    const centralMid = await createMiddleware(executionJs, 0).catch(e => { throw e });
 
     let api: IEsApi = apis[fname] || {
         transports: [],
@@ -42,7 +42,7 @@ async function loadApiFile(fname: string) {
             const parameters = lodash.get(transport, 'parameters');
             const mids = lodash.get(transport, 'mids') as any[];
 
-            const pre = await createMiddleware(mids, 0);
+            const pre = await createMiddleware(mids, 0).catch(e => { throw e });
 
             const mid = connectMiddlewares(pre, centralMid);
 
@@ -51,7 +51,7 @@ async function loadApiFile(fname: string) {
                 delete api.transports[id];
             }
 
-            const trp = await createTransport(type, parameters, mid);
+            const trp = await createTransport(type, parameters, mid).catch(e => { throw e });
 
             if (trp !== undefined) {
                 api.transports[id] = trp;
@@ -63,12 +63,12 @@ async function loadApiFile(fname: string) {
 }
 
 async function reloadEnv(dir: string) {
-    const finfos = await fsasync.readdir(dir, { withFileTypes: true });
+    const finfos = await fsasync.readdir(dir, { withFileTypes: true }).catch(e => { throw e });
 
-    finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(async finfo => {
+    finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(finfo => {
         logger.info(`Loading API ${finfo.name}`);
 
-        await loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
+        loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
             logger.error(`Error loding file ${finfo.name}`, e);
         });
     });
@@ -87,7 +87,7 @@ export async function loadEnv(envName: string) {
     }
 
     if (envDirExists) {
-        const envFinfo = await fsasync.stat(envDir);
+        const envFinfo = await fsasync.stat(envDir).catch(e => { throw e });
         if (envFinfo.isDirectory()) {
             reloadEnv(envDir);
             watcher = fs.watch(envDir, (ev, fname) => {

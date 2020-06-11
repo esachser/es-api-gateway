@@ -4,7 +4,7 @@
             "type": "EsHttpTransport",
             "id": "http",
             "parameters": {
-                "routeContext": "/api/v4/teste/",
+                "routeContext": "/api/v3/",
                 "routes": {
                     "/": [
                         "GET",

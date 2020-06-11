@@ -1,16 +1,14 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 import got, { Got } from 'got';
 import Keyv  from 'keyv';
 import { nanoid } from 'nanoid';
 
-export class EsHttpRequestMiddleware implements IEsMiddleware {
+export class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
-
-    next?: IEsMiddleware;
 
     readonly cache: Keyv | undefined;
     readonly got: Got;
@@ -18,10 +16,10 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = values;
-        this.next = nextMiddleware;
 
         const cacheEnabled = Boolean(lodash.get(values, 'cache.enabled'));
         if (cacheEnabled) {
@@ -70,7 +68,7 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
                 retry,
                 followRedirect,
                 maxRedirects
-            });
+            }).catch(e => { throw e });
 
             lodash.set(context.properties, 'response.headers', res?.headers || {});
             lodash.set(context.properties, 'response.status', res?.statusCode || 500);
@@ -78,18 +76,6 @@ export class EsHttpRequestMiddleware implements IEsMiddleware {
         }
         catch (err) {
             logger.error('Error calling HTTP endpoint', err);
-        }
-    }
-
-    async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['after']);
-        if (rAfter) {
-            await this.next?.execute(context);
-            await this.runInternal(context);
-        }
-        else {
-            await this.runInternal(context);
-            await this.next?.execute(context);
         }
     }
 };

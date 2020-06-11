@@ -27,29 +27,34 @@ export interface IEsContext {
 }
 
 export interface IEsMiddlewareConstructor {
-    new(values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware
+    new(values: any, after: boolean, nextMiddleware?: IEsMiddleware): IEsMiddleware
 }
 
 export interface IEsMiddleware {
     next?: IEsMiddleware
-    execute(context: IEsContext): void
+    execute(context: IEsContext): Promise<void>
 }
 
 export abstract class EsMiddleware implements IEsMiddleware {
     next?: IEsMiddleware
 
-    abstract after: boolean
+    after: boolean
 
     abstract async runInternal(context: IEsContext): Promise<void>
 
-    async execute(context: IEsContext) {
+    constructor(after: boolean, nextMiddleware: IEsMiddleware | undefined) {
+        this.after = after;
+        this.next = nextMiddleware;
+    }
+
+    async execute(context: IEsContext): Promise<void> {
         if (this.after) {
-            await this.next?.execute(context);
-            await this.runInternal(context);
+            await this.next?.execute(context).catch(e => { throw e });
+            await this.runInternal(context).catch(e => { throw e });
         }
         else {
-            await this.runInternal(context);
-            await this.next?.execute(context);
+            await this.runInternal(context).catch(e => { throw e });
+            await this.next?.execute(context).catch(e => { throw e });
         }
     }
 }
@@ -73,12 +78,12 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
 
     const ctor = getMiddlewareConstructor(type);
 
-    const v = await validateObject(type, data);
+    const v = await validateObject(type, data).catch(e => { throw e });
 
     if (ctor !== undefined && v) {
-        return new ctor(data, await createMiddleware(arr, idx + 1));
+        return new ctor(data, await createMiddleware(arr, idx + 1).catch(e => { throw e }));
     }
-    return createMiddleware(arr, idx + 1);
+    return createMiddleware(arr, idx + 1).catch(e => { throw e });
 }
 
 export function connect2Mids(mid1: IEsMiddleware, mid2: IEsMiddleware) {
@@ -117,7 +122,7 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
 export async function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined) {
     const ctor = getTransportConstructor(type);
 
-    const v = await validateObject(type, parameters);
+    const v = await validateObject(type, parameters).catch(e => { throw e });
 
     if (ctor !== undefined && v) {
         return new ctor(parameters, middleware);

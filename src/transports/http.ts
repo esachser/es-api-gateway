@@ -34,13 +34,22 @@ export class EsHttpTransport implements IEsTransport {
      */
     constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined) {
         // Verifica padrões
+        
+        
+        if (!params.routeContext.endsWith('/')) {
+            params.routeContext += '/';
+        }
+
+        // Procura estaticamente e testa se já existe
+        for (const basePath of EsHttpTransport.baseRoutesUsed) {
+            if (basePath.startsWith(params.routeContext) || params.routeContext.startsWith(basePath)) {
+                throw new Error(`Base route already exists. Exists ${basePath} x ${params.routeContext} New`);
+            }
+        }
+
         this.middleware = middleware;
         this.routeContext = params.routeContext;
         this.router = new Router();
-        
-        if (!this.routeContext.endsWith('/')) {
-            this.routeContext += '/';
-        }
 
         const routeContextSize = this.routeContext.length-1;
 
@@ -76,7 +85,7 @@ export class EsHttpTransport implements IEsTransport {
             let init = Date.now();
 
             // Roda o que precisa
-            await next();
+            await next().catch(e => { throw e });
             
             ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers', {}));
             const statusCode = lodash.get(ctx.iesContext.properties, 'response.status');
@@ -93,16 +102,18 @@ export class EsHttpTransport implements IEsTransport {
 
             httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), async (ctx, next) => {
                 // Executa middleware central
-                await this.middleware?.execute(ctx.iesContext);
+                await this.middleware?.execute(ctx.iesContext).catch(e => { throw e });
                 return next();
             });
         });
 
+        EsHttpTransport.baseRoutesUsed.add(params.routeContext);
         logger.info(`Loaded ${this.routeContext}`);
     }
 
     clear() {
         httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
+        EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
         logger.info(`Clear ${this.routeContext} executed`);
         logger.debug(httpRouter.stack);
     }

@@ -4,22 +4,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadCustomMiddlewares = exports.loadMiddlewares = void 0;
-var decache_1 = __importDefault(require("decache"));
-var fs_1 = __importDefault(require("fs"));
-var logger_1 = require("../util/logger");
-var property_middleware_1 = require("./property-middleware");
-var metrics_middleware_1 = require("./metrics-middleware");
-var parallel_middleware_1 = require("./parallel-middleware");
-var sequence_middleware_1 = require("./sequence-middleware");
-var condition_middleware_1 = require("./condition-middleware");
-var httprequest_middleware_1 = require("./httprequest-middleware");
-var openapiverify_middleware_1 = require("./openapiverify-middleware");
-var middlewares_1 = require("../core/middlewares");
+const decache_1 = __importDefault(require("decache"));
+const fs_1 = __importDefault(require("fs"));
+const logger_1 = require("../util/logger");
+const property_middleware_1 = require("./property-middleware");
+const metrics_middleware_1 = require("./metrics-middleware");
+const parallel_middleware_1 = require("./parallel-middleware");
+const sequence_middleware_1 = require("./sequence-middleware");
+const condition_middleware_1 = require("./condition-middleware");
+const httprequest_middleware_1 = require("./httprequest-middleware");
+const openapiverify_middleware_1 = require("./openapiverify-middleware");
+const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
-    var finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
-    finfos.forEach(function (finfo) {
+    const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
+    finfos.forEach(finfo => {
         if (finfo.isDirectory()) {
-            logger_1.logger.info("Loading middleware " + finfo.name);
+            logger_1.logger.info(`Loading middleware ${finfo.name}`);
         }
     });
 }
@@ -38,8 +38,8 @@ exports.loadMiddlewares = loadMiddlewares;
 function loadCustomMiddlewares() {
     // Limpa cache dos custom
     logger_1.logger.info('Removing all custom middlewares');
-    Object.keys(require.cache).filter(function (s) { return s.startsWith('./custom/middlewares/'); }).forEach(function (k) {
-        logger_1.logger.info("Removing cache entry " + k);
+    Object.keys(require.cache).filter(s => s.startsWith('./custom/middlewares/')).forEach(k => {
+        logger_1.logger.info(`Removing cache entry ${k}`);
         decache_1.default(k);
     });
 }

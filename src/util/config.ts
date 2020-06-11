@@ -17,12 +17,16 @@ const configFileName = path.resolve(baseDirectory, 'conf', 'global.json');
 
 export async function loadConfig() {
     logger.info('Reloading global config file');
-    const text = await fsasync.readFile(configFileName);
+    const text = await fsasync.readFile(configFileName).catch(e => { throw e });
     configuration = JSON.parse(text.toString()) as IEsConfig;
     logger.level = configuration.logLevel || 'info';
 }
 
 fs.watch(configFileName, async (event, fname) => {
-    await loadConfig();
-    await loadEnv(configuration.env);
+    await loadConfig().catch(e => { 
+        logger.error('Error loading config', e);
+    });
+    await loadEnv(configuration.env).catch(e => { 
+        logger.error('Error loading APIs', e);
+     });
 });

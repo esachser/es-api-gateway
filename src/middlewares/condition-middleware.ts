@@ -1,26 +1,23 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 import { NodeVM, VMScript } from 'vm2';
 
 const vm = new NodeVM();
 
-export class EsConditionMiddleware implements IEsMiddleware {
+export class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
 
-    next?: IEsMiddleware;
-
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['after'] = values['after'];
         this.values['conditions'] = [];
-        this.next = nextMiddleware;
 
         if (Array.isArray(values['conditions'])) {
             values['conditions'].forEach((condition, i) => {
@@ -42,23 +39,11 @@ export class EsConditionMiddleware implements IEsMiddleware {
                 let condition = this.values['conditions'][i];
                 if (condition['conditionExpression'] instanceof VMScript) {
                     if (Boolean(vm.run(condition['conditionExpression'])(context))) {
-                        await condition['mids']?.execute(context);
+                        await condition['mids']?.execute(context).catch((e:any) => { throw e });
                         return;
                     }
                 }
             }
-        }
-    }
-
-    async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['after']);
-        if (rAfter) {
-            await this.next?.execute(context);
-            await this.runInternal(context);
-        }
-        else {
-            await this.runInternal(context);
-            await this.next?.execute(context);
         }
     }
 };

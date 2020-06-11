@@ -1,4 +1,4 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 
@@ -9,11 +9,10 @@ export class EsMetricsMiddleware implements IEsMiddleware {
 
     next?: IEsMiddleware;
 
-
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
@@ -21,7 +20,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
 
     async execute(context: IEsContext) {
         let init = new Date().valueOf();
-        await this.next?.execute(context);
+        await this.next?.execute(context).catch(e => { throw e });
         let end = new Date().valueOf();
         let diff = end - init;
         logger.info(`Duration: ${diff}ms`);

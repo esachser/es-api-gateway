@@ -4,16 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadCustomTransports = exports.loadTransports = void 0;
-var decache_1 = __importDefault(require("decache"));
-var fs_1 = __importDefault(require("fs"));
-var logger_1 = require("../util/logger");
-var http_1 = require("./http");
-var transports_1 = require("../core/transports");
+const decache_1 = __importDefault(require("decache"));
+const fs_1 = __importDefault(require("fs"));
+const logger_1 = require("../util/logger");
+const http_1 = require("./http");
+const transports_1 = require("../core/transports");
 function readDirectoryProjects(dir) {
-    var finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
-    finfos.forEach(function (finfo) {
+    const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
+    finfos.forEach(finfo => {
         if (finfo.isDirectory()) {
-            logger_1.logger.info("Loading transport " + finfo.name);
+            logger_1.logger.info(`Loading transport ${finfo.name}`);
         }
     });
 }
@@ -25,8 +25,8 @@ exports.loadTransports = loadTransports;
 function loadCustomTransports() {
     // Limpa cache dos custom
     logger_1.logger.info('Removing all transports');
-    Object.keys(require.cache).filter(function (s) { return s.startsWith('./custom/transports/'); }).forEach(function (k) {
-        logger_1.logger.info("Removing cache entry " + k);
+    Object.keys(require.cache).filter(s => s.startsWith('./custom/transports/')).forEach(k => {
+        logger_1.logger.info(`Removing cache entry ${k}`);
         decache_1.default(k);
     });
 }

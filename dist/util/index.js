@@ -4,6 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.baseDirectory = void 0;
-var path_1 = __importDefault(require("path"));
+const path_1 = __importDefault(require("path"));
 exports.baseDirectory = path_1.default.resolve('.');
 //# sourceMappingURL=index.js.map

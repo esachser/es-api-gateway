@@ -1,4 +1,4 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { NodeVM, VMScript } from 'vm2';
 import { logger } from '../util/logger';
@@ -13,22 +13,20 @@ const vm = new NodeVM({
     }
 });
 
-export class EsPropertyMiddleware implements IEsMiddleware {
+export class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
-
-    next?: IEsMiddleware;
 
     readonly vmScript: VMScript;
 
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = values;
-        this.next = nextMiddleware;
 
         // Se for uma expressão, prepara VMScript para rodar.
         let script = '';
@@ -56,21 +54,6 @@ export class EsPropertyMiddleware implements IEsMiddleware {
         }
         catch (err) {
             logger.error('Error while setting property', err);
-        }
-    }
-
-    async execute(context: IEsContext) {
-        const after = Boolean(lodash.get(this.values, 'after'));
-        vm.freeze(context, 'ctx');
-        
-        const rAfter = Boolean(this.values['after']);
-        if (rAfter) {
-            await this.next?.execute(context);
-            await this.runInternal(context);
-        }
-        else {
-            await this.runInternal(context);
-            await this.next?.execute(context);
         }
     }
 };

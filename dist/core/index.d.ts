@@ -6,21 +6,6 @@ export interface IEsContext {
     rawbody: string;
     parsedbody?: any;
 }
-export declare type EsObjectSchema = {
-    type: 'object';
-    optional: boolean;
-    schema: EsObjectSchema;
-    defaultValue?: any;
-};
-export declare type EsOtherSchema = {
-    type: 'string' | 'number' | 'boolean' | 'any' | 'array';
-    optional: boolean;
-    defaultValue?: any;
-};
-export declare type EsSchema = EsObjectSchema | EsOtherSchema;
-export declare type EsParameters = {
-    [id: string]: EsSchema;
-};
 export interface IEsMiddlewareConstructor {
     new (values: any, nextMiddleware?: IEsMiddleware): IEsMiddleware;
 }
@@ -28,11 +13,16 @@ export interface IEsMiddleware {
     next?: IEsMiddleware;
     execute(context: IEsContext): void;
 }
+export declare abstract class EsMiddleware implements IEsMiddleware {
+    next?: IEsMiddleware;
+    abstract after: boolean;
+    abstract runInternal(context: IEsContext): Promise<void>;
+    execute(context: IEsContext): Promise<void>;
+}
 export interface IEsTranportConstructor {
     new (params: any, middleware?: IEsMiddleware): IEsTransport;
 }
 export interface IEsTransport {
-    parameters: EsParameters;
     middleware: IEsMiddleware | undefined;
     clear(): void;
 }

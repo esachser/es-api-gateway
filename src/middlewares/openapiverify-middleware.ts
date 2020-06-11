@@ -1,26 +1,23 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
 
-export class EsOpenApiVerifyMiddleware implements IEsMiddleware {
+export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
-
-    next?: IEsMiddleware;
 
     oasValidator?: ChowChow;
 
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['after'] = values['after'];
-        this.next = nextMiddleware;
 
         const oas = lodash.get(values, 'oas', {});
 
@@ -36,7 +33,7 @@ export class EsOpenApiVerifyMiddleware implements IEsMiddleware {
             });
     }
 
-    async runIntenal(context: IEsContext) {
+    async runInternal(context: IEsContext) {
         if (this.oasValidator !== undefined) {
             const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
             let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
@@ -54,17 +51,6 @@ export class EsOpenApiVerifyMiddleware implements IEsMiddleware {
             if (reqMeta === undefined) {
                 throw Error('Invalid request');
             }
-        }
-    }
-
-    async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['after'])
-        if (!rAfter) {
-            await this.runIntenal(context);
-        }
-        await this.next?.execute(context);
-        if (rAfter) {
-            await this.runIntenal(context);
         }
     }
 };

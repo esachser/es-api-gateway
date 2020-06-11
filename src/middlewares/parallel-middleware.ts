@@ -1,8 +1,8 @@
-import { IEsMiddleware, IEsContext, EsParameters, IEsMiddlewareConstructor, createMiddleware } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsMiddlewareConstructor, createMiddleware, IEsContext } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 
-export class EsParallelMiddleware implements IEsMiddleware {
+export class EsParallelMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
@@ -12,31 +12,23 @@ export class EsParallelMiddleware implements IEsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['after'] = values['after'];
         this.values['mids'] = [];
-        this.next = nextMiddleware;
 
         if (Array.isArray(values['mids'])) {
             values['mids'].forEach(async (ms, i) => {
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] =  await createMiddleware(ms, 0);
+                    this.values['mids'][i] =  await createMiddleware(ms, 0).catch(e => { throw e });
                 }
             });
         }
     }
 
-    async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['after'])
-        if(!rAfter) {
-            await Promise.all(this.values['mids'].map((m:IEsMiddleware) => m?.execute(context)));
-        }
-        await this.next?.execute(context);
-        if (rAfter) {
-            await Promise.all(this.values['mids'].map((m:IEsMiddleware) => m?.execute(context)));
-        }        
+    async runInternal(context: IEsContext) {
+        Promise.all(this.values['mids'].map((m:IEsMiddleware) => m?.execute(context).catch(e => { throw e }))).catch(e => { throw e });
     }
 };
 

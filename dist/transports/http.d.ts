@@ -1,4 +1,4 @@
-import { IEsTransport, EsParameters, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
+import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import Router from 'koa-router';
 declare type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface IEsHttpTransportParams {
@@ -14,10 +14,10 @@ declare module 'koa' {
     }
 }
 export declare class EsHttpTransport implements IEsTransport {
-    parameters: EsParameters;
     middleware: IEsMiddleware | undefined;
     routeContext: string;
     router: Router;
+    static baseRoutesUsed: Set<string>;
     /**
      *
      */

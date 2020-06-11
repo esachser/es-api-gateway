@@ -1,8 +1,8 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
+import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 
-export class EsSequenceMiddleware implements IEsMiddleware {
+export class EsSequenceMiddleware extends EsMiddleware {
     static readonly isInOut = true;
 
     values: any;
@@ -12,42 +12,30 @@ export class EsSequenceMiddleware implements IEsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+        super(after, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
-        this.values['after'] = values['after'];
         this.values['mids'] = [];
-        this.next = nextMiddleware;
 
         if (Array.isArray(values['mids'])) {
             values['mids'].forEach(async (ms, i) => {
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] =  await createMiddleware(ms, 0);
+                    this.values['mids'][i] = await createMiddleware(ms, 0).catch(e => { throw e });
                 }
                 else {
-                    this.values['mids'][i] =  await createMiddleware([ms], 0);
+                    this.values['mids'][i] = await createMiddleware([ms], 0).catch(e => { throw e });
                 }
             });
         }
     }
 
-    async execute(context: IEsContext) {
-        const rAfter = Boolean(this.values['after'])
-        if(!rAfter) {
-            if (Array.isArray(this.values['mids'])) {
-                for (let i = 0; i < this.values['mids'].length; i++) {
-                    await this.values['mids'][i]?.execute(context);
-                }
+    async runInternal(context: IEsContext) {
+        if (Array.isArray(this.values['mids'])) {
+            for (let i = 0; i < this.values['mids'].length; i++) {
+                await this.values['mids'][i]?.execute(context).catch((e:any) => { throw e });
             }
         }
-        await this.next?.execute(context);
-        if (rAfter) {
-            if (Array.isArray(this.values['mids'])) {
-                for (let i = 0; i < this.values['mids'].length; i++) {
-                    await this.values['mids'][i]?.execute(context);
-                }
-            }
-        }        
     }
 };
 

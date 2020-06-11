@@ -98,7 +98,8 @@ export function addNewSchema(name:string, schema:any) {
 
 export async function validateObject(schemaName:string, obj:any): Promise<boolean> {
     try{
-        const v = await ajv.validate(schemaName, obj);
+        const av = ajv.validate(schemaName, obj);
+        const v = Boolean(av instanceof Promise ? await av.catch((e:any) => { throw e }) : av);
         if (!v) {
             logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`);
         }
