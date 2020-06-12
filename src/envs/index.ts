@@ -36,7 +36,7 @@ async function loadApiFile(fname: string) {
     const transports = lodash.get(apiJson, 'transports');
 
     if (transports !== undefined && lodash.isArray(transports)) {
-        for await (const transport of transports) {
+        for (const transport of transports) {
             const type = lodash.get(transport, 'type');
             const id = lodash.get(transport, 'id');
             const parameters = lodash.get(transport, 'parameters');
