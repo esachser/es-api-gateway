@@ -53,7 +53,7 @@ exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsSequenceMiddleware",
     "title": "Sequence Middleware",
-    "type": "object",
+    "type": "objectsadf",
     "additionalProperties": false,
     "required": [
         "mids"

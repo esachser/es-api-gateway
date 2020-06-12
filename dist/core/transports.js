@@ -5,9 +5,14 @@ const logger_1 = require("../util/logger");
 const schemas_1 = require("./schemas");
 const transports = {};
 function addTransport(name, constructor, parameters) {
-    logger_1.logger.info('Loading Http Tranport');
-    transports[name] = constructor;
-    schemas_1.addNewSchema(name, parameters);
+    try {
+        logger_1.logger.info(`Loading ${name} Tranport`);
+        transports[name] = constructor;
+        schemas_1.addNewSchema(name, parameters);
+    }
+    catch (err) {
+        logger_1.logger.error(`Error loading middleware ${name} -- `, err);
+    }
 }
 exports.addTransport = addTransport;
 function getTransportConstructor(name) {

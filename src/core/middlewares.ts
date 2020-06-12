@@ -5,9 +5,14 @@ import { addNewSchema } from "./schemas";
 const mids: {[id:string]:IEsMiddlewareConstructor} = {};
 
 export function addMiddleware(name: string, constructor: IEsMiddlewareConstructor, parameters: any) {
-    logger.info('Loading Property Middleware');
-    mids[name] = constructor;
-    addNewSchema(name, parameters);
+    try {
+        logger.info(`Loading ${name} Middleware`);
+        addNewSchema(name, parameters);
+        mids[name] = constructor;
+    }
+    catch (err) {
+        logger.error(`Error loading middleware ${name} -- `, err);
+    }
 }
 
 export function getMiddlewareConstructor(name: string): IEsMiddlewareConstructor | undefined {
