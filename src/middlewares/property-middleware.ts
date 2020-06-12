@@ -17,6 +17,7 @@ const vm = new NodeVM({
 export class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsPropertyMiddleware';
+    static readonly meta = { middleware: EsPropertyMiddleware.middlewareName };
 
     values: any;
 
@@ -53,6 +54,7 @@ export class EsPropertyMiddleware extends EsMiddleware {
 
     async runInternal(context: IEsContext) {
         if (this.vmScript !== undefined) {
+            context.logger.debug(`Writing to ${this.values['name']}`, lodash.merge(EsPropertyMiddleware.meta, context.meta));
             lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
         }
     }

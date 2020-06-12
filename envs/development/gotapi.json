@@ -45,5 +45,8 @@
                 "prefixUrl": "request.prefixUrl"
             }
         }
-    ]
+    ],
+    "logging": {
+        "level": "info"
+    }
 }

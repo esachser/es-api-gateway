@@ -49,6 +49,7 @@ let EsParallelMiddleware = /** @class */ (() => {
     }
     EsParallelMiddleware.isInOut = true;
     EsParallelMiddleware.middlewareName = 'EsParallelMiddleware';
+    EsParallelMiddleware.meta = { middleware: EsParallelMiddleware.middlewareName };
     return EsParallelMiddleware;
 })();
 exports.EsParallelMiddleware = EsParallelMiddleware;

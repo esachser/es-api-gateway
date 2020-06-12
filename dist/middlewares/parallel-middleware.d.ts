@@ -2,6 +2,9 @@ import { IEsMiddleware, EsMiddleware, IEsMiddlewareConstructor, IEsContext } fro
 export declare class EsParallelMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsParallelMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     next?: IEsMiddleware;
     /**

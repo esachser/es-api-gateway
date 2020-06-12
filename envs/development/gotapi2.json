@@ -155,5 +155,8 @@
                 "url": "urlRequest2"
             }
         }
-    ]
+    ],
+    "logging": {
+        "level": "info"
+    }
 }

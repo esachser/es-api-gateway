@@ -58,6 +58,7 @@ let EsPropertyMiddleware = /** @class */ (() => {
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (this.vmScript !== undefined) {
+                    context.logger.debug(`Writing to ${this.values['name']}`, lodash_1.default.merge(EsPropertyMiddleware.meta, context.meta));
                     lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
                 }
             });
@@ -65,6 +66,7 @@ let EsPropertyMiddleware = /** @class */ (() => {
     }
     EsPropertyMiddleware.isInOut = true;
     EsPropertyMiddleware.middlewareName = 'EsPropertyMiddleware';
+    EsPropertyMiddleware.meta = { middleware: EsPropertyMiddleware.middlewareName };
     return EsPropertyMiddleware;
 })();
 exports.EsPropertyMiddleware = EsPropertyMiddleware;

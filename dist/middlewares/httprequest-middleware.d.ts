@@ -4,6 +4,9 @@ import Keyv from 'keyv';
 export declare class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsHttpRequestMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     readonly cache: Keyv | undefined;
     readonly got: Got;

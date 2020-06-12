@@ -6,6 +6,7 @@ import { EsMiddlewareError } from '../core/errors';
 export class EsMetricsMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsMetricsMiddleware';
+    static readonly meta = { middleware: EsMetricsMiddleware.middlewareName };
 
     values: any;
 
@@ -27,11 +28,12 @@ export class EsMetricsMiddleware implements IEsMiddleware {
     async loadAsync() { }
 
     async execute(context: IEsContext) {
+        const meta = lodash.merge(EsMetricsMiddleware.meta, context.meta);
         let init = new Date().valueOf();
         await this.next?.execute(context);
         let end = new Date().valueOf();
         let diff = end - init;
-        logger.info(`Duration: ${diff}ms`);
+        context.logger.debug(`Duration: ${diff}ms`, meta);
         lodash.set(context.properties, this.values['prop'], diff);
     }
 };

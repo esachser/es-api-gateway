@@ -17,14 +17,16 @@ const http_server_1 = require("../util/http-server");
 const lodash_1 = __importDefault(require("lodash"));
 const koa_router_1 = __importDefault(require("koa-router"));
 const logger_1 = require("../util/logger");
+const nanoid_1 = require("nanoid");
 ;
 let EsHttpTransport = /** @class */ (() => {
     class EsHttpTransport {
         /**
          *
          */
-        constructor(params, middleware) {
+        constructor(params, api, apiLogger, middleware) {
             // Verifica padrões
+            this.apiLogger = apiLogger;
             if (!params.routeContext.endsWith('/')) {
                 params.routeContext += '/';
             }
@@ -59,14 +61,24 @@ let EsHttpTransport = /** @class */ (() => {
                         }
                     },
                     parsedbody: ctx.request.body,
-                    rawbody: ctx.request.rawBody
+                    rawbody: ctx.request.rawBody,
+                    logger: this.apiLogger,
+                    meta: {
+                        api,
+                        transport: 'EsHttpTransport',
+                        uid: nanoid_1.nanoid(12)
+                    }
                 };
                 logger_1.logger.info(`Started api with path ${context.properties.request.path}`);
                 ctx.iesContext = context;
                 //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
                 let init = Date.now();
-                // Roda o que precisa
-                yield next();
+                try {
+                    // Roda o que precisa
+                    yield next();
+                }
+                catch (err) {
+                }
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                 const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                 ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;

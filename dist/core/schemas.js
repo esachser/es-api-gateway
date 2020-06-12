@@ -75,7 +75,8 @@ exports.API_SCHEMA = {
     "type": "object",
     "required": [
         "transports",
-        "execution"
+        "execution",
+        "logging"
     ],
     "properties": {
         "transports": {
@@ -88,6 +89,17 @@ exports.API_SCHEMA = {
             "type": "array",
             "items": {
                 "$ref": "es-middleware"
+            }
+        },
+        "logging": {
+            "type": "object",
+            "required": [
+                "level"
+            ],
+            "properties": {
+                "level": {
+                    "type": "string"
+                }
             }
         }
     }

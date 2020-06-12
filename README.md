@@ -17,10 +17,10 @@ Aspectos que devem ser vistos:
 - [**OK**] Não permitir criação da API em caso de erro em qualquer parte da criação
   - [**OK**] Criar extensão de error para representar isso.
 - [**OK**] Refatorar middleware base para classes abstratas
-  - **after** deve ser padrão na definição
-  - **execute** deve seguir ou não o **after**
-  - **runInternal** deve ser implementado
-- Configuração logger para cada API
+  - [**OK**] **after** deve ser padrão na definição
+  - [**OK**] **execute** deve seguir ou não o **after**
+  - [**OK**] **runInternal** deve ser implementado
+- [**OK**] Configuração logger para cada API
 - Tipos de Logger na configuração global
 - Cada Path no transporte HTTP pode ter middlewares
 - Criar Throw Error Middleware

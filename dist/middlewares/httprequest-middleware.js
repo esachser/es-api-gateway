@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
-const logger_1 = require("../util/logger");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
@@ -55,6 +54,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
+                const meta = lodash_1.default.merge(EsHttpRequestMiddleware.meta, context.meta);
                 const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
                 let path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
                 const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.rawbody'));
@@ -81,20 +81,29 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         timeout,
                         retry,
                         followRedirect,
-                        maxRedirects
+                        maxRedirects,
+                        hooks: {
+                            beforeRequest: [
+                                opts => {
+                                    context.logger.debug('Calling Http endpoint', lodash_1.default.merge(opts.headers, meta));
+                                }
+                            ]
+                        }
                     });
+                    context.logger.debug('Result received', lodash_1.default.merge(lodash_1.default.get(res, ['headers', 'statusCode', 'body']), meta));
                     lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
                     lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
                     lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);
                 }
                 catch (err) {
-                    logger_1.logger.error('Error calling HTTP endpoint', err);
+                    context.logger.error('Error calling HTTP endpoint', err, meta);
                 }
             });
         }
     }
     EsHttpRequestMiddleware.isInOut = true;
     EsHttpRequestMiddleware.middlewareName = 'EsHttpRequestMiddleware';
+    EsHttpRequestMiddleware.meta = { middleware: EsHttpRequestMiddleware.middlewareName };
     return EsHttpRequestMiddleware;
 })();
 exports.EsHttpRequestMiddleware = EsHttpRequestMiddleware;

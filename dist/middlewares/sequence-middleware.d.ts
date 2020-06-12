@@ -2,6 +2,9 @@ import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } fro
 export declare class EsSequenceMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsSequenceMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     next?: IEsMiddleware;
     /**

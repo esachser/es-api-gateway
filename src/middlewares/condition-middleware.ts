@@ -9,6 +9,7 @@ const vm = new NodeVM();
 export class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsConditionMiddleware';
+    static readonly meta = { middleware: EsConditionMiddleware.middlewareName };
 
     values: any;
 
@@ -47,11 +48,14 @@ export class EsConditionMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
+        const meta = lodash.merge(EsConditionMiddleware.meta, context.meta);
         if (Array.isArray(this.values['conditions'])) {
             for (let i = 0; i < this.values['conditions'].length; i++) {
                 let condition = this.values['conditions'][i];
                 if (condition['conditionExpression'] instanceof VMScript) {
+                    context.logger.debug(`Testing condition ${i}`, meta);
                     if (Boolean(vm.run(condition['conditionExpression'])(context))) {
+                        context.logger.debug(`Condition ${i} reached`, meta);
                         await condition['mids']?.execute(context).catch((e:any) => { throw e });
                         return;
                     }

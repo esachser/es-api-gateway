@@ -3,6 +3,9 @@ import ChowChow from "oas3-chow-chow";
 export declare class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsOpenApiVerifyMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     oasValidator?: ChowChow;
     /**

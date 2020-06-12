@@ -8,6 +8,7 @@ import { EsMiddlewareError } from '../core/errors';
 export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsOpenApiVerifyMiddleware';
+    static readonly meta = { middleware: EsOpenApiVerifyMiddleware.middlewareName };
 
     values: any;
 
@@ -53,6 +54,7 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
             }
 
             const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
+            context.logger.debug('OAS Validator result', lodash.merge(reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
 
             if (reqMeta === undefined) {
                 throw Error('Invalid request');

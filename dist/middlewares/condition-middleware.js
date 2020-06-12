@@ -56,11 +56,14 @@ let EsConditionMiddleware = /** @class */ (() => {
         runInternal(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
+                const meta = lodash_1.default.merge(EsConditionMiddleware.meta, context.meta);
                 if (Array.isArray(this.values['conditions'])) {
                     for (let i = 0; i < this.values['conditions'].length; i++) {
                         let condition = this.values['conditions'][i];
                         if (condition['conditionExpression'] instanceof vm2_1.VMScript) {
+                            context.logger.debug(`Testing condition ${i}`, meta);
                             if (Boolean(vm.run(condition['conditionExpression'])(context))) {
+                                context.logger.debug(`Condition ${i} reached`, meta);
                                 yield ((_a = condition['mids']) === null || _a === void 0 ? void 0 : _a.execute(context).catch((e) => { throw e; }));
                                 return;
                             }
@@ -72,6 +75,7 @@ let EsConditionMiddleware = /** @class */ (() => {
     }
     EsConditionMiddleware.isInOut = true;
     EsConditionMiddleware.middlewareName = 'EsConditionMiddleware';
+    EsConditionMiddleware.meta = { middleware: EsConditionMiddleware.middlewareName };
     return EsConditionMiddleware;
 })();
 exports.EsConditionMiddleware = EsConditionMiddleware;

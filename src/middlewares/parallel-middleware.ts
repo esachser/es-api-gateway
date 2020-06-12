@@ -6,6 +6,7 @@ import { EsMiddlewareError } from '../core/errors';
 export class EsParallelMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsParallelMiddleware';
+    static readonly meta = { middleware: EsParallelMiddleware.middlewareName };
 
     values: any;
 

@@ -24,17 +24,21 @@ const http_server_1 = require("../util/http-server");
 const schemas_1 = require("../core/schemas");
 let apis = {};
 function loadApiFile(fname) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = JSON.parse((yield promises_1.default.readFile(fname)).toString());
         logger_1.logger.debug(apiJson);
+        fname = path_1.default.basename(fname, '.json');
         let api = apis[fname] || {
             transports: [],
-            central: {}
+            central: {},
+            logger: {},
         };
         delete apis[fname];
         for (const tname of Object.keys(api.transports)) {
             if (api.transports[tname] !== undefined) {
                 api.transports[tname].clear();
+                (_a = api.logger) === null || _a === void 0 ? void 0 : _a.close();
                 delete api.transports[tname];
             }
         }
@@ -44,7 +48,12 @@ function loadApiFile(fname) {
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
         const centralMid = yield core_1.createMiddleware(executionJs, 0);
+        let logLevel = lodash_1.default.get(apiJson, 'logging.level', 'info');
+        if (!lodash_1.default.isString(logLevel)) {
+            logLevel = 'info';
+        }
         api.central = centralMid;
+        api.logger = logger_1.createLogger(logLevel, fname);
         const transports = lodash_1.default.get(apiJson, 'transports');
         if (transports !== undefined && lodash_1.default.isArray(transports)) {
             for (const transport of transports) {
@@ -58,7 +67,7 @@ function loadApiFile(fname) {
                     api.transports[id].clear();
                     delete api.transports[id];
                 }
-                const trp = yield core_1.createTransport(type, parameters, mid);
+                const trp = yield core_1.createTransport(type, fname, api.logger, parameters, mid);
                 if (trp !== undefined) {
                     api.transports[id] = trp;
                 }

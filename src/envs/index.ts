@@ -3,14 +3,16 @@ import fs from 'fs';
 import path from 'path';
 import lodash from 'lodash';
 import { baseDirectory } from '../util';
-import { logger } from '../util/logger';
+import { logger, createLogger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
 import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
+import { Logger } from 'winston';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
-    central: IEsMiddleware | undefined;
+    central: IEsMiddleware | undefined,
+    logger: Logger | undefined,
 }
 
 let apis: { [id: string]: IEsApi } = {};
@@ -19,10 +21,12 @@ async function loadApiFile(fname: string) {
     const apiJson = JSON.parse((await fsasync.readFile(fname)).toString());
 
     logger.debug(apiJson);
+    fname = path.basename(fname, '.json');
 
     let api: IEsApi = apis[fname] || {
         transports: [],
-        central: {}
+        central: {},
+        logger: {},
     };
 
     delete apis[fname];
@@ -30,6 +34,7 @@ async function loadApiFile(fname: string) {
     for (const tname of Object.keys(api.transports)) {
         if (api.transports[tname] !== undefined) {
             api.transports[tname].clear();
+            api.logger?.close();
             delete api.transports[tname];
         }
     }
@@ -41,8 +46,13 @@ async function loadApiFile(fname: string) {
     // Carrega Middlewares centrais.
     const executionJs = lodash.get(apiJson, 'execution') as any[];
     const centralMid = await createMiddleware(executionJs, 0);
+    let logLevel = lodash.get(apiJson, 'logging.level', 'info');
+    if (!lodash.isString(logLevel)) {
+        logLevel = 'info';
+    }
 
     api.central = centralMid;
+    api.logger = createLogger(logLevel, fname);
 
     const transports = lodash.get(apiJson, 'transports');
 
@@ -62,7 +72,7 @@ async function loadApiFile(fname: string) {
                 delete api.transports[id];
             }
 
-            const trp = await createTransport(type, parameters, mid);
+            const trp = await createTransport(type, fname, api.logger, parameters, mid);
 
             if (trp !== undefined) {
                 api.transports[id] = trp;

@@ -6,6 +6,7 @@ import { EsMiddlewareError } from '../core/errors';
 export class EsSequenceMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsSequenceMiddleware';
+    static readonly meta = { middleware: EsSequenceMiddleware.middlewareName };
 
     values: any;
 
@@ -39,8 +40,10 @@ export class EsSequenceMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
+        const meta = lodash.merge(EsSequenceMiddleware.meta, context.meta);
         if (Array.isArray(this.values['mids'])) {
             for (let i = 0; i < this.values['mids'].length; i++) {
+                context.logger.debug(`Running middleware ${i}`, meta);
                 await this.values['mids'][i]?.execute(context).catch((e:any) => { throw e });
             }
         }

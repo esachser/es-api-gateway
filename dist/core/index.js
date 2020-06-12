@@ -96,12 +96,12 @@ function connectMiddlewares(...middlewares) {
     return mid;
 }
 exports.connectMiddlewares = connectMiddlewares;
-function createTransport(type, parameters, middleware) {
+function createTransport(type, api, logger, parameters, middleware) {
     return __awaiter(this, void 0, void 0, function* () {
         const ctor = transports_1.getTransportConstructor(type);
         const v = yield schemas_1.validateObject(type, parameters);
         if (ctor !== undefined && v) {
-            const transport = new ctor(parameters, middleware);
+            const transport = new ctor(parameters, api, logger, middleware);
             yield transport.loadAsync(parameters);
             return transport;
         }

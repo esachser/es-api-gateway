@@ -91,5 +91,8 @@
             },
             "after": false
         }
-    ]
+    ],
+    "logging": {
+        "level": "info"
+    }
 }

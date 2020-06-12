@@ -61,6 +61,15 @@ export declare const API_SCHEMA: {
                 $ref: string;
             };
         };
+        logging: {
+            type: string;
+            required: string[];
+            properties: {
+                level: {
+                    type: string;
+                };
+            };
+        };
     };
 };
 export declare function loadJsonSchemaValidator(): void;

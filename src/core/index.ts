@@ -3,6 +3,7 @@ import lodash from 'lodash';
 import { getMiddlewareConstructor } from './middlewares';
 import { getTransportConstructor } from './transports';
 import { validateObject } from './schemas';
+import { Logger } from 'winston';
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
@@ -24,6 +25,12 @@ export interface IEsContext {
     properties: { [id:string] : any }
     rawbody: string
     parsedbody?: any
+    logger: Logger,
+    meta: {
+        api:string,
+        transport:string,
+        uid:string
+    }
 }
 
 export interface IEsMiddlewareConstructor {
@@ -63,7 +70,7 @@ export abstract class EsMiddleware implements IEsMiddleware {
 }
 
 export interface IEsTranportConstructor {
-    new (params: any, middleware?: IEsMiddleware): IEsTransport
+    new (params: any, api: string, logger: Logger, middleware?: IEsMiddleware): IEsTransport
 }
 
 export interface IEsTransport {
@@ -126,13 +133,13 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
     return mid;
 }
 
-export async function createTransport(type: string, parameters: any, middleware: IEsMiddleware | undefined) {
+export async function createTransport(type: string, api: string, logger: Logger, parameters: any, middleware: IEsMiddleware | undefined) {
     const ctor = getTransportConstructor(type);
 
     const v = await validateObject(type, parameters);
 
     if (ctor !== undefined && v) {
-        const transport = new ctor(parameters, middleware);
+        const transport = new ctor(parameters, api, logger, middleware);
         await transport.loadAsync(parameters);
         return transport;
     }

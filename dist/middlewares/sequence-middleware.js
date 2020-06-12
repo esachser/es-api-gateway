@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsSequenceMiddleware = void 0;
 const core_1 = require("../core");
+const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 let EsSequenceMiddleware = /** @class */ (() => {
     class EsSequenceMiddleware extends core_1.EsMiddleware {
@@ -44,8 +48,10 @@ let EsSequenceMiddleware = /** @class */ (() => {
         runInternal(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
+                const meta = lodash_1.default.merge(EsSequenceMiddleware.meta, context.meta);
                 if (Array.isArray(this.values['mids'])) {
                     for (let i = 0; i < this.values['mids'].length; i++) {
+                        context.logger.debug(`Running middleware ${i}`, meta);
                         yield ((_a = this.values['mids'][i]) === null || _a === void 0 ? void 0 : _a.execute(context).catch((e) => { throw e; }));
                     }
                 }
@@ -54,6 +60,7 @@ let EsSequenceMiddleware = /** @class */ (() => {
     }
     EsSequenceMiddleware.isInOut = true;
     EsSequenceMiddleware.middlewareName = 'EsSequenceMiddleware';
+    EsSequenceMiddleware.meta = { middleware: EsSequenceMiddleware.middlewareName };
     return EsSequenceMiddleware;
 })();
 exports.EsSequenceMiddleware = EsSequenceMiddleware;

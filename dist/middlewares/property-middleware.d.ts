@@ -3,6 +3,9 @@ import { VMScript } from 'vm2';
 export declare class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsPropertyMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     readonly vmScript?: VMScript;
     /**

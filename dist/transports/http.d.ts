@@ -1,5 +1,6 @@
 import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import Router from 'koa-router';
+import { Logger } from 'winston';
 declare type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface IEsHttpTransportParams {
     routeContext: string;
@@ -18,10 +19,11 @@ export declare class EsHttpTransport implements IEsTransport {
     routeContext: string;
     router: Router;
     static baseRoutesUsed: Set<string>;
+    apiLogger: Logger;
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined);
+    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined);
     loadAsync(): Promise<void>;
     clear(): void;
 }

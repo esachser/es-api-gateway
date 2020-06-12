@@ -2,6 +2,9 @@ import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 export declare class EsMetricsMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsMetricsMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     next?: IEsMiddleware;
     /**

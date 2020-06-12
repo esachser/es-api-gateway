@@ -2,6 +2,9 @@ import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } fro
 export declare class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsConditionMiddleware";
+    static readonly meta: {
+        middleware: string;
+    };
     values: any;
     /**
      * Constrói o middleware a partir dos parâmetros

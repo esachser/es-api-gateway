@@ -9,6 +9,7 @@ import { EsMiddlewareError } from '../core/errors';
 export class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsHttpRequestMiddleware';
+    static readonly meta = { middleware: EsHttpRequestMiddleware.middlewareName };
 
     values: any;
 
@@ -51,6 +52,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
     async loadAsync() { }
 
     async runInternal(context: IEsContext) {
+        const meta = lodash.merge(EsHttpRequestMiddleware.meta, context.meta);
         const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
         let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
         const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.rawbody'));
@@ -80,15 +82,24 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 timeout,
                 retry,
                 followRedirect,
-                maxRedirects
+                maxRedirects, 
+                hooks: {
+                    beforeRequest: [
+                        opts => {
+                            context.logger.debug('Calling Http endpoint', lodash.merge(opts.headers, meta));
+                        }
+                    ]
+                }
             });
+
+            context.logger.debug('Result received', lodash.merge(lodash.get(res, ['headers', 'statusCode', 'body']), meta as any));
 
             lodash.set(context.properties, 'response.headers', res?.headers || {});
             lodash.set(context.properties, 'response.status', res?.statusCode || 500);
             lodash.set(context.properties, 'response.body', res?.body);
         }
         catch (err) {
-            logger.error('Error calling HTTP endpoint', err);
+            context.logger.error('Error calling HTTP endpoint', err as any, meta as any);
         }
     }
 };

@@ -3,6 +3,8 @@ import { httpRouter } from '../util/http-server';
 import lodash from 'lodash';
 import Router from 'koa-router';
 import { logger } from '../util/logger';
+import { Logger } from 'winston';
+import { nanoid } from 'nanoid';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -29,12 +31,14 @@ export class EsHttpTransport implements IEsTransport {
 
     static baseRoutesUsed: Set<string> = new Set<string>();
 
+    apiLogger: Logger
+
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined) {
+    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined) {
         // Verifica padrões
-        
+        this.apiLogger = apiLogger
         
         if (!params.routeContext.endsWith('/')) {
             params.routeContext += '/';
@@ -74,7 +78,13 @@ export class EsHttpTransport implements IEsTransport {
                     }
                 },
                 parsedbody: ctx.request.body,
-                rawbody: ctx.request.rawBody
+                rawbody: ctx.request.rawBody,
+                logger: this.apiLogger,
+                meta: {
+                    api,
+                    transport: 'EsHttpTransport',
+                    uid: nanoid(12)
+                }
             };
 
             logger.info(`Started api with path ${context.properties.request.path}`);
@@ -84,8 +94,13 @@ export class EsHttpTransport implements IEsTransport {
             //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
             let init = Date.now();
 
-            // Roda o que precisa
-            await next();
+            try{
+                // Roda o que precisa
+                await next();
+            }
+            catch (err) {
+
+            }            
             
             ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers', {}));
             const statusCode = lodash.get(ctx.iesContext.properties, 'response.status');
