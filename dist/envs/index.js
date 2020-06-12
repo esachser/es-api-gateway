@@ -27,16 +27,24 @@ function loadApiFile(fname) {
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = JSON.parse((yield promises_1.default.readFile(fname)).toString());
         logger_1.logger.debug(apiJson);
+        let api = apis[fname] || {
+            transports: [],
+            central: {}
+        };
+        delete apis[fname];
+        for (const tname of Object.keys(api.transports)) {
+            if (api.transports[tname] !== undefined) {
+                api.transports[tname].clear();
+                delete api.transports[tname];
+            }
+        }
         if (!(yield schemas_1.validateObject('es-api', apiJson))) {
             return;
         }
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
         const centralMid = yield core_1.createMiddleware(executionJs, 0);
-        let api = apis[fname] || {
-            transports: [],
-            central: centralMid
-        };
+        api.central = centralMid;
         const transports = lodash_1.default.get(apiJson, 'transports');
         if (transports !== undefined && lodash_1.default.isArray(transports)) {
             for (const transport of transports) {

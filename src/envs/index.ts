@@ -20,6 +20,20 @@ async function loadApiFile(fname: string) {
 
     logger.debug(apiJson);
 
+    let api: IEsApi = apis[fname] || {
+        transports: [],
+        central: {}
+    };
+
+    delete apis[fname];
+
+    for (const tname of Object.keys(api.transports)) {
+        if (api.transports[tname] !== undefined) {
+            api.transports[tname].clear();
+            delete api.transports[tname];
+        }
+    }
+
     if (!(await validateObject('es-api', apiJson))) {
         return;
     }
@@ -28,10 +42,7 @@ async function loadApiFile(fname: string) {
     const executionJs = lodash.get(apiJson, 'execution') as any[];
     const centralMid = await createMiddleware(executionJs, 0);
 
-    let api: IEsApi = apis[fname] || {
-        transports: [],
-        central: centralMid
-    };
+    api.central = centralMid;
 
     const transports = lodash.get(apiJson, 'transports');
 
