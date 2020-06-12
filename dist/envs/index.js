@@ -33,14 +33,14 @@ let apis = {};
 function loadApiFile(fname) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const apiJson = JSON.parse((yield promises_1.default.readFile(fname).catch(e => { throw e; })).toString());
+        const apiJson = JSON.parse((yield promises_1.default.readFile(fname)).toString());
         logger_1.logger.debug(apiJson);
-        if (!(yield schemas_1.validateObject('es-api', apiJson).catch(e => { throw e; }))) {
+        if (!(yield schemas_1.validateObject('es-api', apiJson))) {
             return;
         }
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
-        const centralMid = yield core_1.createMiddleware(executionJs, 0).catch(e => { throw e; });
+        const centralMid = yield core_1.createMiddleware(executionJs, 0);
         let api = apis[fname] || {
             transports: [],
             central: centralMid
@@ -54,13 +54,13 @@ function loadApiFile(fname) {
                     const id = lodash_1.default.get(transport, 'id');
                     const parameters = lodash_1.default.get(transport, 'parameters');
                     const mids = lodash_1.default.get(transport, 'mids');
-                    const pre = yield core_1.createMiddleware(mids, 0).catch(e => { throw e; });
+                    const pre = yield core_1.createMiddleware(mids, 0);
                     const mid = core_1.connectMiddlewares(pre, centralMid);
                     if (api.transports[id] !== undefined) {
                         api.transports[id].clear();
                         delete api.transports[id];
                     }
-                    const trp = yield core_1.createTransport(type, parameters, mid).catch(e => { throw e; });
+                    const trp = yield core_1.createTransport(type, parameters, mid);
                     if (trp !== undefined) {
                         api.transports[id] = trp;
                     }
@@ -79,7 +79,7 @@ function loadApiFile(fname) {
 }
 function reloadEnv(dir) {
     return __awaiter(this, void 0, void 0, function* () {
-        const finfos = yield promises_1.default.readdir(dir, { withFileTypes: true }).catch(e => { throw e; });
+        const finfos = yield promises_1.default.readdir(dir, { withFileTypes: true });
         finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(finfo => {
             logger_1.logger.info(`Loading API ${finfo.name}`);
             loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(e => {
@@ -98,7 +98,7 @@ function loadEnv(envName) {
             http_server_1.httpRouter.stack = [];
         }
         if (envDirExists) {
-            const envFinfo = yield promises_1.default.stat(envDir).catch(e => { throw e; });
+            const envFinfo = yield promises_1.default.stat(envDir);
             if (envFinfo.isDirectory()) {
                 reloadEnv(envDir);
                 watcher = fs_1.default.watch(envDir, (ev, fname) => {

@@ -14,7 +14,7 @@ export function loadHttpServer() {
     app.use(async (ctx,next) => {
         // Avaliando tempo de execução total da aplicação koa
         let init = Date.now();
-        await next().catch(e => { throw e });
+        await next();
         let diff = Date.now() - init;
         logger.debug(`Total app process time: ${diff}ms`);
     });
@@ -22,7 +22,7 @@ export function loadHttpServer() {
     app.use(helmet());
 
     app.use(async (ctx, next) => {
-        await next().catch(e => { throw e });
+        await next();
         if (ctx.status === 404 && ctx.body === undefined) {
             ctx.body = {
                 error: 'Not Found'

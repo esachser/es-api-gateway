@@ -68,7 +68,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 retry,
                 followRedirect,
                 maxRedirects
-            }).catch(e => { throw e });
+            });
 
             lodash.set(context.properties, 'response.headers', res?.headers || {});
             lodash.set(context.properties, 'response.status', res?.statusCode || 500);

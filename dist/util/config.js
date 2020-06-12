@@ -25,7 +25,7 @@ const configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.
 function loadConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Reloading global config file');
-        const text = yield promises_1.default.readFile(configFileName).catch(e => { throw e; });
+        const text = yield promises_1.default.readFile(configFileName);
         exports.configuration = JSON.parse(text.toString());
         logger_1.logger.level = exports.configuration.logLevel || 'info';
     });

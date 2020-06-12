@@ -29,7 +29,7 @@ let EsMetricsMiddleware = /** @class */ (() => {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
                 let init = new Date().valueOf();
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context).catch(e => { throw e; }));
+                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
                 let end = new Date().valueOf();
                 let diff = end - init;
                 logger_1.logger.info(`Duration: ${diff}ms`);

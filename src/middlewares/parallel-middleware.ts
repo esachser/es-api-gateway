@@ -21,14 +21,14 @@ export class EsParallelMiddleware extends EsMiddleware {
         if (Array.isArray(values['mids'])) {
             values['mids'].forEach(async (ms, i) => {
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] =  await createMiddleware(ms, 0).catch(e => { throw e });
+                    this.values['mids'][i] =  await createMiddleware(ms, 0);
                 }
             });
         }
     }
 
     async runInternal(context: IEsContext) {
-        Promise.all(this.values['mids'].map((m:IEsMiddleware) => m?.execute(context).catch(e => { throw e }))).catch(e => { throw e });
+        Promise.all(this.values['mids'].map((m:IEsMiddleware) => m?.execute(context)));
     }
 };
 

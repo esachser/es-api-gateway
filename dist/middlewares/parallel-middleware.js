@@ -24,14 +24,14 @@ let EsParallelMiddleware = /** @class */ (() => {
             if (Array.isArray(values['mids'])) {
                 values['mids'].forEach((ms, i) => __awaiter(this, void 0, void 0, function* () {
                     if (Array.isArray(ms)) {
-                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0).catch(e => { throw e; });
+                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
                     }
                 }));
             }
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                Promise.all(this.values['mids'].map((m) => m === null || m === void 0 ? void 0 : m.execute(context).catch(e => { throw e; }))).catch(e => { throw e; });
+                Promise.all(this.values['mids'].map((m) => m === null || m === void 0 ? void 0 : m.execute(context)));
             });
         }
     }

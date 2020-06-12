@@ -24,10 +24,10 @@ let EsSequenceMiddleware = /** @class */ (() => {
             if (Array.isArray(values['mids'])) {
                 values['mids'].forEach((ms, i) => __awaiter(this, void 0, void 0, function* () {
                     if (Array.isArray(ms)) {
-                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0).catch(e => { throw e; });
+                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
                     }
                     else {
-                        this.values['mids'][i] = yield core_1.createMiddleware([ms], 0).catch(e => { throw e; });
+                        this.values['mids'][i] = yield core_1.createMiddleware([ms], 0);
                     }
                 }));
             }

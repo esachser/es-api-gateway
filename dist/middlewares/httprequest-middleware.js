@@ -72,7 +72,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         retry,
                         followRedirect,
                         maxRedirects
-                    }).catch(e => { throw e; });
+                    });
                     lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
                     lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
                     lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);

@@ -66,7 +66,7 @@ let EsHttpTransport = /** @class */ (() => {
                 //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
                 let init = Date.now();
                 // Roda o que precisa
-                yield next().catch(e => { throw e; });
+                yield next();
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                 const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                 ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
@@ -80,7 +80,7 @@ let EsHttpTransport = /** @class */ (() => {
                 http_server_1.httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
                     // Executa middleware central
-                    yield ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(ctx.iesContext).catch(e => { throw e; }));
+                    yield ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(ctx.iesContext));
                     return next();
                 }));
             });

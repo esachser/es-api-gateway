@@ -7,14 +7,14 @@ import { loadHttpServer } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 
 async function start() {
-    await loadConfig().catch(e => { throw e });
+    await loadConfig();
     loadMiddlewares();
     loadCustomMiddlewares();
     loadTransports();
     loadCustomTransports();
     loadHttpServer();
     loadJsonSchemaValidator();
-    await loadEnv(configuration.env).catch(e => { throw e });
+    await loadEnv(configuration.env);
 }
 
 start().catch(e => {

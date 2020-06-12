@@ -20,7 +20,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
 
     async execute(context: IEsContext) {
         let init = new Date().valueOf();
-        await this.next?.execute(context).catch(e => { throw e });
+        await this.next?.execute(context);
         let end = new Date().valueOf();
         let diff = end - init;
         logger.info(`Duration: ${diff}ms`);

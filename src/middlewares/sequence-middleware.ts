@@ -21,10 +21,10 @@ export class EsSequenceMiddleware extends EsMiddleware {
         if (Array.isArray(values['mids'])) {
             values['mids'].forEach(async (ms, i) => {
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] = await createMiddleware(ms, 0).catch(e => { throw e });
+                    this.values['mids'][i] = await createMiddleware(ms, 0);
                 }
                 else {
-                    this.values['mids'][i] = await createMiddleware([ms], 0).catch(e => { throw e });
+                    this.values['mids'][i] = await createMiddleware([ms], 0);
                 }
             });
         }
@@ -45,7 +45,7 @@ export const MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsSequenceMiddleware",
     "title": "Sequence Middleware",
-    "type": "objectsadf",
+    "type": "object",
     "additionalProperties": false,
     "required": [
         "mids"

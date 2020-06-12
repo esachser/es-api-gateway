@@ -85,7 +85,7 @@ export class EsHttpTransport implements IEsTransport {
             let init = Date.now();
 
             // Roda o que precisa
-            await next().catch(e => { throw e });
+            await next();
             
             ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers', {}));
             const statusCode = lodash.get(ctx.iesContext.properties, 'response.status');
@@ -102,7 +102,7 @@ export class EsHttpTransport implements IEsTransport {
 
             httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), async (ctx, next) => {
                 // Executa middleware central
-                await this.middleware?.execute(ctx.iesContext).catch(e => { throw e });
+                await this.middleware?.execute(ctx.iesContext);
                 return next();
             });
         });

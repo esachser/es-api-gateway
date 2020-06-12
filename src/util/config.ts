@@ -17,7 +17,7 @@ const configFileName = path.resolve(baseDirectory, 'conf', 'global.json');
 
 export async function loadConfig() {
     logger.info('Reloading global config file');
-    const text = await fsasync.readFile(configFileName).catch(e => { throw e });
+    const text = await fsasync.readFile(configFileName);
     configuration = JSON.parse(text.toString()) as IEsConfig;
     logger.level = configuration.logLevel || 'info';
 }
