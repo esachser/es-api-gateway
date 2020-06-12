@@ -2,11 +2,13 @@ import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, crea
 import lodash from 'lodash';
 import { logger } from '../util/logger';
 import { NodeVM, VMScript } from 'vm2';
+import { EsMiddlewareError } from '../core/errors';
 
 const vm = new NodeVM();
 
 export class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsConditionMiddleware'
 
     values: any;
 
@@ -18,18 +20,36 @@ export class EsConditionMiddleware extends EsMiddleware {
         // Verifica values contra o esquema.
         this.values = {};
         this.values['conditions'] = [];
+    }
 
+    async loadAsync(values:any) {
         if (Array.isArray(values['conditions'])) {
-            values['conditions'].forEach((condition, i) => {
-                if (Array.isArray(condition.mids)) {
-                    this.values['conditions'][i] = {};
-                    const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
-                    this.values['conditions'][i]['conditionExpression'] = new VMScript(script).compile();
-                    createMiddleware(condition.mids, 0).then(mid => {
-                        this.values['conditions'][i]['mids'] = mid;
-                    });
+            for (let i = 0; i < values['conditions'].length; i++) {
+                const condition = values['conditions'][i];
+                if (!lodash.isString(condition.conditionExpression)) {
+                    throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.conditionExpression MUST be string');
                 }
-            });
+                if (!lodash.isArray(condition.mids)) {
+                    throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
+                }
+
+                const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
+                const compiledScript = new VMScript(script).compile();
+                const conditionStructure: any = {};
+                conditionStructure['conditionExpression'] = compiledScript;
+                conditionStructure['mids'] = await createMiddleware(condition.mids, 0);
+                this.values['conditions'][i] = conditionStructure;
+            }
+            // values['conditions'].forEach((condition, i) => {
+            //     if (Array.isArray(condition.mids)) {
+            //         this.values['conditions'][i] = {};
+            //         const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
+            //         this.values['conditions'][i]['conditionExpression'] = new VMScript(script).compile();
+            //         createMiddleware(condition.mids, 0).then(mid => {
+            //             this.values['conditions'][i]['mids'] = mid;
+            //         });
+            //     }
+            // });
         }
     }
 
