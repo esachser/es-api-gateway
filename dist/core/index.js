@@ -62,7 +62,9 @@ function createMiddleware(arr, idx) {
         const ctor = middlewares_1.getMiddlewareConstructor(type);
         const v = yield schemas_1.validateObject(type, data);
         if (ctor !== undefined && v) {
-            return new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1));
+            const mid = new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1));
+            yield mid.loadAsync(data);
+            return mid;
         }
         return createMiddleware(arr, idx + 1);
     });
@@ -99,7 +101,9 @@ function createTransport(type, parameters, middleware) {
         const ctor = transports_1.getTransportConstructor(type);
         const v = yield schemas_1.validateObject(type, parameters);
         if (ctor !== undefined && v) {
-            return new ctor(parameters, middleware);
+            const transport = new ctor(parameters, middleware);
+            yield transport.loadAsync(parameters);
+            return transport;
         }
         return undefined;
     });

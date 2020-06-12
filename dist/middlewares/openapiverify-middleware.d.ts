@@ -2,12 +2,14 @@ import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } fro
 import ChowChow from "oas3-chow-chow";
 export declare class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = "EsOpenApiVerifyMiddleware";
     values: any;
     oasValidator?: ChowChow;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    loadAsync(values: any): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;

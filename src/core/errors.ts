@@ -23,9 +23,23 @@ export class EsTransportError extends Error {
 export class EsMiddlewareError extends Error {
     
     readonly middleware: string
+    readonly error: any;
     
-    constructor(middleware: string, message: string) {
+    constructor(middleware: string, message: string, error?: any) {
         super(message);
         this.middleware = middleware;
+        this.error = error;
+    }
+};
+
+export class EsSchemaError extends Error {
+    
+    readonly schemaName: string
+    readonly error: any;
+    
+    constructor(schemaName: string, message: string, error?: any) {
+        super(message);
+        this.schemaName = schemaName;
+        this.error = error;
     }
 };

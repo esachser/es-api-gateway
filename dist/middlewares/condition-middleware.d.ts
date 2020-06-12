@@ -1,11 +1,13 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 export declare class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = "EsConditionMiddleware";
     values: any;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    loadAsync(values: any): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;

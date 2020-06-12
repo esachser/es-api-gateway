@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsParallelMiddleware = void 0;
 const core_1 = require("../core");
+const errors_1 = require("../core/errors");
 let EsParallelMiddleware = /** @class */ (() => {
     class EsParallelMiddleware extends core_1.EsMiddleware {
         /**
@@ -21,13 +22,24 @@ let EsParallelMiddleware = /** @class */ (() => {
             // Verifica values contra o esquema.
             this.values = {};
             this.values['mids'] = [];
-            if (Array.isArray(values['mids'])) {
-                values['mids'].forEach((ms, i) => __awaiter(this, void 0, void 0, function* () {
-                    if (Array.isArray(ms)) {
-                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+        }
+        loadAsync(values) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (Array.isArray(values['mids'])) {
+                    for (let i = 0; i < values['mids'].length; i++) {
+                        let ms = values['mids'][i];
+                        if (Array.isArray(ms)) {
+                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+                        }
+                        else {
+                            throw new errors_1.EsMiddlewareError(EsParallelMiddleware.middlewareName, `values.mids[${i}] MUST be array`);
+                        }
                     }
-                }));
-            }
+                }
+                else {
+                    throw new errors_1.EsMiddlewareError(EsParallelMiddleware.middlewareName, `values.mids MUST be array`);
+                }
+            });
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -36,6 +48,7 @@ let EsParallelMiddleware = /** @class */ (() => {
         }
     }
     EsParallelMiddleware.isInOut = true;
+    EsParallelMiddleware.middlewareName = 'EsParallelMiddleware';
     return EsParallelMiddleware;
 })();
 exports.EsParallelMiddleware = EsParallelMiddleware;

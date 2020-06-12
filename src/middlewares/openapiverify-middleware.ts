@@ -3,9 +3,11 @@ import lodash from 'lodash';
 import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
+import { EsMiddlewareError } from '../core/errors';
 
 export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsOpenApiVerifyMiddleware';
 
     values: any;
 
@@ -16,21 +18,25 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
         super(after, nextMiddleware);
-        // Verifica values contra o esquema.
         this.values = {};
+    }
 
+    async loadAsync(values: any) {
         const oas = lodash.get(values, 'oas', {});
+        try{
+            const api = await SwaggerParser.validate(oas);
+            const openapiVersion = lodash.get(api, 'openapi', '');
 
-        SwaggerParser.validate(oas)
-            .then(api => {
-                const openapiVersion = lodash.get(api, 'openapi', '');
-                if (lodash.toString(openapiVersion).startsWith('3.')) {
-                    this.oasValidator = new ChowChow(api as any);
-                }
-            })
-            .catch(err => {
-                logger.error('Error validating OpenAPI Spec', err);
-            });
+            if (lodash.toString(openapiVersion).startsWith('3.')) {
+                this.oasValidator = new ChowChow(api as any);
+            }
+            else {
+                throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'The OpenAPI version MUST be 3.x.x');
+            }
+        }
+        catch(err) {
+            throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error creating OpenAPI validator', err);
+        }
     }
 
     async runInternal(context: IEsContext) {

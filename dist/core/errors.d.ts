@@ -8,5 +8,11 @@ export declare class EsTransportError extends Error {
 }
 export declare class EsMiddlewareError extends Error {
     readonly middleware: string;
-    constructor(middleware: string, message: string);
+    readonly error: any;
+    constructor(middleware: string, message: string, error?: any);
+}
+export declare class EsSchemaError extends Error {
+    readonly schemaName: string;
+    readonly error: any;
+    constructor(schemaName: string, message: string, error?: any);
 }

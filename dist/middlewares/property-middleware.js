@@ -16,8 +16,8 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const vm2_1 = require("vm2");
-const logger_1 = require("../util/logger");
 const stringify_object_1 = __importDefault(require("stringify-object"));
+const errors_1 = require("../core/errors");
 const vm = new vm2_1.NodeVM({
     console: 'inherit',
     sandbox: {},
@@ -49,22 +49,22 @@ let EsPropertyMiddleware = /** @class */ (() => {
                 this.vmScript = new vm2_1.VMScript(script).compile();
             }
             catch (err) {
-                logger_1.logger.error('Error compiling script', { error: err, script });
-                this.vmScript = new vm2_1.VMScript('module.exports=() => undefined').compile();
+                throw new errors_1.EsMiddlewareError(EsPropertyMiddleware.middlewareName, 'Error compiling property script', err);
             }
+        }
+        loadAsync() {
+            return __awaiter(this, void 0, void 0, function* () { });
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                try {
+                if (this.vmScript !== undefined) {
                     lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
-                }
-                catch (err) {
-                    logger_1.logger.error('Error while setting property', err);
                 }
             });
         }
     }
     EsPropertyMiddleware.isInOut = true;
+    EsPropertyMiddleware.middlewareName = 'EsPropertyMiddleware';
     return EsPropertyMiddleware;
 })();
 exports.EsPropertyMiddleware = EsPropertyMiddleware;

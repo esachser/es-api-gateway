@@ -4,9 +4,11 @@ import { logger } from '../util/logger';
 import got, { Got } from 'got';
 import Keyv  from 'keyv';
 import { nanoid } from 'nanoid';
+import { EsMiddlewareError } from '../core/errors';
 
 export class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsHttpRequestMiddleware';
 
     values: any;
 
@@ -25,17 +27,28 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         if (cacheEnabled) {
             const cacheMaxAge = lodash.get(values, 'cache.maxAge', 1000);
             const cacheMaxSize = lodash.get(values, 'cache.maxSize', 100);
+
+            if (!lodash.isInteger(cacheMaxAge)) {
+                throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxAge MUST be integer');
+            }
+            if (!lodash.isInteger(cacheMaxSize)) {
+                throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxSize MUST be integer');
+            }
+
             this.cache = new Keyv('redis://localhost:6379', {
                 maxSize: cacheMaxSize,
                 ttl: cacheMaxAge,
                 namespace: `gotcache:${nanoid(12)}`
             });
         }
+
         this.got = got.extend({
             throwHttpErrors: false,
             cache: this.cache
         });
     }
+
+    async loadAsync() { }
 
     async runInternal(context: IEsContext) {
         const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
@@ -132,10 +145,12 @@ export const MiddlewareSchema = {
             ],
             "properties": {
                 "maxAge": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "maxSize": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "enabled": {
                     "type": "boolean"

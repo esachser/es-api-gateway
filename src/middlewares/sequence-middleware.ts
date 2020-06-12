@@ -1,9 +1,11 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
+import { EsMiddlewareError } from '../core/errors';
 
 export class EsSequenceMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsSequenceMiddleware';
 
     values: any;
 
@@ -17,16 +19,22 @@ export class EsSequenceMiddleware extends EsMiddleware {
         // Verifica values contra o esquema.
         this.values = {};
         this.values['mids'] = [];
+    }
 
+    async loadAsync(values: any) {
         if (Array.isArray(values['mids'])) {
-            values['mids'].forEach(async (ms, i) => {
+            for (let i=0; i < values['mids'].length; i++) {
+                let ms = values['mids'][i];
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] = await createMiddleware(ms, 0);
+                    this.values['mids'][i] =  await createMiddleware(ms, 0);
                 }
                 else {
                     this.values['mids'][i] = await createMiddleware([ms], 0);
                 }
-            });
+            }
+        }
+        else {
+            throw new EsMiddlewareError(EsSequenceMiddleware.middlewareName, `values.mids MUST be array`);
         }
     }
 

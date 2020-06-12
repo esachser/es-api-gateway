@@ -19,6 +19,7 @@ const logger_1 = require("../util/logger");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
+const errors_1 = require("../core/errors");
 let EsHttpRequestMiddleware = /** @class */ (() => {
     class EsHttpRequestMiddleware extends core_1.EsMiddleware {
         /**
@@ -32,6 +33,12 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
             if (cacheEnabled) {
                 const cacheMaxAge = lodash_1.default.get(values, 'cache.maxAge', 1000);
                 const cacheMaxSize = lodash_1.default.get(values, 'cache.maxSize', 100);
+                if (!lodash_1.default.isInteger(cacheMaxAge)) {
+                    throw new errors_1.EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxAge MUST be integer');
+                }
+                if (!lodash_1.default.isInteger(cacheMaxSize)) {
+                    throw new errors_1.EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxSize MUST be integer');
+                }
                 this.cache = new keyv_1.default('redis://localhost:6379', {
                     maxSize: cacheMaxSize,
                     ttl: cacheMaxAge,
@@ -42,6 +49,9 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 throwHttpErrors: false,
                 cache: this.cache
             });
+        }
+        loadAsync() {
+            return __awaiter(this, void 0, void 0, function* () { });
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -84,6 +94,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
         }
     }
     EsHttpRequestMiddleware.isInOut = true;
+    EsHttpRequestMiddleware.middlewareName = 'EsHttpRequestMiddleware';
     return EsHttpRequestMiddleware;
 })();
 exports.EsHttpRequestMiddleware = EsHttpRequestMiddleware;
@@ -139,10 +150,12 @@ exports.MiddlewareSchema = {
             ],
             "properties": {
                 "maxAge": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "maxSize": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "enabled": {
                     "type": "boolean"

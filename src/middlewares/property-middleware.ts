@@ -3,6 +3,7 @@ import lodash from 'lodash';
 import { NodeVM, VMScript } from 'vm2';
 import { logger } from '../util/logger';
 import stringifyObject from 'stringify-object';
+import { EsMiddlewareError } from '../core/errors';
 
 const vm = new NodeVM({
     console: 'inherit',
@@ -15,10 +16,11 @@ const vm = new NodeVM({
 
 export class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsPropertyMiddleware';
 
     values: any;
 
-    readonly vmScript: VMScript;
+    readonly vmScript?: VMScript;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -43,17 +45,15 @@ export class EsPropertyMiddleware extends EsMiddleware {
             this.vmScript = new VMScript(script).compile();
         }
         catch (err) {
-            logger.error('Error compiling script', { error: err, script });
-            this.vmScript = new VMScript('module.exports=() => undefined').compile();
+            throw new EsMiddlewareError(EsPropertyMiddleware.middlewareName, 'Error compiling property script', err);
         }
     }
 
+    async loadAsync() {}
+
     async runInternal(context: IEsContext) {
-        try {
+        if (this.vmScript !== undefined) {
             lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
-        }
-        catch (err) {
-            logger.error('Error while setting property', err);
         }
     }
 };

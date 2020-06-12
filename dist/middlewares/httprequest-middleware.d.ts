@@ -3,6 +3,7 @@ import { Got } from 'got';
 import Keyv from 'keyv';
 export declare class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = "EsHttpRequestMiddleware";
     values: any;
     readonly cache: Keyv | undefined;
     readonly got: Got;
@@ -10,6 +11,7 @@ export declare class EsHttpRequestMiddleware extends EsMiddleware {
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    loadAsync(): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
@@ -60,9 +62,11 @@ export declare const MiddlewareSchema: {
             properties: {
                 maxAge: {
                     type: string;
+                    minimum: number;
                 };
                 maxSize: {
                     type: string;
+                    minimum: number;
                 };
                 enabled: {
                     type: string;

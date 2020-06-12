@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsSequenceMiddleware = void 0;
 const core_1 = require("../core");
+const errors_1 = require("../core/errors");
 let EsSequenceMiddleware = /** @class */ (() => {
     class EsSequenceMiddleware extends core_1.EsMiddleware {
         /**
@@ -21,16 +22,24 @@ let EsSequenceMiddleware = /** @class */ (() => {
             // Verifica values contra o esquema.
             this.values = {};
             this.values['mids'] = [];
-            if (Array.isArray(values['mids'])) {
-                values['mids'].forEach((ms, i) => __awaiter(this, void 0, void 0, function* () {
-                    if (Array.isArray(ms)) {
-                        this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+        }
+        loadAsync(values) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (Array.isArray(values['mids'])) {
+                    for (let i = 0; i < values['mids'].length; i++) {
+                        let ms = values['mids'][i];
+                        if (Array.isArray(ms)) {
+                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+                        }
+                        else {
+                            this.values['mids'][i] = yield core_1.createMiddleware([ms], 0);
+                        }
                     }
-                    else {
-                        this.values['mids'][i] = yield core_1.createMiddleware([ms], 0);
-                    }
-                }));
-            }
+                }
+                else {
+                    throw new errors_1.EsMiddlewareError(EsSequenceMiddleware.middlewareName, `values.mids MUST be array`);
+                }
+            });
         }
         runInternal(context) {
             var _a;
@@ -44,6 +53,7 @@ let EsSequenceMiddleware = /** @class */ (() => {
         }
     }
     EsSequenceMiddleware.isInOut = true;
+    EsSequenceMiddleware.middlewareName = 'EsSequenceMiddleware';
     return EsSequenceMiddleware;
 })();
 exports.EsSequenceMiddleware = EsSequenceMiddleware;

@@ -1,9 +1,11 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import lodash from 'lodash';
 import { logger } from '../util/logger';
+import { EsMiddlewareError } from '../core/errors';
 
 export class EsMetricsMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = 'EsMetricsMiddleware';
 
     values: any;
 
@@ -16,7 +18,13 @@ export class EsMetricsMiddleware implements IEsMiddleware {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;
+
+        if (!lodash.isString(values['prop'])) {
+            throw new EsMiddlewareError(EsMetricsMiddleware.middlewareName, 'prop MUST be string');
+        }
     }
+
+    async loadAsync() { }
 
     async execute(context: IEsContext) {
         let init = new Date().valueOf();

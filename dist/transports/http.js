@@ -87,6 +87,9 @@ let EsHttpTransport = /** @class */ (() => {
             EsHttpTransport.baseRoutesUsed.add(params.routeContext);
             logger_1.logger.info(`Loaded ${this.routeContext}`);
         }
+        loadAsync() {
+            return __awaiter(this, void 0, void 0, function* () { });
+        }
         clear() {
             http_server_1.httpRouter.stack = http_server_1.httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
             EsHttpTransport.baseRoutesUsed.delete(this.routeContext);

@@ -69,7 +69,7 @@ async function reloadEnv(dir: string) {
         logger.info(`Loading API ${finfo.name}`);
 
         loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
-            logger.error(`Error loding file ${finfo.name}`, e);
+            logger.error(`Error loading file ${finfo.name}`, e);
         });
     });
 }

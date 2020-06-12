@@ -68,6 +68,7 @@ export interface IEsTranportConstructor {
 
 export interface IEsTransport {
     middleware: IEsMiddleware | undefined
+    loadAsync(params: any): Promise<void>
     clear(): void
 }
 
@@ -131,7 +132,9 @@ export async function createTransport(type: string, parameters: any, middleware:
     const v = await validateObject(type, parameters);
 
     if (ctor !== undefined && v) {
-        return new ctor(parameters, middleware);
+        const transport = new ctor(parameters, middleware);
+        await transport.loadAsync(parameters);
+        return transport;
     }
 
     return undefined;

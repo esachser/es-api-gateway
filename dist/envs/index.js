@@ -65,7 +65,7 @@ function reloadEnv(dir) {
         finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(finfo => {
             logger_1.logger.info(`Loading API ${finfo.name}`);
             loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(e => {
-                logger_1.logger.error(`Error loding file ${finfo.name}`, e);
+                logger_1.logger.error(`Error loading file ${finfo.name}`, e);
             });
         });
     });

@@ -1,12 +1,14 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 export declare class EsMetricsMiddleware implements IEsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = "EsMetricsMiddleware";
     values: any;
     next?: IEsMiddleware;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    loadAsync(): Promise<void>;
     execute(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;

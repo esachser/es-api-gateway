@@ -22,6 +22,7 @@ export declare class EsHttpTransport implements IEsTransport {
      *
      */
     constructor(params: IEsHttpTransportParams, middleware: IEsMiddleware | undefined);
+    loadAsync(): Promise<void>;
     clear(): void;
 }
 export declare const TransportContructor: IEsTranportConstructor;

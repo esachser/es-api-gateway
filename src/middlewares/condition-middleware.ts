@@ -8,7 +8,7 @@ const vm = new NodeVM();
 
 export class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = 'EsConditionMiddleware'
+    static readonly middlewareName = 'EsConditionMiddleware';
 
     values: any;
 
@@ -40,16 +40,9 @@ export class EsConditionMiddleware extends EsMiddleware {
                 conditionStructure['mids'] = await createMiddleware(condition.mids, 0);
                 this.values['conditions'][i] = conditionStructure;
             }
-            // values['conditions'].forEach((condition, i) => {
-            //     if (Array.isArray(condition.mids)) {
-            //         this.values['conditions'][i] = {};
-            //         const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
-            //         this.values['conditions'][i]['conditionExpression'] = new VMScript(script).compile();
-            //         createMiddleware(condition.mids, 0).then(mid => {
-            //             this.values['conditions'][i]['mids'] = mid;
-            //         });
-            //     }
-            // });
+        }
+        else {
+            throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'conditions MUST be array');
         }
     }
 

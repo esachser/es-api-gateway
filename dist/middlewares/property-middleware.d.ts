@@ -2,12 +2,14 @@ import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } fro
 import { VMScript } from 'vm2';
 export declare class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
+    static readonly middlewareName = "EsPropertyMiddleware";
     values: any;
-    readonly vmScript: VMScript;
+    readonly vmScript?: VMScript;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    loadAsync(): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;

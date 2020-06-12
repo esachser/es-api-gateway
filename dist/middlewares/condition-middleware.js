@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsConditionMiddleware = void 0;
 const core_1 = require("../core");
+const lodash_1 = __importDefault(require("lodash"));
 const vm2_1 = require("vm2");
+const errors_1 = require("../core/errors");
 const vm = new vm2_1.NodeVM();
 let EsConditionMiddleware = /** @class */ (() => {
     class EsConditionMiddleware extends core_1.EsMiddleware {
@@ -23,18 +28,30 @@ let EsConditionMiddleware = /** @class */ (() => {
             // Verifica values contra o esquema.
             this.values = {};
             this.values['conditions'] = [];
-            if (Array.isArray(values['conditions'])) {
-                values['conditions'].forEach((condition, i) => {
-                    if (Array.isArray(condition.mids)) {
-                        this.values['conditions'][i] = {};
+        }
+        loadAsync(values) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (Array.isArray(values['conditions'])) {
+                    for (let i = 0; i < values['conditions'].length; i++) {
+                        const condition = values['conditions'][i];
+                        if (!lodash_1.default.isString(condition.conditionExpression)) {
+                            throw new errors_1.EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.conditionExpression MUST be string');
+                        }
+                        if (!lodash_1.default.isArray(condition.mids)) {
+                            throw new errors_1.EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
+                        }
                         const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
-                        this.values['conditions'][i]['conditionExpression'] = new vm2_1.VMScript(script).compile();
-                        core_1.createMiddleware(condition.mids, 0).then(mid => {
-                            this.values['conditions'][i]['mids'] = mid;
-                        });
+                        const compiledScript = new vm2_1.VMScript(script).compile();
+                        const conditionStructure = {};
+                        conditionStructure['conditionExpression'] = compiledScript;
+                        conditionStructure['mids'] = yield core_1.createMiddleware(condition.mids, 0);
+                        this.values['conditions'][i] = conditionStructure;
                     }
-                });
-            }
+                }
+                else {
+                    throw new errors_1.EsMiddlewareError(EsConditionMiddleware.middlewareName, 'conditions MUST be array');
+                }
+            });
         }
         runInternal(context) {
             var _a;
@@ -54,6 +71,7 @@ let EsConditionMiddleware = /** @class */ (() => {
         }
     }
     EsConditionMiddleware.isInOut = true;
+    EsConditionMiddleware.middlewareName = 'EsConditionMiddleware';
     return EsConditionMiddleware;
 })();
 exports.EsConditionMiddleware = EsConditionMiddleware;

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsMetricsMiddleware = void 0;
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
+const errors_1 = require("../core/errors");
 let EsMetricsMiddleware = /** @class */ (() => {
     class EsMetricsMiddleware {
         /**
@@ -24,6 +25,12 @@ let EsMetricsMiddleware = /** @class */ (() => {
             // Verifica values contra o esquema.
             this.values = values;
             this.next = nextMiddleware;
+            if (!lodash_1.default.isString(values['prop'])) {
+                throw new errors_1.EsMiddlewareError(EsMetricsMiddleware.middlewareName, 'prop MUST be string');
+            }
+        }
+        loadAsync() {
+            return __awaiter(this, void 0, void 0, function* () { });
         }
         execute(context) {
             var _a;
@@ -38,6 +45,7 @@ let EsMetricsMiddleware = /** @class */ (() => {
         }
     }
     EsMetricsMiddleware.isInOut = true;
+    EsMetricsMiddleware.middlewareName = 'EsMetricsMiddleware';
     return EsMetricsMiddleware;
 })();
 exports.EsMetricsMiddleware = EsMetricsMiddleware;

@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsOpenApiVerifyMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
-const logger_1 = require("../util/logger");
 const swagger_parser_1 = __importDefault(require("@apidevtools/swagger-parser"));
 const oas3_chow_chow_1 = __importDefault(require("oas3-chow-chow"));
+const errors_1 = require("../core/errors");
 let EsOpenApiVerifyMiddleware = /** @class */ (() => {
     class EsOpenApiVerifyMiddleware extends core_1.EsMiddleware {
         /**
@@ -25,18 +25,24 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
          */
         constructor(values, after, nextMiddleware) {
             super(after, nextMiddleware);
-            // Verifica values contra o esquema.
             this.values = {};
-            const oas = lodash_1.default.get(values, 'oas', {});
-            swagger_parser_1.default.validate(oas)
-                .then(api => {
-                const openapiVersion = lodash_1.default.get(api, 'openapi', '');
-                if (lodash_1.default.toString(openapiVersion).startsWith('3.')) {
-                    this.oasValidator = new oas3_chow_chow_1.default(api);
+        }
+        loadAsync(values) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const oas = lodash_1.default.get(values, 'oas', {});
+                try {
+                    const api = yield swagger_parser_1.default.validate(oas);
+                    const openapiVersion = lodash_1.default.get(api, 'openapi', '');
+                    if (lodash_1.default.toString(openapiVersion).startsWith('3.')) {
+                        this.oasValidator = new oas3_chow_chow_1.default(api);
+                    }
+                    else {
+                        throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'The OpenAPI version MUST be 3.x.x');
+                    }
                 }
-            })
-                .catch(err => {
-                logger_1.logger.error('Error validating OpenAPI Spec', err);
+                catch (err) {
+                    throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error creating OpenAPI validator', err);
+                }
             });
         }
         runInternal(context) {
@@ -60,6 +66,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
         }
     }
     EsOpenApiVerifyMiddleware.isInOut = true;
+    EsOpenApiVerifyMiddleware.middlewareName = 'EsOpenApiVerifyMiddleware';
     return EsOpenApiVerifyMiddleware;
 })();
 exports.EsOpenApiVerifyMiddleware = EsOpenApiVerifyMiddleware;

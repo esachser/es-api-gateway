@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateObject = exports.addNewSchema = exports.loadJsonSchemaValidator = exports.API_SCHEMA = exports.TRANSPORT_SCHEMA = exports.MIDDLEWARE_SCHEMA = void 0;
 const ajv_1 = __importDefault(require("ajv"));
 const logger_1 = require("../util/logger");
+const errors_1 = require("./errors");
 exports.MIDDLEWARE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://esachser.github.io/es-apigw/v1/schemas/es-middleware",
@@ -115,12 +116,12 @@ function validateObject(schemaName, obj) {
             const av = ajv.validate(schemaName, obj);
             const v = Boolean(av instanceof Promise ? yield av.catch((e) => { throw e; }) : av);
             if (!v) {
-                logger_1.logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`);
+                throw new errors_1.EsSchemaError(schemaName, ajv.errorsText(ajv.errors));
             }
             return v;
         }
         catch (err) {
-            logger_1.logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`, err);
+            throw new errors_1.EsSchemaError(schemaName, ajv.errorsText(ajv.errors), err);
         }
         return false;
     });

@@ -1,5 +1,6 @@
 import Ajv from 'ajv';
 import { logger } from '../util/logger';
+import { EsSchemaError } from './errors';
 
 export const MIDDLEWARE_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema",
@@ -104,12 +105,12 @@ export async function validateObject(schemaName:string, obj:any): Promise<boolea
         const av = ajv.validate(schemaName, obj);
         const v = Boolean(av instanceof Promise ? await av.catch((e:any) => { throw e }) : av);
         if (!v) {
-            logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`);
+            throw new EsSchemaError(schemaName, ajv.errorsText(ajv.errors));
         }
         return v;
     }
     catch (err) {
-        logger.error(`Schema ${schemaName} with errors: ${ajv.errorsText(ajv.errors)}`, err);
+        throw new EsSchemaError(schemaName, ajv.errorsText(ajv.errors), err);
     }
     return false;    
 }

@@ -111,6 +111,8 @@ export class EsHttpTransport implements IEsTransport {
         logger.info(`Loaded ${this.routeContext}`);
     }
 
+    async loadAsync() {}
+
     clear() {
         httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
         EsHttpTransport.baseRoutesUsed.delete(this.routeContext);

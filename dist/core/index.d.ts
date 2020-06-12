@@ -5,7 +5,6 @@ export interface IEsContext {
     };
     rawbody: string;
     parsedbody?: any;
-    loadAsync(): Promise<void>;
 }
 export interface IEsMiddlewareConstructor {
     new (values: any, after: boolean, nextMiddleware?: IEsMiddleware): IEsMiddleware;
@@ -13,10 +12,12 @@ export interface IEsMiddlewareConstructor {
 export interface IEsMiddleware {
     next?: IEsMiddleware;
     execute(context: IEsContext): Promise<void>;
+    loadAsync(values: any): Promise<void>;
 }
 export declare abstract class EsMiddleware implements IEsMiddleware {
     next?: IEsMiddleware;
     after: boolean;
+    abstract loadAsync(values: any): Promise<void>;
     abstract runInternal(context: IEsContext): Promise<void>;
     constructor(after: boolean, nextMiddleware: IEsMiddleware | undefined);
     execute(context: IEsContext): Promise<void>;
@@ -26,6 +27,7 @@ export interface IEsTranportConstructor {
 }
 export interface IEsTransport {
     middleware: IEsMiddleware | undefined;
+    loadAsync(params: any): Promise<void>;
     clear(): void;
 }
 export declare function createMiddleware(arr: any[], idx: number): Promise<IEsMiddleware | undefined>;

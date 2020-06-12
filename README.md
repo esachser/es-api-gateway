@@ -13,9 +13,9 @@ Aspectos que devem ser vistos:
 - [**OK**] Carga dos middlewares e transportes no core
 - [**OK**] Verificar se o prefixo já não está utilizado no transporte http
 - [**OK**] Não carregar middleware ou transporte cujo esquema estiver incorreto
-- Criar construtor assíncrono para garantir que o load dos middlewares está acontecendo
-- Não permitir criação da API em caso de erro em qualquer parte da criação
-  - Criar extensão de error para representar isso.
+- [**OK**] Criar construtor assíncrono para garantir que o load dos middlewares está acontecendo
+- [**OK**] Não permitir criação da API em caso de erro em qualquer parte da criação
+  - [**OK**] Criar extensão de error para representar isso.
 - [**OK**] Refatorar middleware base para classes abstratas
   - **after** deve ser padrão na definição
   - **execute** deve seguir ou não o **after**
@@ -25,6 +25,7 @@ Aspectos que devem ser vistos:
 - Cada Path no transporte HTTP pode ter middlewares
 - Criar Throw Error Middleware
 - Criar Catch Error Middleware
+- ForEach Middleware
 - OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware
   - Inspect ou JWKS
