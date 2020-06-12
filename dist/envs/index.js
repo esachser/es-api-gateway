@@ -8,13 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,7 +24,6 @@ const http_server_1 = require("../util/http-server");
 const schemas_1 = require("../core/schemas");
 let apis = {};
 function loadApiFile(fname) {
-    var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = JSON.parse((yield promises_1.default.readFile(fname)).toString());
         logger_1.logger.debug(apiJson);
@@ -47,31 +39,21 @@ function loadApiFile(fname) {
         };
         const transports = lodash_1.default.get(apiJson, 'transports');
         if (transports !== undefined && lodash_1.default.isArray(transports)) {
-            try {
-                for (var transports_1 = __asyncValues(transports), transports_1_1; transports_1_1 = yield transports_1.next(), !transports_1_1.done;) {
-                    const transport = transports_1_1.value;
-                    const type = lodash_1.default.get(transport, 'type');
-                    const id = lodash_1.default.get(transport, 'id');
-                    const parameters = lodash_1.default.get(transport, 'parameters');
-                    const mids = lodash_1.default.get(transport, 'mids');
-                    const pre = yield core_1.createMiddleware(mids, 0);
-                    const mid = core_1.connectMiddlewares(pre, centralMid);
-                    if (api.transports[id] !== undefined) {
-                        api.transports[id].clear();
-                        delete api.transports[id];
-                    }
-                    const trp = yield core_1.createTransport(type, parameters, mid);
-                    if (trp !== undefined) {
-                        api.transports[id] = trp;
-                    }
+            for (const transport of transports) {
+                const type = lodash_1.default.get(transport, 'type');
+                const id = lodash_1.default.get(transport, 'id');
+                const parameters = lodash_1.default.get(transport, 'parameters');
+                const mids = lodash_1.default.get(transport, 'mids');
+                const pre = yield core_1.createMiddleware(mids, 0);
+                const mid = core_1.connectMiddlewares(pre, centralMid);
+                if (api.transports[id] !== undefined) {
+                    api.transports[id].clear();
+                    delete api.transports[id];
                 }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (transports_1_1 && !transports_1_1.done && (_a = transports_1.return)) yield _a.call(transports_1);
+                const trp = yield core_1.createTransport(type, parameters, mid);
+                if (trp !== undefined) {
+                    api.transports[id] = trp;
                 }
-                finally { if (e_1) throw e_1.error; }
             }
         }
         apis[fname] = api;

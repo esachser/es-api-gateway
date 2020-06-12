@@ -33,12 +33,15 @@ export interface IEsMiddlewareConstructor {
 export interface IEsMiddleware {
     next?: IEsMiddleware
     execute(context: IEsContext): Promise<void>
+    loadAsync(values:any): Promise<void>
 }
 
 export abstract class EsMiddleware implements IEsMiddleware {
     next?: IEsMiddleware
 
     after: boolean
+
+    abstract async loadAsync(values:any): Promise<void>
 
     abstract async runInternal(context: IEsContext): Promise<void>
 
@@ -82,7 +85,9 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
     const v = await validateObject(type, data);
 
     if (ctor !== undefined && v) {
-        return new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1));
+        const mid = new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1));
+        await mid.loadAsync(data);
+        return mid;
     }
     return createMiddleware(arr, idx + 1);
 }

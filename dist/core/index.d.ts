@@ -5,6 +5,7 @@ export interface IEsContext {
     };
     rawbody: string;
     parsedbody?: any;
+    loadAsync(): Promise<void>;
 }
 export interface IEsMiddlewareConstructor {
     new (values: any, after: boolean, nextMiddleware?: IEsMiddleware): IEsMiddleware;
