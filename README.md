@@ -21,8 +21,9 @@ Aspectos que devem ser vistos:
   - [**OK**] **execute** deve seguir ou não o **after**
   - [**OK**] **runInternal** deve ser implementado
 - [**OK**] Configuração logger para cada API
-  - [**OK**] Logger Redis por API 
+  - [**OK**] Logger Redis por API
 - Cada Path no transporte HTTP pode ter middlewares
+- Setar tipo de response padrão por path
 - Criar Throw Error Middleware
 - Criar Catch Error Middleware
 - ForEach Middleware

@@ -5,7 +5,6 @@ import Transport from 'winston-transport';
 import _ from 'lodash';
 import { baseDirectory } from '.';
 import { configuration } from './config';
-import stringifyObject from 'stringify-object';
 
 export const logger = winston.createLogger({
     level: 'info',
@@ -35,14 +34,19 @@ class RedisTransport extends Transport {
     }
 
     log(info:any, callback: () => void) {
-        this._redisClientLogger.publish(this._channel, stringifyObject(info), () => {
-            callback();
-            this.emit('logged', info);
-        });
+        try {
+            this._redisClientLogger.publish(this._channel, JSON.stringify(info), () => {
+                callback();
+                this.emit('logged', info);
+            });
+        }
+        catch (err) {
+            logger.error('Error sending log to Redis', _.merge({ channel: this._channel }, err));
+        }
     }
 
     close() {
-        this._redisClientLogger.disconnect();
+        this._redisClientLogger.quit();
     }
 }
 
