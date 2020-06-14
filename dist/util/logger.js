@@ -8,9 +8,9 @@ const winston_1 = __importDefault(require("winston"));
 const path_1 = __importDefault(require("path"));
 const ioredis_1 = __importDefault(require("ioredis"));
 const winston_transport_1 = __importDefault(require("winston-transport"));
+const lodash_1 = __importDefault(require("lodash"));
 const _1 = require(".");
 const config_1 = require("./config");
-const stringify_object_1 = __importDefault(require("stringify-object"));
 exports.logger = winston_1.default.createLogger({
     level: 'info',
     format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
@@ -32,13 +32,18 @@ class RedisTransport extends winston_transport_1.default {
         this._channel = opts.channel;
     }
     log(info, callback) {
-        this._redisClientLogger.publish(this._channel, stringify_object_1.default(info), () => {
-            callback();
-            this.emit('logged', info);
-        });
+        try {
+            this._redisClientLogger.publish(this._channel, JSON.stringify(info), () => {
+                callback();
+                this.emit('logged', info);
+            });
+        }
+        catch (err) {
+            exports.logger.error('Error sending log to Redis', lodash_1.default.merge({ channel: this._channel }, err));
+        }
     }
     close() {
-        this._redisClientLogger.disconnect();
+        this._redisClientLogger.quit();
     }
 }
 function createLogger(level, api) {

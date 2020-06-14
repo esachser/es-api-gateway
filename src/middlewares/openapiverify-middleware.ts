@@ -53,11 +53,17 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
                 path = `/${path}`;
             }
 
-            const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
-            context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
+            try {
+                const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
+                context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
 
-            if (reqMeta === undefined) {
-                throw Error('Invalid request');
+                if (reqMeta === undefined) {
+                    throw Error('Invalid request');
+                }
+            }
+            catch (err) {
+                context.logger.error('Error verifying OpenAPI Request', _.merge({}, err, EsOpenApiVerifyMiddleware.meta, context.meta));
+                throw err;
             }
         }
     }
