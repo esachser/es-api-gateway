@@ -34,12 +34,12 @@ let EsMetricsMiddleware = /** @class */ (() => {
         execute(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
-                const meta = lodash_1.default.merge(EsMetricsMiddleware.meta, context.meta);
+                const meta = lodash_1.default.merge({}, EsMetricsMiddleware.meta, context.meta);
                 let init = new Date().valueOf();
                 yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
                 let end = new Date().valueOf();
                 let diff = end - init;
-                context.logger.info(`Duration: ${diff}ms`, meta);
+                context.logger.debug(`Duration: ${diff}ms`, meta);
                 lodash_1.default.set(context.properties, this.values['prop'], diff);
             });
         }

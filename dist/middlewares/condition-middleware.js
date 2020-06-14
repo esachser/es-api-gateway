@@ -56,7 +56,7 @@ let EsConditionMiddleware = /** @class */ (() => {
         runInternal(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
-                const meta = lodash_1.default.merge(EsConditionMiddleware.meta, context.meta);
+                const meta = lodash_1.default.merge({}, EsConditionMiddleware.meta, context.meta);
                 if (Array.isArray(this.values['conditions'])) {
                     for (let i = 0; i < this.values['conditions'].length; i++) {
                         let condition = this.values['conditions'][i];

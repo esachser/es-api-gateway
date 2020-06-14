@@ -1,7 +1,11 @@
 import winston from 'winston';
 import path from 'path';
+import Redis from 'ioredis';
+import Transport from 'winston-transport';
+import lodash from 'lodash';
 import { baseDirectory } from '.';
 import { configuration } from './config';
+import stringifyObject from 'stringify-object';
 
 export const logger = winston.createLogger({
     level: 'info',
@@ -17,6 +21,31 @@ export const logger = winston.createLogger({
     ]
 });
 
+const redisClientLogger = new Redis();
+
+class RedisTransport extends Transport {
+
+    private readonly _redisClientLogger: Redis.Redis;
+    private readonly _channel: string;
+
+    constructor(opts: { transportOpts?: Transport.TransportStreamOptions, redisOpts?: Redis.RedisOptions, channel: string }) {
+        super(opts.transportOpts);
+        this._redisClientLogger = new Redis(opts.redisOpts);
+        this._channel = opts.channel;
+    }
+
+    log(info:any, callback: () => void) {
+        this._redisClientLogger.publish(this._channel, stringifyObject(info), () => {
+            callback();
+            this.emit('logged', info);
+        });
+    }
+
+    close() {
+        this._redisClientLogger.disconnect();
+    }
+}
+
 export function createLogger(level: string, api: string) {
     return winston.createLogger({
         level,
@@ -24,6 +53,7 @@ export function createLogger(level: string, api: string) {
         defaultMeta: { service: 'es-apigw', api },
         transports: [
             new winston.transports.File({ filename: path.resolve(baseDirectory, 'logs', 'apis', configuration.env, `${api}.log`), maxFiles:1, maxsize: 1024*1024 }),
+            new RedisTransport({channel: `esgateway:logging:apis:${api}`})
         ],
     });
 }

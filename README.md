@@ -21,6 +21,7 @@ Aspectos que devem ser vistos:
   - [**OK**] **execute** deve seguir ou não o **after**
   - [**OK**] **runInternal** deve ser implementado
 - [**OK**] Configuração logger para cada API
+- Verificar possibilidade de usar Event Emitter
 - Tipos de Logger na configuração global
 - Cada Path no transporte HTTP pode ter middlewares
 - Criar Throw Error Middleware

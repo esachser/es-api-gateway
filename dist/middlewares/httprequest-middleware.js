@@ -54,7 +54,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                const meta = lodash_1.default.merge(EsHttpRequestMiddleware.meta, context.meta);
+                const meta = lodash_1.default.merge({}, EsHttpRequestMiddleware.meta, context.meta);
                 const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
                 let path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
                 const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.rawbody'));
@@ -85,12 +85,12 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         hooks: {
                             beforeRequest: [
                                 opts => {
-                                    context.logger.debug('Calling Http endpoint', lodash_1.default.merge(opts.headers, meta));
+                                    context.logger.debug('Calling Http endpoint', lodash_1.default.merge({}, opts.headers, meta));
                                 }
                             ]
                         }
                     });
-                    context.logger.debug('Result received', lodash_1.default.merge(lodash_1.default.get(res, ['headers', 'statusCode', 'body']), meta));
+                    context.logger.debug('Result received', lodash_1.default.merge({}, lodash_1.default.get(res, ['headers', 'statusCode', 'body']), meta));
                     lodash_1.default.set(context.properties, 'response.headers', (res === null || res === void 0 ? void 0 : res.headers) || {});
                     lodash_1.default.set(context.properties, 'response.status', (res === null || res === void 0 ? void 0 : res.statusCode) || 500);
                     lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);

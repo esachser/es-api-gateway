@@ -40,7 +40,7 @@ export class EsSequenceMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
-        const meta = lodash.merge(EsSequenceMiddleware.meta, context.meta);
+        const meta = lodash.merge({}, EsSequenceMiddleware.meta, context.meta);
         if (Array.isArray(this.values['mids'])) {
             for (let i = 0; i < this.values['mids'].length; i++) {
                 context.logger.debug(`Running middleware ${i}`, meta);

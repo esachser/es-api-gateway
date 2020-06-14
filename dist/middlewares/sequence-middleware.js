@@ -48,7 +48,7 @@ let EsSequenceMiddleware = /** @class */ (() => {
         runInternal(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
-                const meta = lodash_1.default.merge(EsSequenceMiddleware.meta, context.meta);
+                const meta = lodash_1.default.merge({}, EsSequenceMiddleware.meta, context.meta);
                 if (Array.isArray(this.values['mids'])) {
                     for (let i = 0; i < this.values['mids'].length; i++) {
                         context.logger.debug(`Running middleware ${i}`, meta);

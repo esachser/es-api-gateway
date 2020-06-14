@@ -48,7 +48,7 @@ export class EsConditionMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
-        const meta = lodash.merge(EsConditionMiddleware.meta, context.meta);
+        const meta = lodash.merge({}, EsConditionMiddleware.meta, context.meta);
         if (Array.isArray(this.values['conditions'])) {
             for (let i = 0; i < this.values['conditions'].length; i++) {
                 let condition = this.values['conditions'][i];
