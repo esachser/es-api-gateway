@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
 
@@ -40,7 +40,7 @@ export class EsSequenceMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
-        const meta = lodash.merge({}, EsSequenceMiddleware.meta, context.meta);
+        const meta = _.merge({}, EsSequenceMiddleware.meta, context.meta);
         if (Array.isArray(this.values['mids'])) {
             for (let i = 0; i < this.values['mids'].length; i++) {
                 context.logger.debug(`Running middleware ${i}`, meta);

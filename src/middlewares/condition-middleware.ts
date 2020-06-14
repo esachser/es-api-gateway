@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import { NodeVM, VMScript } from 'vm2';
 import { EsMiddlewareError } from '../core/errors';
@@ -27,10 +27,10 @@ export class EsConditionMiddleware extends EsMiddleware {
         if (Array.isArray(values['conditions'])) {
             for (let i = 0; i < values['conditions'].length; i++) {
                 const condition = values['conditions'][i];
-                if (!lodash.isString(condition.conditionExpression)) {
+                if (!_.isString(condition.conditionExpression)) {
                     throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.conditionExpression MUST be string');
                 }
-                if (!lodash.isArray(condition.mids)) {
+                if (!_.isArray(condition.mids)) {
                     throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
                 }
 
@@ -48,7 +48,7 @@ export class EsConditionMiddleware extends EsMiddleware {
     }
 
     async runInternal(context: IEsContext) {
-        const meta = lodash.merge({}, EsConditionMiddleware.meta, context.meta);
+        const meta = _.merge({}, EsConditionMiddleware.meta, context.meta);
         if (Array.isArray(this.values['conditions'])) {
             for (let i = 0; i < this.values['conditions'].length; i++) {
                 let condition = this.values['conditions'][i];

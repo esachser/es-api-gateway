@@ -39,11 +39,11 @@ let EsPropertyMiddleware = /** @class */ (() => {
             let script = '';
             if (values['value'] === undefined &&
                 values['expression'] !== undefined) {
-                script = `const lodash=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
+                script = `const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
             }
             // Senão, prepara VMScript para somente devolver o valor
             else {
-                script = `const lodash=require('lodash');module.exports=function(ctx){ return ${stringify_object_1.default(values['value'])}; }`;
+                script = `const _=require('lodash');module.exports=function(ctx){ return ${stringify_object_1.default(values['value'])}; }`;
             }
             try {
                 this.vmScript = new vm2_1.VMScript(script).compile();

@@ -1,7 +1,7 @@
 import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { baseDirectory } from '../util';
 import { logger, createLogger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
@@ -44,24 +44,24 @@ async function loadApiFile(fname: string) {
     }
 
     // Carrega Middlewares centrais.
-    const executionJs = lodash.get(apiJson, 'execution') as any[];
+    const executionJs = _.get(apiJson, 'execution') as any[];
     const centralMid = await createMiddleware(executionJs, 0);
-    let logLevel = lodash.get(apiJson, 'logging.level', 'info');
-    if (!lodash.isString(logLevel)) {
+    let logLevel = _.get(apiJson, 'logging.level', 'info');
+    if (!_.isString(logLevel)) {
         logLevel = 'info';
     }
 
     api.central = centralMid;
     api.logger = createLogger(logLevel, fname);
 
-    const transports = lodash.get(apiJson, 'transports');
+    const transports = _.get(apiJson, 'transports');
 
-    if (transports !== undefined && lodash.isArray(transports)) {
+    if (transports !== undefined && _.isArray(transports)) {
         for (const transport of transports) {
-            const type = lodash.get(transport, 'type');
-            const id = lodash.get(transport, 'id');
-            const parameters = lodash.get(transport, 'parameters');
-            const mids = lodash.get(transport, 'mids') as any[];
+            const type = _.get(transport, 'type');
+            const id = _.get(transport, 'id');
+            const parameters = _.get(transport, 'parameters');
+            const mids = _.get(transport, 'mids') as any[];
 
             const pre = await createMiddleware(mids, 0);
 

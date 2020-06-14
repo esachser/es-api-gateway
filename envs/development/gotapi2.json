@@ -81,7 +81,7 @@
                             },
                             "post": {
                                 "tags": [
-                                    "pet"
+                                    "Chamadas"
                                 ],
                                 "summary": "Post something",
                                 "operationId": "postAnything",
@@ -139,7 +139,7 @@
             "after": false,
             "data": {
                 "name": "urlRequest2",
-                "expression": "lodash.toLower(lodash.toString(lodash.get(ctx.properties, 'request.method', '')))"
+                "expression": "_.toLower(_.toString(_.get(ctx.properties, 'request.method', '')))"
             }
         },
         {

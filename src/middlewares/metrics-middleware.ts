@@ -1,5 +1,5 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
 
@@ -20,7 +20,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
         this.values = values;
         this.next = nextMiddleware;
 
-        if (!lodash.isString(values['prop'])) {
+        if (!_.isString(values['prop'])) {
             throw new EsMiddlewareError(EsMetricsMiddleware.middlewareName, 'prop MUST be string');
         }
     }
@@ -28,13 +28,13 @@ export class EsMetricsMiddleware implements IEsMiddleware {
     async loadAsync() { }
 
     async execute(context: IEsContext) {
-        const meta = lodash.merge({}, EsMetricsMiddleware.meta, context.meta);
+        const meta = _.merge({}, EsMetricsMiddleware.meta, context.meta);
         let init = new Date().valueOf();
         await this.next?.execute(context);
         let end = new Date().valueOf();
         let diff = end - init;
         context.logger.debug(`Duration: ${diff}ms`, meta);
-        lodash.set(context.properties, this.values['prop'], diff);
+        _.set(context.properties, this.values['prop'], diff);
     }
 };
 

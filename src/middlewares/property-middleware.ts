@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { NodeVM, VMScript } from 'vm2';
 import { logger } from '../util/logger';
 import stringifyObject from 'stringify-object';
@@ -35,11 +35,11 @@ export class EsPropertyMiddleware extends EsMiddleware {
         let script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-            script = `const lodash=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
+            script = `const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script = `const lodash=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
+            script = `const _=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
         }
 
         try {
@@ -54,8 +54,8 @@ export class EsPropertyMiddleware extends EsMiddleware {
 
     async runInternal(context: IEsContext) {
         if (this.vmScript !== undefined) {
-            context.logger.debug(`Writing to ${this.values['name']}`, lodash.merge({}, EsPropertyMiddleware.meta, context.meta));
-            lodash.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+            context.logger.debug(`Writing to ${this.values['name']}`, _.merge({}, EsPropertyMiddleware.meta, context.meta));
+            _.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
         }
     }
 };

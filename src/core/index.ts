@@ -1,5 +1,5 @@
 // import workerpool from 'workerpool';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { getMiddlewareConstructor } from './middlewares';
 import { getTransportConstructor } from './transports';
 import { validateObject } from './schemas';
@@ -84,9 +84,9 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
         return undefined;
     }
 
-    const type = lodash.get(arr[idx], 'type');
-    const data = lodash.get(arr[idx], 'data');
-    const after = lodash.get(arr[idx], 'after', false);
+    const type = _.get(arr[idx], 'type');
+    const data = _.get(arr[idx], 'data');
+    const after = _.get(arr[idx], 'after', false);
 
     const ctor = getMiddlewareConstructor(type);
 

@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import got, { Got } from 'got';
 import Keyv  from 'keyv';
@@ -24,15 +24,15 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         // Verifica values contra o esquema.
         this.values = values;
 
-        const cacheEnabled = Boolean(lodash.get(values, 'cache.enabled'));
+        const cacheEnabled = Boolean(_.get(values, 'cache.enabled'));
         if (cacheEnabled) {
-            const cacheMaxAge = lodash.get(values, 'cache.maxAge', 1000);
-            const cacheMaxSize = lodash.get(values, 'cache.maxSize', 100);
+            const cacheMaxAge = _.get(values, 'cache.maxAge', 1000);
+            const cacheMaxSize = _.get(values, 'cache.maxSize', 100);
 
-            if (!lodash.isInteger(cacheMaxAge)) {
+            if (!_.isInteger(cacheMaxAge)) {
                 throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxAge MUST be integer');
             }
-            if (!lodash.isInteger(cacheMaxSize)) {
+            if (!_.isInteger(cacheMaxSize)) {
                 throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxSize MUST be integer');
             }
 
@@ -52,20 +52,20 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
     async loadAsync() { }
 
     async runInternal(context: IEsContext) {
-        const meta = lodash.merge({}, EsHttpRequestMiddleware.meta, context.meta);
-        const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
-        let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
-        const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.rawbody'));
-        const headers = lodash.get(context.properties, lodash.get(this.values, 'headers', 'request.headers'));
-        const query = lodash.get(context.properties, lodash.get(this.values, 'query', 'request.query'), {});
-        const prefixUrl = lodash.get(context.properties, lodash.get(this.values, 'prefixUrl'), '');
+        const meta = _.merge({}, EsHttpRequestMiddleware.meta, context.meta);
+        const method = _.get(context.properties, _.get(this.values, 'method', 'request.method'));
+        let path = _.get(context.properties, _.get(this.values, 'url', 'request.path'), '');
+        const body = _.get(context.properties, _.get(this.values, 'body', 'request.rawbody'));
+        const headers = _.get(context.properties, _.get(this.values, 'headers', 'request.headers'));
+        const query = _.get(context.properties, _.get(this.values, 'query', 'request.query'), {});
+        const prefixUrl = _.get(context.properties, _.get(this.values, 'prefixUrl'), '');
 
         // Leitura de opcionais
-        const encoding = lodash.get(context.properties, lodash.get(this.values, 'encoding'), undefined);
-        const timeout = lodash.get(context.properties, lodash.get(this.values, 'timeout'), 10000);
-        const retry = lodash.get(context.properties, lodash.get(this.values, 'retry'), undefined);
-        const followRedirect = lodash.get(context.properties, lodash.get(this.values, 'followRedirect'), false);
-        const maxRedirects = lodash.get(context.properties, lodash.get(this.values, 'maxRedirects'), 5);
+        const encoding = _.get(context.properties, _.get(this.values, 'encoding'), undefined);
+        const timeout = _.get(context.properties, _.get(this.values, 'timeout'), 10000);
+        const retry = _.get(context.properties, _.get(this.values, 'retry'), undefined);
+        const followRedirect = _.get(context.properties, _.get(this.values, 'followRedirect'), false);
+        const maxRedirects = _.get(context.properties, _.get(this.values, 'maxRedirects'), 5);
 
         if (path.startsWith('/')) {
             path = path.substr(1);
@@ -86,17 +86,17 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 hooks: {
                     beforeRequest: [
                         opts => {
-                            context.logger.debug('Calling Http endpoint', lodash.merge({}, opts.headers, meta));
+                            context.logger.debug('Calling Http endpoint', _.merge({}, opts.headers, meta));
                         }
                     ]
                 }
             });
 
-            context.logger.debug('Result received', lodash.merge({}, lodash.get(res, ['headers', 'statusCode', 'body']), meta as any));
+            context.logger.debug('Result received', _.merge({}, _.get(res, ['headers', 'statusCode', 'body']), meta as any));
 
-            lodash.set(context.properties, 'response.headers', res?.headers || {});
-            lodash.set(context.properties, 'response.status', res?.statusCode || 500);
-            lodash.set(context.properties, 'response.body', res?.body);
+            _.set(context.properties, 'response.headers', res?.headers || {});
+            _.set(context.properties, 'response.status', res?.statusCode || 500);
+            _.set(context.properties, 'response.body', res?.body);
         }
         catch (err) {
             context.logger.error('Error calling HTTP endpoint', err as any, meta as any);

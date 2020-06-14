@@ -1,6 +1,6 @@
 import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import { httpRouter } from '../util/http-server';
-import lodash from 'lodash';
+import _ from 'lodash';
 import Router from 'koa-router';
 import { logger } from '../util/logger';
 import { Logger } from 'winston';
@@ -102,10 +102,10 @@ export class EsHttpTransport implements IEsTransport {
 
             }            
             
-            ctx.set(lodash.get(ctx.iesContext.properties, 'response.headers', {}));
-            const statusCode = lodash.get(ctx.iesContext.properties, 'response.status');
-            ctx.status = lodash.isNumber(statusCode) ? statusCode : 404;
-            ctx.body = lodash.get(ctx.iesContext.properties, 'response.body');
+            ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
+            const statusCode = _.get(ctx.iesContext.properties, 'response.status');
+            ctx.status = _.isNumber(statusCode) ? statusCode : 404;
+            ctx.body = _.get(ctx.iesContext.properties, 'response.body');
             
             let diff = Date.now() - init;
             logger.debug(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);

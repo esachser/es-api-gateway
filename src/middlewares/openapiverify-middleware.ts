@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
@@ -23,12 +23,12 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     }
 
     async loadAsync(values: any) {
-        const oas = lodash.get(values, 'oas', {});
+        const oas = _.get(values, 'oas', {});
         try{
             const api = await SwaggerParser.validate(oas);
-            const openapiVersion = lodash.get(api, 'openapi', '');
+            const openapiVersion = _.get(api, 'openapi', '');
 
-            if (lodash.toString(openapiVersion).startsWith('3.')) {
+            if (_.toString(openapiVersion).startsWith('3.')) {
                 this.oasValidator = new ChowChow(api as any);
             }
             else {
@@ -42,19 +42,19 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
 
     async runInternal(context: IEsContext) {
         if (this.oasValidator !== undefined) {
-            const method = lodash.get(context.properties, lodash.get(this.values, 'method', 'request.method'));
-            let path = lodash.get(context.properties, lodash.get(this.values, 'url', 'request.path'), '');
-            const body = lodash.get(context.properties, lodash.get(this.values, 'body', 'request.body'));
-            const headers = lodash.get(context.properties, lodash.get(this.values, 'headers', 'request.headers'));
-            const query = lodash.get(context.properties, lodash.get(this.values, 'query', 'request.query'), {});
-            const params = lodash.get(context.properties, lodash.get(this.values, 'params', 'request.params'), {});
+            const method = _.get(context.properties, _.get(this.values, 'method', 'request.method'));
+            let path = _.get(context.properties, _.get(this.values, 'url', 'request.path'), '');
+            const body = _.get(context.properties, _.get(this.values, 'body', 'request.body'));
+            const headers = _.get(context.properties, _.get(this.values, 'headers', 'request.headers'));
+            const query = _.get(context.properties, _.get(this.values, 'query', 'request.query'), {});
+            const params = _.get(context.properties, _.get(this.values, 'params', 'request.params'), {});
 
             if (!path.startsWith('/')) {
                 path = `/${path}`;
             }
 
             const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
-            context.logger.debug('OAS Validator result', lodash.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
+            context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
 
             if (reqMeta === undefined) {
                 throw Error('Invalid request');

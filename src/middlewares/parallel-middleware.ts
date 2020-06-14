@@ -1,5 +1,5 @@
 import { IEsMiddleware, EsMiddleware, IEsMiddlewareConstructor, createMiddleware, IEsContext } from '../core';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
 

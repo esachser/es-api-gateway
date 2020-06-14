@@ -2,7 +2,7 @@ import winston from 'winston';
 import path from 'path';
 import Redis from 'ioredis';
 import Transport from 'winston-transport';
-import lodash from 'lodash';
+import _ from 'lodash';
 import { baseDirectory } from '.';
 import { configuration } from './config';
 import stringifyObject from 'stringify-object';
