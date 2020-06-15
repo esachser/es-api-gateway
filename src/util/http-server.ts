@@ -1,10 +1,19 @@
 import koa from 'koa';
 import Router from 'koa-router';
 import helmet from 'koa-helmet';
-import bodyParser from 'koa-bodyparser';
-
+import getRawBody from 'raw-body';
+import contentType from 'content-type';
+import koaBody from 'koa-body';
 import { configuration } from './config';
 import { logger } from './logger';
+
+declare module 'koa' {
+    interface BaseRequest {
+        parsedBody?: any
+    }
+}
+
+const unparsed = Symbol.for('unparsedBody');
 
 export const httpRouter = new Router();
 
@@ -30,7 +39,19 @@ export function loadHttpServer() {
         }
     });
 
-    app.use(bodyParser());
+    app.use(koaBody({
+        includeUnparsed: true,
+    }));
+
+    app.use(async (ctx, next) => {
+        if (ctx.request.body !== undefined) {
+            const raw = ctx.request.body[unparsed];
+            ctx.request.parsedBody = ctx.request.body;
+            ctx.request.body = raw;
+        }
+        return next();
+    });
+
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     
     const server = app.listen(configuration.httpPort || 3000, () => {

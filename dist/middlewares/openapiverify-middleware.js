@@ -50,7 +50,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                 if (this.oasValidator !== undefined) {
                     const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
                     let path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
-                    const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.body'));
+                    const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.parsedBody'), {});
                     const headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'headers', 'request.headers'));
                     const query = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'query', 'request.query'), {});
                     const params = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'params', 'request.params'), {});
@@ -58,6 +58,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                         path = `/${path}`;
                     }
                     try {
+                        // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
                         const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
                         if (reqMeta === undefined) {

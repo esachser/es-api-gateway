@@ -56,12 +56,11 @@ let EsHttpTransport = /** @class */ (() => {
                             path: allPath.substr(routeContextSize),
                             method: ctx.method,
                             body: ctx.request.body,
-                            rawbody: ctx.request.rawBody,
+                            parsedBody: ctx.request.parsedBody,
                             routePrefix: this.routeContext
                         }
                     },
-                    parsedbody: ctx.request.body,
-                    rawbody: ctx.request.rawBody,
+                    body: ctx.request.body,
                     logger: this.apiLogger,
                     meta: {
                         api,
@@ -79,13 +78,14 @@ let EsHttpTransport = /** @class */ (() => {
                 }
                 catch (err) {
                     context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
+                    context.logger.error('Error running middlewares', lodash_1.default.merge({}, err.error, context.meta));
                 }
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                 const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                 ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
-                ctx.body = JSON.stringify(lodash_1.default.get(ctx.iesContext.properties, 'response.body'));
+                ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                 let diff = Date.now() - init;
-                logger_1.logger.debug(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
+                logger_1.logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
             }));
             Object.keys(params.routes).forEach(path => {
                 let totalPath = `${this.routeContext}${path}`;

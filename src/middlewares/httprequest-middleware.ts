@@ -55,7 +55,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         const meta = _.merge({}, EsHttpRequestMiddleware.meta, context.meta);
         const method = _.get(context.properties, _.get(this.values, 'method', 'request.method'));
         let path = _.get(context.properties, _.get(this.values, 'url', 'request.path'), '');
-        const body = _.get(context.properties, _.get(this.values, 'body', 'request.rawbody'));
+        const body = _.get(context.properties, _.get(this.values, 'body', 'request.body'));
         const headers = _.get(context.properties, _.get(this.values, 'headers', 'request.headers'));
         const query = _.get(context.properties, _.get(this.values, 'query', 'request.query'), {});
         const prefixUrl = _.get(context.properties, _.get(this.values, 'prefixUrl'), '');
@@ -72,6 +72,8 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         }
 
         try {
+            // Deleta host para evitar problemas na conexão https
+            delete headers['host'];
             const res = await this.got(path, {
                 prefixUrl,
                 method,
@@ -83,6 +85,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 retry,
                 followRedirect,
                 maxRedirects, 
+                decompress: false,
                 hooks: {
                     beforeRequest: [
                         opts => {

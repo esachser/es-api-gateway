@@ -4,8 +4,7 @@ export interface IEsContext {
     properties: {
         [id: string]: any;
     };
-    rawbody: string;
-    parsedbody?: any;
+    body: string;
     logger: Logger;
     meta: {
         api: string;

@@ -57,7 +57,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 const meta = lodash_1.default.merge({}, EsHttpRequestMiddleware.meta, context.meta);
                 const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
                 let path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
-                const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.rawbody'));
+                const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.body'));
                 const headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'headers', 'request.headers'));
                 const query = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'query', 'request.query'), {});
                 const prefixUrl = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'prefixUrl'), '');
@@ -71,6 +71,8 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                     path = path.substr(1);
                 }
                 try {
+                    delete headers['host'];
+                    delete headers['host'];
                     const res = yield this.got(path, {
                         prefixUrl,
                         method,
@@ -82,6 +84,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         retry,
                         followRedirect,
                         maxRedirects,
+                        decompress: false,
                         hooks: {
                             beforeRequest: [
                                 opts => {

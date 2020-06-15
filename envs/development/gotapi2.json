@@ -123,7 +123,7 @@
             "after": false,
             "data": {
                 "name": "request.prefixUrl",
-                "value": "http://httpbin.org"
+                "value": "https://httpbin.org/"
             }
         },
         {

@@ -73,12 +73,11 @@ export class EsHttpTransport implements IEsTransport {
                         path: allPath.substr(routeContextSize),
                         method: ctx.method,
                         body: ctx.request.body,
-                        rawbody: ctx.request.rawBody,
+                        parsedBody: ctx.request.parsedBody,
                         routePrefix: this.routeContext
                     }
                 },
-                parsedbody: ctx.request.body,
-                rawbody: ctx.request.rawBody,
+                body: ctx.request.body,
                 logger: this.apiLogger,
                 meta: {
                     api,
@@ -100,6 +99,7 @@ export class EsHttpTransport implements IEsTransport {
             }
             catch (err) {
                 context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
+                context.logger.error('Error running middlewares', _.merge({}, err.error, context.meta));
             }
             
             ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
@@ -108,7 +108,7 @@ export class EsHttpTransport implements IEsTransport {
             ctx.body = _.get(ctx.iesContext.properties, 'response.body');
             
             let diff = Date.now() - init;
-            logger.debug(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
+            logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
         });
 
         Object.keys(params.routes).forEach(path => {
