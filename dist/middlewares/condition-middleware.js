@@ -17,7 +17,14 @@ const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const vm2_1 = require("vm2");
 const errors_1 = require("../core/errors");
-const vm = new vm2_1.NodeVM();
+const vm = new vm2_1.NodeVM({
+    console: 'inherit',
+    sandbox: {},
+    require: {
+        external: true,
+        root: "./"
+    }
+});
 let EsConditionMiddleware = /** @class */ (() => {
     class EsConditionMiddleware extends core_1.EsMiddleware {
         /**
@@ -40,7 +47,7 @@ let EsConditionMiddleware = /** @class */ (() => {
                         if (!lodash_1.default.isArray(condition.mids)) {
                             throw new errors_1.EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
                         }
-                        const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
+                        const script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return Boolean(${values['conditions'][i]['conditionExpression']}); }`;
                         const compiledScript = new vm2_1.VMScript(script).compile();
                         const conditionStructure = {};
                         conditionStructure['conditionExpression'] = compiledScript;
@@ -62,10 +69,16 @@ let EsConditionMiddleware = /** @class */ (() => {
                         let condition = this.values['conditions'][i];
                         if (condition['conditionExpression'] instanceof vm2_1.VMScript) {
                             context.logger.debug(`Testing condition ${i}`, meta);
-                            if (Boolean(vm.run(condition['conditionExpression'])(context))) {
-                                context.logger.debug(`Condition ${i} reached`, meta);
-                                yield ((_a = condition['mids']) === null || _a === void 0 ? void 0 : _a.execute(context).catch((e) => { throw e; }));
-                                return;
+                            try {
+                                let v = vm.run(condition['conditionExpression'])(context);
+                                if (Boolean(v)) {
+                                    context.logger.debug(`Condition ${i} reached`, meta);
+                                    yield ((_a = condition['mids']) === null || _a === void 0 ? void 0 : _a.execute(context));
+                                    return;
+                                }
+                            }
+                            catch (err) {
+                                throw err;
                             }
                         }
                     }

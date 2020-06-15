@@ -11,6 +11,7 @@ import { MiddlewareCtor as EsSequenceMiddlewareContructor, MiddlewareSchema as E
 import { MiddlewareCtor as EsConditionMiddlewareContructor, MiddlewareSchema as EsConditionSchema } from './condition-middleware';
 import { MiddlewareCtor as EsHttpRequestMiddlewareContructor, MiddlewareSchema as EsHttpRequestSchema } from './httprequest-middleware';
 import { MiddlewareCtor as EsOpenApiVerifyMiddlewareContructor, MiddlewareSchema as EsOpenApiVerifySchema } from './openapiverify-middleware';
+import { MiddlewareCtor as EsThrowMiddlewareContructor, MiddlewareSchema as EsThrowSchema } from './throw-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -33,6 +34,7 @@ export function loadMiddlewares() {
     addMiddleware('EsConditionMiddleware', EsConditionMiddlewareContructor, EsConditionSchema);
     addMiddleware('EsHttpRequestMiddleware', EsHttpRequestMiddlewareContructor, EsHttpRequestSchema);
     addMiddleware('EsOpenApiVerifyMiddleware', EsOpenApiVerifyMiddlewareContructor, EsOpenApiVerifySchema);
+    addMiddleware('EsThrowMiddleware', EsThrowMiddlewareContructor, EsThrowSchema);
 };
 
 export function loadCustomMiddlewares() {

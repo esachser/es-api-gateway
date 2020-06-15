@@ -99,7 +99,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
             _.set(context.properties, 'response.body', res?.body);
         }
         catch (err) {
-            context.logger.error('Error calling HTTP endpoint', err as any, meta as any);
+            context.logger.error('Error calling HTTP endpoint', _.merge(err, meta));
         }
     }
 };

@@ -58,12 +58,11 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
                 context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
 
                 if (reqMeta === undefined) {
-                    throw Error('Invalid request');
+                    throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request');
                 }
             }
             catch (err) {
-                context.logger.error('Error verifying OpenAPI Request', _.merge({}, err, EsOpenApiVerifyMiddleware.meta, context.meta));
-                throw err;
+                throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
             }
         }
     }

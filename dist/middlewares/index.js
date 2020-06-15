@@ -14,6 +14,7 @@ const sequence_middleware_1 = require("./sequence-middleware");
 const condition_middleware_1 = require("./condition-middleware");
 const httprequest_middleware_1 = require("./httprequest-middleware");
 const openapiverify_middleware_1 = require("./openapiverify-middleware");
+const throw_middleware_1 = require("./throw-middleware");
 const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -32,6 +33,7 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsConditionMiddleware', condition_middleware_1.MiddlewareCtor, condition_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsHttpRequestMiddleware', httprequest_middleware_1.MiddlewareCtor, httprequest_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsOpenApiVerifyMiddleware', openapiverify_middleware_1.MiddlewareCtor, openapiverify_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsThrowMiddleware', throw_middleware_1.MiddlewareCtor, throw_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

@@ -4,7 +4,14 @@ import { logger } from '../util/logger';
 import { NodeVM, VMScript } from 'vm2';
 import { EsMiddlewareError } from '../core/errors';
 
-const vm = new NodeVM();
+const vm = new NodeVM({
+    console: 'inherit',
+    sandbox: {},
+    require: {
+        external: true,
+        root: "./"
+    }
+});
 
 export class EsConditionMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -34,7 +41,7 @@ export class EsConditionMiddleware extends EsMiddleware {
                     throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
                 }
 
-                const script = `module.exports=function(ctx){ try { return Boolean(${values['conditions'][i]['conditionExpression']});} catch(err) { return false; } }`;
+                const script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return Boolean(${values['conditions'][i]['conditionExpression']}); }`;
                 const compiledScript = new VMScript(script).compile();
                 const conditionStructure: any = {};
                 conditionStructure['conditionExpression'] = compiledScript;
@@ -54,10 +61,16 @@ export class EsConditionMiddleware extends EsMiddleware {
                 let condition = this.values['conditions'][i];
                 if (condition['conditionExpression'] instanceof VMScript) {
                     context.logger.debug(`Testing condition ${i}`, meta);
-                    if (Boolean(vm.run(condition['conditionExpression'])(context))) {
-                        context.logger.debug(`Condition ${i} reached`, meta);
-                        await condition['mids']?.execute(context).catch((e:any) => { throw e });
-                        return;
+                    try {
+                        let v = vm.run(condition['conditionExpression'])(context);
+                        if (Boolean(v)) {
+                            context.logger.debug(`Condition ${i} reached`, meta);
+                            await condition['mids']?.execute(context);
+                            return;
+                        }
+                    }
+                    catch (err) {
+                        throw err;
                     }
                 }
             }

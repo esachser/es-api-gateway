@@ -78,6 +78,7 @@ let EsHttpTransport = /** @class */ (() => {
                     yield next();
                 }
                 catch (err) {
+                    context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
                 }
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                 const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');

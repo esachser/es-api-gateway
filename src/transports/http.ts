@@ -99,8 +99,8 @@ export class EsHttpTransport implements IEsTransport {
                 await next();
             }
             catch (err) {
-
-            }            
+                context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
+            }
             
             ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
             const statusCode = _.get(ctx.iesContext.properties, 'response.status');

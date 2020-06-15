@@ -53,7 +53,7 @@ function createLogger(level, api) {
         defaultMeta: { service: 'es-apigw', api },
         transports: [
             new winston_1.default.transports.File({ filename: path_1.default.resolve(_1.baseDirectory, 'logs', 'apis', config_1.configuration.env, `${api}.log`), maxFiles: 1, maxsize: 1024 * 1024 }),
-            new RedisTransport({ channel: `esgateway:logging:apis:${api}` })
+            new RedisTransport({ channel: `esgateway:logging:apis:${config_1.configuration.env}:${api}` })
         ],
     });
 }

@@ -16,6 +16,41 @@
             },
             "mids": [
                 {
+                    "type": "EsConditionMiddleware",
+                    "after": true,
+                    "data": {
+                        "conditions": [
+                            {
+                                "conditionExpression": "_.get(ctx.properties, 'response.status', 500) >= 400",
+                                "mids": [
+                                    {
+                                        "type": "EsPropertyMiddleware",
+                                        "after": false,
+                                        "data": {
+                                            "name": "response.body",
+                                            "expression": "{ statusCode: _.get(ctx.properties, 'response.status'), error: 'API não teve retorno de sucesso' }"
+                                        }
+                                    },
+                                    {
+                                        "type": "EsPropertyMiddleware",
+                                        "after": false,
+                                        "data": {
+                                            "name": "response.status",
+                                            "expression": "_.get(ctx.properties, 'response.status', 500)"
+                                        }
+                                    },
+                                    {
+                                        "type": "EsThrowMiddleware",
+                                        "data": {
+                                            "errorProp": "response.body"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
                     "type": "EsMetricsMiddleware",
                     "data":{
                         "prop": "response.headers.timems"

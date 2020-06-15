@@ -96,7 +96,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                     lodash_1.default.set(context.properties, 'response.body', res === null || res === void 0 ? void 0 : res.body);
                 }
                 catch (err) {
-                    context.logger.error('Error calling HTTP endpoint', err, meta);
+                    context.logger.error('Error calling HTTP endpoint', lodash_1.default.merge(err, meta));
                 }
             });
         }

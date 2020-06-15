@@ -61,12 +61,11 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                         const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
                         if (reqMeta === undefined) {
-                            throw Error('Invalid request');
+                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request');
                         }
                     }
                     catch (err) {
-                        context.logger.error('Error verifying OpenAPI Request', lodash_1.default.merge({}, err, EsOpenApiVerifyMiddleware.meta, context.meta));
-                        throw err;
+                        throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
                     }
                 }
             });
