@@ -100,6 +100,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         }
         catch (err) {
             context.logger.error('Error calling HTTP endpoint', _.merge(err, meta));
+            throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'Error calling endpoint', err);
         }
     }
 };

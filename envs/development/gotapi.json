@@ -27,14 +27,6 @@
                                         "type": "EsPropertyMiddleware",
                                         "after": false,
                                         "data": {
-                                            "name": "response.body",
-                                            "expression": "{ statusCode: _.get(ctx.properties, 'response.status'), error: 'API não teve retorno de sucesso' }"
-                                        }
-                                    },
-                                    {
-                                        "type": "EsPropertyMiddleware",
-                                        "after": false,
-                                        "data": {
                                             "name": "response.status",
                                             "expression": "_.get(ctx.properties, 'response.status', 500)"
                                         }
@@ -66,6 +58,40 @@
             "data": {
                 "name": "request.prefixUrl",
                 "value": "http://localhost:5000/api/bla"
+            }
+        },
+        {
+            "type": "EsCatchMiddleware",
+            "data": {
+                "mids": [
+                    {
+                        "type": "EsPropertyMiddleware",
+                        "after": false,
+                        "data": {
+                            "name": "response.status",
+                            "expression": "500"
+                        }
+                    },
+                    {
+                        "type": "EsPropertyMiddleware",
+                        "after": false,
+                        "data": {
+                            "name": "response.headers.Content-Type",
+                            "value": "application/json; charset=utf-8"
+                        }
+                    },
+                    {
+                        "type": "EsPropertyMiddleware",
+                        "after": false,
+                        "data": {
+                            "name": "response.body",
+                            "value": {
+                                "error": "Error connecting to endpoint",
+                                "error_description": "Exception ocurred while trying to call endpoint. Contact the system administrator for more information"
+                            }
+                        }
+                    }
+                ]
             }
         },
         {

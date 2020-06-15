@@ -97,6 +97,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 }
                 catch (err) {
                     context.logger.error('Error calling HTTP endpoint', lodash_1.default.merge(err, meta));
+                    throw new errors_1.EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'Error calling endpoint', err);
                 }
             });
         }

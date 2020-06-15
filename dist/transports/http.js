@@ -83,7 +83,7 @@ let EsHttpTransport = /** @class */ (() => {
                 ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                 const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                 ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
-                ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
+                ctx.body = JSON.stringify(lodash_1.default.get(ctx.iesContext.properties, 'response.body'));
                 let diff = Date.now() - init;
                 logger_1.logger.debug(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
             }));

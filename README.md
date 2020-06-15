@@ -23,9 +23,10 @@ Aspectos que devem ser vistos:
 - [**OK**] Configuração logger para cada API
   - [**OK**] Logger Redis por API
 - [**OK**] Criar Throw Error Middleware
-- Criar Catch Error Middleware
+- [**OK**] Criar Catch Error Middleware
   - Setar tipo de response padrão por path
 - ForEach Middleware
+- Cada Path no transporte HTTP pode ter middlewares
 - OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware
   - Inspect ou JWKS
@@ -35,7 +36,6 @@ Aspectos que devem ser vistos:
   - **Saída**: Executar transformação de JSON para BUffer
   - Sempre obedecendo um media-type
 - HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
-- Cada Path no transporte HTTP pode ter middlewares
 - Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC
 - Tipos de Logger na configuração global
