@@ -19,6 +19,7 @@ const path_1 = __importDefault(require("path"));
 const _1 = require(".");
 const logger_1 = require("./logger");
 const envs_1 = require("../envs");
+const authenticators_1 = require("../authenticators");
 ;
 exports.configuration = { env: 'local' };
 const configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.json');
@@ -34,6 +35,9 @@ exports.loadConfig = loadConfig;
 fs_1.default.watch(configFileName, (event, fname) => __awaiter(void 0, void 0, void 0, function* () {
     yield loadConfig().catch(e => {
         logger_1.logger.error('Error loading config', e);
+    });
+    yield authenticators_1.startAuthenticators().catch(e => {
+        logger_1.logger.error('Error starting authenticators', e);
     });
     yield envs_1.loadEnv(exports.configuration.env).catch(e => {
         logger_1.logger.error('Error loading APIs', e);

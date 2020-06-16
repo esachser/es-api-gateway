@@ -16,6 +16,7 @@ const transports_1 = require("./transports");
 const envs_1 = require("./envs");
 const http_server_1 = require("./util/http-server");
 const schemas_1 = require("./core/schemas");
+const authenticators_1 = require("./authenticators");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         yield config_1.loadConfig();
@@ -23,8 +24,10 @@ function start() {
         middlewares_1.loadCustomMiddlewares();
         transports_1.loadTransports();
         transports_1.loadCustomTransports();
+        authenticators_1.loadAuthenticators();
         http_server_1.loadHttpServer();
         schemas_1.loadJsonSchemaValidator();
+        yield authenticators_1.startAuthenticators();
         yield envs_1.loadEnv(config_1.configuration.env);
     });
 }

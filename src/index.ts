@@ -5,6 +5,7 @@ import { loadTransports, loadCustomTransports } from './transports';
 import { loadEnv } from './envs';
 import { loadHttpServer } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
+import { loadAuthenticators, startAuthenticators } from './authenticators';
 
 async function start() {
     await loadConfig();
@@ -12,8 +13,10 @@ async function start() {
     loadCustomMiddlewares();
     loadTransports();
     loadCustomTransports();
+    loadAuthenticators();
     loadHttpServer();
     loadJsonSchemaValidator();
+    await startAuthenticators();
     await loadEnv(configuration.env);
 }
 

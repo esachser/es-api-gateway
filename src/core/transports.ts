@@ -11,7 +11,7 @@ export function addTransport(name: string, constructor: IEsTranportConstructor, 
         addNewSchema(name, parameters);
     }
     catch (err) {
-        logger.error(`Error loading middleware ${name} -- `, err);
+        logger.error(`Error loading transport ${name} -- `, err);
     }
 }
 

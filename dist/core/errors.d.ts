@@ -17,3 +17,8 @@ export declare class EsSchemaError extends Error {
     readonly error: any;
     constructor(schemaName: string, message: string, error?: any);
 }
+export declare class EsAuthenticatorError extends Error {
+    readonly authenticator: string;
+    readonly error: any;
+    constructor(authenticator: string, message: string, error?: any);
+}

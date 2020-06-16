@@ -45,3 +45,15 @@ export class EsSchemaError extends Error {
         this.error = error;
     }
 };
+
+export class EsAuthenticatorError extends Error {
+    
+    readonly authenticator: string;
+    readonly error: any;
+    
+    constructor(authenticator: string, message: string, error?: any) {
+        super(message);
+        this.authenticator = authenticator;
+        this.error = error;
+    }
+};

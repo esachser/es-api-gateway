@@ -1,5 +1,16 @@
 {
     "env": "development",
     "httpPort": 4000,
-    "logLevel": "info"
+    "logLevel": "info",
+    "authenticators": [
+        {
+            "type": "EsOAuth2JwtAuthenticator",
+            "id": "auth0authesachser",
+            "name": "Auth0 Esachser Authenticator",
+            "parameters": {
+                "jwksUri": "https://esachser.auth0.com/.well-known/jwks.json",
+                "scopesProp": "scope"
+            }
+        }
+    ]
 }

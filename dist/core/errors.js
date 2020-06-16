@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EsSchemaError = exports.EsMiddlewareError = exports.EsTransportError = exports.EsApiCreationError = void 0;
+exports.EsAuthenticatorError = exports.EsSchemaError = exports.EsMiddlewareError = exports.EsTransportError = exports.EsApiCreationError = void 0;
 class EsApiCreationError extends Error {
     constructor(api, message) {
         super(message);
@@ -35,5 +35,14 @@ class EsSchemaError extends Error {
     }
 }
 exports.EsSchemaError = EsSchemaError;
+;
+class EsAuthenticatorError extends Error {
+    constructor(authenticator, message, error) {
+        super(message);
+        this.authenticator = authenticator;
+        this.error = error;
+    }
+}
+exports.EsAuthenticatorError = EsAuthenticatorError;
 ;
 //# sourceMappingURL=errors.js.map

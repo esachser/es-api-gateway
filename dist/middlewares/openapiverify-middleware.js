@@ -75,7 +75,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                         const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
                         if (this._propResult !== undefined) {
-                            lodash_1.default.set(context.properties, this._propResult, JSON.stringify(reqMeta));
+                            lodash_1.default.set(context.properties, this._propResult, reqMeta);
                         }
                     }
                     catch (err) {

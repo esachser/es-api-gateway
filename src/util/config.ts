@@ -4,11 +4,13 @@ import path from 'path';
 import { baseDirectory } from '.';
 import { logger } from './logger';
 import { loadEnv } from '../envs';
+import { startAuthenticators } from '../authenticators';
 
 export interface IEsConfig {
     env: string,
     logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'crit',
-    httpPort?: number
+    httpPort?: number,
+    authenticators?: Array<any> 
 };
 
 export let configuration: IEsConfig = { env: 'local' };
@@ -26,7 +28,10 @@ fs.watch(configFileName, async (event, fname) => {
     await loadConfig().catch(e => { 
         logger.error('Error loading config', e);
     });
+    await startAuthenticators().catch(e => { 
+        logger.error('Error starting authenticators', e);
+    });
     await loadEnv(configuration.env).catch(e => { 
         logger.error('Error loading APIs', e);
-     });
+    });
 });

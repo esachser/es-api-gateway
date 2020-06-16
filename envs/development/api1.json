@@ -53,6 +53,14 @@
             },
             "mids": [
                 {
+                    "type": "EsAuthenticateMiddleware",
+                    "data": {
+                        "prop": "response.headers.authorization",
+                        "authenticatorId": "auth0authesachser"
+                    },
+                    "after": false
+                },
+                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",

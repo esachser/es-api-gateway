@@ -18,6 +18,7 @@ const lodash_1 = __importDefault(require("lodash"));
 const middlewares_1 = require("./middlewares");
 const transports_1 = require("./transports");
 const schemas_1 = require("./schemas");
+const errors_1 = require("./errors");
 function applyMixins(derivedCtor, baseCtors) {
     baseCtors.forEach(baseCtor => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
@@ -60,13 +61,16 @@ function createMiddleware(arr, idx) {
         const data = lodash_1.default.get(arr[idx], 'data');
         const after = lodash_1.default.get(arr[idx], 'after', false);
         const ctor = middlewares_1.getMiddlewareConstructor(type);
-        const v = yield schemas_1.validateObject(type, data);
-        if (ctor !== undefined && v) {
-            const mid = new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1));
-            yield mid.loadAsync(data);
-            return mid;
+        if (ctor === undefined) {
+            throw new errors_1.EsMiddlewareError(type, `Constructor of ${type} doesnt exists`);
         }
-        return createMiddleware(arr, idx + 1);
+        const v = yield schemas_1.validateObject(type, data);
+        if (!v) {
+            throw new errors_1.EsMiddlewareError(type, `${type} parameters are invalid`);
+        }
+        const mid = new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1));
+        yield mid.loadAsync(data);
+        return mid;
     });
 }
 exports.createMiddleware = createMiddleware;
@@ -99,13 +103,16 @@ exports.connectMiddlewares = connectMiddlewares;
 function createTransport(type, api, logger, parameters, middleware) {
     return __awaiter(this, void 0, void 0, function* () {
         const ctor = transports_1.getTransportConstructor(type);
-        const v = yield schemas_1.validateObject(type, parameters);
-        if (ctor !== undefined && v) {
-            const transport = new ctor(parameters, api, logger, middleware);
-            yield transport.loadAsync(parameters);
-            return transport;
+        if (ctor === undefined) {
+            throw new errors_1.EsTransportError(type, `Constructor of ${type} doesnt exists`);
         }
-        return undefined;
+        const v = yield schemas_1.validateObject(type, parameters);
+        if (!v) {
+            throw new errors_1.EsTransportError(type, `${type} parameters are invalid`);
+        }
+        const transport = new ctor(parameters, api, logger, middleware);
+        yield transport.loadAsync(parameters);
+        return transport;
     });
 }
 exports.createTransport = createTransport;

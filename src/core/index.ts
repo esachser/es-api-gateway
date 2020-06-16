@@ -4,6 +4,7 @@ import { getMiddlewareConstructor } from './middlewares';
 import { getTransportConstructor } from './transports';
 import { validateObject } from './schemas';
 import { Logger } from 'winston';
+import { EsTransportError, EsMiddlewareError } from './errors';
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
@@ -89,14 +90,19 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
 
     const ctor = getMiddlewareConstructor(type);
 
+    if (ctor === undefined) {
+        throw new EsMiddlewareError(type, `Constructor of ${type} doesnt exists`);
+    }
+
     const v = await validateObject(type, data);
 
-    if (ctor !== undefined && v) {
-        const mid = new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1));
-        await mid.loadAsync(data);
-        return mid;
+    if (!v) {
+        throw new EsMiddlewareError(type, `${type} parameters are invalid`);
     }
-    return createMiddleware(arr, idx + 1);
+
+    const mid = new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1));
+    await mid.loadAsync(data);
+    return mid;
 }
 
 export function connect2Mids(mid1: IEsMiddleware, mid2: IEsMiddleware) {
@@ -134,14 +140,17 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
 
 export async function createTransport(type: string, api: string, logger: Logger, parameters: any, middleware: IEsMiddleware | undefined) {
     const ctor = getTransportConstructor(type);
+    if (ctor === undefined) {
+        throw new EsTransportError(type, `Constructor of ${type} doesnt exists`);
+    }
 
     const v = await validateObject(type, parameters);
 
-    if (ctor !== undefined && v) {
-        const transport = new ctor(parameters, api, logger, middleware);
-        await transport.loadAsync(parameters);
-        return transport;
+    if (!v) {
+        throw new EsTransportError(type, `${type} parameters are invalid`);
     }
 
-    return undefined;
+    const transport = new ctor(parameters, api, logger, middleware);
+    await transport.loadAsync(parameters);
+    return transport;
 }

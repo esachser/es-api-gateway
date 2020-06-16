@@ -11,7 +11,7 @@ function addTransport(name, constructor, parameters) {
         schemas_1.addNewSchema(name, parameters);
     }
     catch (err) {
-        logger_1.logger.error(`Error loading middleware ${name} -- `, err);
+        logger_1.logger.error(`Error loading transport ${name} -- `, err);
     }
 }
 exports.addTransport = addTransport;

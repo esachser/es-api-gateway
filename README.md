@@ -31,6 +31,7 @@ Aspectos que devem ser vistos:
 - Criar OAuth2 Middleware
   - Inspect ou JWKS
   - Escopos via propriedade
+- Execute JS middleware
 - Parsers de entrada e saída
   - **Entrada**: Executar transformação de Buffer para JSON
   - **Saída**: Executar transformação de JSON para BUffer
@@ -39,4 +40,14 @@ Aspectos que devem ser vistos:
 - Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC
 - Tipos de Logger na configuração global
+- Gerar JWS Middleware
+- Verificar JWS Middleware
+- Gerar JWE Middleware
+- Verificar/Decriptar JWE Middleware
+
+## Outros pontos
+
+Outros pontos a serem verificados:
+
+- Verificar concorrência nos *creators*
 
