@@ -7,8 +7,14 @@
                 "routeContext": "/api/v4/teste",
                 "routes": {
                     "/": [
-                        "GET",
-                        "POST"
+                        {
+                            "method": "GET",
+                            "mids": []
+                        },
+                        {
+                            "method": "POST",
+                            "mids": []
+                        }
                     ]
                 }
             },

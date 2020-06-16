@@ -7,10 +7,16 @@
                 "routeContext": "/api/v3/teste/",
                 "routes": {
                     "/": [
-                        "GET"
+                        {
+                            "method": "GET",
+                            "mids": []
+                        }
                     ],
                     "/healthz": [
-                        "GET"
+                        {
+                            "method": "GET",
+                            "mids": []
+                        }
                     ]
                 }
             },

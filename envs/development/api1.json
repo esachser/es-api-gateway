@@ -6,8 +6,49 @@
             "parameters": {
                 "routeContext": "/api/teste/",
                 "routes": {
-                    "/": ["GET", "POST"],
-                    "/healthz": ["GET"]
+                    "/": [
+                        {
+                            "method": "GET",
+                            "mids": [
+                                {
+                                    "type": "EsPropertyMiddleware",
+                                    "data": {
+                                        "name": "response.headers.function",
+                                        "value": 1
+                                    },
+                                    "after": true
+                                }
+                            ]
+                        },
+                        {
+                            "method": "POST",
+                            "mids": [
+                                {
+                                    "type": "EsPropertyMiddleware",
+                                    "data": {
+                                        "name": "response.headers.function",
+                                        "value": 2
+                                    },
+                                    "after": false
+                                }
+                            ]
+                        }
+                    ],
+                    "/healthz": [
+                        {
+                            "method": "GET",
+                            "mids": [
+                                {
+                                    "type": "EsPropertyMiddleware",
+                                    "data": {
+                                        "name": "response.headers.function",
+                                        "value": 3
+                                    },
+                                    "after": true
+                                }
+                            ]
+                        }
+                    ]
                 }
             },
             "mids": [

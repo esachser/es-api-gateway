@@ -5,7 +5,10 @@ declare type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface IEsHttpTransportParams {
     routeContext: string;
     routes: {
-        [id: string]: Array<Method>;
+        [id: string]: Array<{
+            method: Method;
+            mids: Array<any>;
+        }>;
     };
     swagger?: any;
 }
@@ -24,7 +27,7 @@ export declare class EsHttpTransport implements IEsTransport {
      *
      */
     constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined);
-    loadAsync(): Promise<void>;
+    loadAsync(params: IEsHttpTransportParams): Promise<void>;
     clear(): void;
 }
 export declare const TransportContructor: IEsTranportConstructor;
@@ -44,7 +47,18 @@ export declare const TransportSchema: {
                     type: string;
                     items: {
                         type: string;
-                        enum: string[];
+                        properties: {
+                            method: {
+                                type: string;
+                                enum: string[];
+                            };
+                            mids: {
+                                type: string;
+                                items: {
+                                    $ref: string;
+                                };
+                            };
+                        };
                     };
                 };
             };

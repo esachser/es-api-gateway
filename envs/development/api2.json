@@ -7,11 +7,20 @@
                 "routeContext": "/api/v2/teste/",
                 "routes": {
                     "/": [
-                        "GET",
-                        "POST"
+                        {
+                            "method": "GET",
+                            "mids": []
+                        },
+                        {
+                            "method": "POST",
+                            "mids": []
+                        }
                     ],
                     "/healthz": [
-                        "GET"
+                        {
+                            "method": "GET",
+                            "mids": []
+                        }
                     ]
                 }
             },

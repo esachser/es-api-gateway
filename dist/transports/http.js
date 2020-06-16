@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransportSchema = exports.TransportContructor = exports.EsHttpTransport = void 0;
+const core_1 = require("../core");
 const http_server_1 = require("../util/http-server");
 const lodash_1 = __importDefault(require("lodash"));
 const koa_router_1 = __importDefault(require("koa-router"));
@@ -87,21 +88,26 @@ let EsHttpTransport = /** @class */ (() => {
                 let diff = Date.now() - init;
                 logger_1.logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
             }));
-            Object.keys(params.routes).forEach(path => {
-                let totalPath = `${this.routeContext}${path}`;
-                totalPath = totalPath.replace(/\/{2,}/g, '/');
-                http_server_1.httpRouter.register(totalPath, params.routes[path].map(t => t.toString()), (ctx, next) => __awaiter(this, void 0, void 0, function* () {
-                    var _a;
-                    // Executa middleware central
-                    yield ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(ctx.iesContext));
-                    return next();
-                }));
-            });
-            EsHttpTransport.baseRoutesUsed.add(params.routeContext);
-            logger_1.logger.info(`Loaded ${this.routeContext}`);
         }
-        loadAsync() {
-            return __awaiter(this, void 0, void 0, function* () { });
+        loadAsync(params) {
+            return __awaiter(this, void 0, void 0, function* () {
+                for (const path in params.routes) {
+                    let totalPath = `${this.routeContext}${path}`;
+                    totalPath = totalPath.replace(/\/{2,}/g, '/');
+                    for (const methodInfo of params.routes[path]) {
+                        const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0);
+                        const middleware = core_1.connectMiddlewares(pathMethodMid, this.middleware);
+                        http_server_1.httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                            // Executa middleware central
+                            //await this.middleware?.execute(ctx.iesContext);
+                            yield (middleware === null || middleware === void 0 ? void 0 : middleware.execute(ctx.iesContext));
+                            return next();
+                        }));
+                    }
+                }
+                EsHttpTransport.baseRoutesUsed.add(params.routeContext);
+                logger_1.logger.info(`Loaded ${this.routeContext}`);
+            });
         }
         clear() {
             http_server_1.httpRouter.stack = http_server_1.httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
@@ -133,8 +139,19 @@ exports.TransportSchema = {
                 "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
                     "type": "array",
                     "items": {
-                        "type": "string",
-                        "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string",
+                                "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+                            },
+                            "mids": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "es-middleware"
+                                }
+                            }
+                        }
                     }
                 }
             }
