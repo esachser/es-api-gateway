@@ -12,11 +12,13 @@ export class EsApiCreationError extends Error {
 
 export class EsTransportError extends Error {
     
-    readonly transport: string
+    readonly transport: string;
+    readonly error: any;
     
-    constructor(transport: string, message: string) {
+    constructor(transport: string, message: string, error?: any) {
         super(message);
         this.transport = transport;
+        this.error = error;
     }
 };
 
