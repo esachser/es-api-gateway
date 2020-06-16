@@ -30,9 +30,19 @@
     ],
     "execution": [
         {
+            "type": "EsPropertyMiddleware",
+            "after": true,
+            "data": {
+                "name": "response.headers.oasRes",
+                "expression": "ctx.properties.oasRes"
+            }
+        },
+        {
             "type": "EsOpenApiVerifyMiddleware",
             "after": false,
             "data": {
+                "throw": true,
+                "propResult": "oasRes",
                 "oas": {
                     "openapi": "3.0.2",
                     "info": {

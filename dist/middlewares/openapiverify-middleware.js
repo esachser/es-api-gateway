@@ -25,7 +25,12 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
          */
         constructor(values, after, nextMiddleware) {
             super(after, nextMiddleware);
-            this.values = {};
+            this._propMethod = '';
+            this._propUrl = '';
+            this._propBody = '';
+            this._propHeaders = '';
+            this._propQuery = '';
+            this._propParams = '';
         }
         loadAsync(values) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -34,7 +39,15 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                     const api = yield swagger_parser_1.default.validate(oas);
                     const openapiVersion = lodash_1.default.get(api, 'openapi', '');
                     if (lodash_1.default.toString(openapiVersion).startsWith('3.')) {
-                        this.oasValidator = new oas3_chow_chow_1.default(api);
+                        this._oasValidator = new oas3_chow_chow_1.default(api);
+                        this._propResult = lodash_1.default.get(values, 'propResult');
+                        this._throw = lodash_1.default.get(values, 'throw');
+                        this._propMethod = lodash_1.default.get(values, 'method', 'request.method');
+                        this._propUrl = lodash_1.default.get(values, 'url', 'request.path');
+                        this._propBody = lodash_1.default.get(values, 'body', 'request.parsedBody');
+                        this._propHeaders = lodash_1.default.get(values, 'headers', 'request.headers');
+                        this._propQuery = lodash_1.default.get(values, 'query', 'request.query');
+                        this._propParams = lodash_1.default.get(values, 'params', 'request.params');
                     }
                     else {
                         throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'The OpenAPI version MUST be 3.x.x');
@@ -47,26 +60,34 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                if (this.oasValidator !== undefined) {
-                    const method = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'method', 'request.method'));
-                    let path = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'url', 'request.path'), '');
-                    const body = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'body', 'request.parsedBody'), {});
-                    const headers = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'headers', 'request.headers'));
-                    const query = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'query', 'request.query'), {});
-                    const params = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'params', 'request.params'), {});
+                if (this._oasValidator !== undefined) {
+                    const method = lodash_1.default.get(context.properties, this._propMethod);
+                    let path = lodash_1.default.get(context.properties, this._propUrl, '');
+                    const body = lodash_1.default.get(context.properties, this._propBody, {});
+                    const headers = lodash_1.default.get(context.properties, this._propHeaders);
+                    const query = lodash_1.default.get(context.properties, this._propQuery, {});
+                    const params = lodash_1.default.get(context.properties, this._propParams, {});
                     if (!path.startsWith('/')) {
                         path = `/${path}`;
                     }
                     try {
                         // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
-                        const reqMeta = this.oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
+                        const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
-                        if (reqMeta === undefined) {
-                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request');
+                        if (this._propResult !== undefined) {
+                            lodash_1.default.set(context.properties, this._propResult, JSON.stringify(reqMeta));
                         }
                     }
                     catch (err) {
-                        throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
+                        if (this._propResult !== undefined) {
+                            lodash_1.default.set(context.properties, this._propResult, undefined);
+                        }
+                        if (Boolean(this._throw)) {
+                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
+                        }
+                        else {
+                            context.logger.error('Error verifying OpenAPI Request', lodash_1.default.merge({}, err, EsOpenApiVerifyMiddleware.meta));
+                        }
                     }
                 }
             });
@@ -87,11 +108,36 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "oas"
+        "oas",
+        "throw"
     ],
     "properties": {
         "oas": {
             "type": "object"
+        },
+        "throw": {
+            "type": "boolean"
+        },
+        "propResult": {
+            "type": "string"
+        },
+        "method": {
+            "type": "string"
+        },
+        "url": {
+            "type": "string"
+        },
+        "body": {
+            "type": "string"
+        },
+        "headers": {
+            "type": "string"
+        },
+        "query": {
+            "type": "string"
+        },
+        "params": {
+            "type": "string"
         }
     }
 };

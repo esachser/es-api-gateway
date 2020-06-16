@@ -10,9 +10,10 @@ class EsApiCreationError extends Error {
 exports.EsApiCreationError = EsApiCreationError;
 ;
 class EsTransportError extends Error {
-    constructor(transport, message) {
+    constructor(transport, message, error) {
         super(message);
         this.transport = transport;
+        this.error = error;
     }
 }
 exports.EsTransportError = EsTransportError;

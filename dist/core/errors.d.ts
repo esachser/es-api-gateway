@@ -4,7 +4,8 @@ export declare class EsApiCreationError extends Error {
 }
 export declare class EsTransportError extends Error {
     readonly transport: string;
-    constructor(transport: string, message: string);
+    readonly error: any;
+    constructor(transport: string, message: string, error?: any);
 }
 export declare class EsMiddlewareError extends Error {
     readonly middleware: string;

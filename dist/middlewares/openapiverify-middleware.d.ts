@@ -1,13 +1,19 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import ChowChow from "oas3-chow-chow";
 export declare class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsOpenApiVerifyMiddleware";
     static readonly meta: {
         middleware: string;
     };
-    values: any;
-    oasValidator?: ChowChow;
+    private _oasValidator?;
+    private _propResult?;
+    private _throw?;
+    private _propMethod;
+    private _propUrl;
+    private _propBody;
+    private _propHeaders;
+    private _propQuery;
+    private _propParams;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
@@ -25,6 +31,30 @@ export declare const MiddlewareSchema: {
     required: string[];
     properties: {
         oas: {
+            type: string;
+        };
+        throw: {
+            type: string;
+        };
+        propResult: {
+            type: string;
+        };
+        method: {
+            type: string;
+        };
+        url: {
+            type: string;
+        };
+        body: {
+            type: string;
+        };
+        headers: {
+            type: string;
+        };
+        query: {
+            type: string;
+        };
+        params: {
             type: string;
         };
     };
