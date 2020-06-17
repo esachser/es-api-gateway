@@ -26,6 +26,7 @@ exports.loadAuthenticators = loadAuthenticators;
 ;
 function startAuthenticators() {
     return __awaiter(this, void 0, void 0, function* () {
+        authenticators_1.clearAuthenticators();
         const auths = lodash_1.default.get(config_1.configuration, 'authenticators', []);
         if (lodash_1.default.isArray(auths)) {
             for (const auth of auths) {

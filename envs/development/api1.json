@@ -53,14 +53,6 @@
             },
             "mids": [
                 {
-                    "type": "EsAuthenticateMiddleware",
-                    "data": {
-                        "prop": "response.headers.authorization",
-                        "authenticatorId": "auth0authesachser"
-                    },
-                    "after": false
-                },
-                {
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "response.headers.responsetime",
@@ -73,6 +65,23 @@
                     "data":{
                         "prop": "metrics.timems"
                     }
+                },
+                {
+                    "type": "EsPropertyMiddleware",
+                    "data": {
+                        "name": "request.headers.authorization",
+                        "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1ERkZOREZFTUROQ1JUYzJOREkwUVVJNVEwSTFOMFl5TkVNNU1EYzJSRGd3TmpVd1F6UXhSQSJ9.eyJpc3MiOiJodHRwczovL2VzYWNoc2VyLmF1dGgwLmNvbS8iLCJzdWIiOiI0dmVLQXBxSlFVUHJaTEdmUVJoNGExWGkwRFB0N1d2WkBjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly9hdXRodGVzdGFwaSIsImlhdCI6MTU5MjM2MzQ1NywiZXhwIjoxNTkyNDQ5ODU3LCJhenAiOiI0dmVLQXBxSlFVUHJaTEdmUVJoNGExWGkwRFB0N1d2WiIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyJ9.Cja5VHLeih_heWL5da6FF5SAqt9YhN50Rf0tPvE70AZdRzXXmb95Hs0E7v9xLAc5HcKWhNDzX7RjaMOReyHUElrDkknwgREYgqIkE1xdyTkeJ_14T7Y-DDaZnH3XecQaHTRVpNefZKHf_HS7dDJGw9H476YhhdBkQrjHV1mI6PLoU58ruy3AGkmRstxBiovzOPby6hSFQ21roxtyKylnGVCi-5DhvBnAHr-VW7YbmxGhyp915E_luO1zyNCxdDNQGSvcp2GARMmhLE0gHQpF5i-QXf_tuoZcv2C8MYakS2nMtyr1OVsKy1eSMuPYcszkIxbM79KpucVunvFbPT1m3Q"
+                    },
+                    "after": false
+                },
+                {
+                    "type": "EsAuthenticateMiddleware",
+                    "data": {
+                        "prop": "request.headers.authorization",
+                        "tokenType": "bearer",
+                        "authenticatorId": "auth0authesachser"
+                    },
+                    "after": false
                 },
                 {
                     "type": "EsParallelMiddleware",

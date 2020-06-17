@@ -9,6 +9,7 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
     static readonly meta = { middleware: EsAuthenticateMiddleware.middlewareName };
 
     private _prop: string;
+    private _tokenType: string;
     private _authenticatorId: string;
 
     /**
@@ -18,6 +19,7 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
         super(after, nextMiddleware);
         
         this._prop = _.get(values, 'prop', 'auth');
+        this._tokenType = _.get(values, 'tokenType', 'bearer');
         const aid = _.get(values, 'authenticatorId');
         if (_.isString(aid)) {
             this._authenticatorId = aid;
@@ -35,11 +37,25 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
 
     async runInternal(context: IEsContext) {
         const value = _.get(context.properties, this._prop);
+
+        if (!_.isString(value)) {
+            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
+        }
+
+        const splited = value.split(' ');
+        if (splited.length !== 2) {
+            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong number of token parts: ${splited.length}`);
+        }
+        if (_.lowerCase(splited[0]) !== this._tokenType) {
+            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong token type`);
+        }
+
         const authenticator = getAuthenticator(this._authenticatorId);
-        const info = await authenticator?.validate(value);
+        
+        const info = await authenticator?.validate({token:splited[1]});
 
         if (!Boolean(info)) {
-            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error`);
+            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Invalid token`);
         }
     }
 };
@@ -54,12 +70,17 @@ export const MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "prop",
+        "tokenType",
         "authenticatorId"
     ],
     "properties": {
         "prop": {
             "type": "string",
             "minLength": 1
+        },
+        "tokenType": {
+            "type": "string",
+            "enum": ["basic", "bearer"]
         },
         "authenticatorId": {
             "type": "string",

@@ -1,59 +1,68 @@
 
 
-export class EsApiCreationError extends Error {
-    
-    readonly api: string
+export abstract class EsError {
 
-    constructor(api:string, message: string) {
-        super(message);
+    innerError: any
+    stack?: string
+    error: string
+    errorDescription: string
+    statusCode: number
+
+    constructor(error?:string, errorDescription?:string, statusCode?:number, innerError?:any) {
+        this.error = error || 'Error';
+        this.errorDescription = errorDescription || 'Contact administrator for more details';
+        this.statusCode = statusCode || 500;
+        this.innerError = innerError;
+        Error.captureStackTrace(this);
+    }
+}
+
+export class EsApiCreationError extends EsError {
+    
+    api: string
+
+    constructor(api:string, message: string, innerError?:any, errorDescription?:string, statusCode?:number) {
+        super(message, errorDescription, statusCode, innerError);
         this.api = api;
     }
 };
 
-export class EsTransportError extends Error {
+export class EsTransportError extends EsError {
     
-    readonly transport: string;
-    readonly error: any;
+    transport: string;
     
-    constructor(transport: string, message: string, error?: any) {
-        super(message);
+    constructor(transport: string, message: string, innerError?:any, errorDescription?:string, statusCode?:number) {
+        super(message, errorDescription, statusCode, innerError);
         this.transport = transport;
-        this.error = error;
     }
 };
 
-export class EsMiddlewareError extends Error {
+export class EsMiddlewareError extends EsError {
     
-    readonly middleware: string
-    readonly error: any;
-    
-    constructor(middleware: string, message: string, error?: any) {
-        super(message);
+    middleware: string;
+
+    constructor(middleware: string, message: string, innerError?:any, errorDescription?:string, statusCode?:number) {
+        super(message, errorDescription, statusCode, innerError);
         this.middleware = middleware;
-        this.error = error;
     }
 };
 
-export class EsSchemaError extends Error {
+export class EsSchemaError extends EsError {
     
-    readonly schemaName: string
-    readonly error: any;
+    schemaName: string;
     
-    constructor(schemaName: string, message: string, error?: any) {
-        super(message);
+    constructor(schemaName: string, message: string, innerError?:any, errorDescription?:string, statusCode?:number) {
+        super(message, errorDescription, statusCode, innerError);
         this.schemaName = schemaName;
-        this.error = error;
     }
 };
 
-export class EsAuthenticatorError extends Error {
+export class EsAuthenticatorError extends EsError {
     
-    readonly authenticator: string;
-    readonly error: any;
+    authenticator: string;
     
-    constructor(authenticator: string, message: string, error?: any) {
-        super(message);
+    constructor(authenticator: string, message: string, innerError?:any, errorDescription?:string, statusCode?:number) {
+        super(message, errorDescription, statusCode, innerError);
         this.authenticator = authenticator;
-        this.error = error;
     }
 };

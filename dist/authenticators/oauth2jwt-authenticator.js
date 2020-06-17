@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthenticatorSchema = exports.AuthenticatorContructor = exports.EsOAuth2JwtAuthenticator = void 0;
 const lodash_1 = __importDefault(require("lodash"));
 const jwks_rsa_1 = __importDefault(require("jwks-rsa"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authenticators_1 = require("../core/authenticators");
 class EsOAuth2JwtAuthenticator extends authenticators_1.EsAuthenticator {
     constructor(name, id, params) {
@@ -26,17 +27,49 @@ class EsOAuth2JwtAuthenticator extends authenticators_1.EsAuthenticator {
             timeout: 5000,
             cache: true,
             cacheMaxEntries: 5,
-            cacheMaxAge: 10 * 60 * 1000
+            cacheMaxAge: 10 * 60 * 1000,
+            rateLimit: true,
+            jwksRequestsPerMinute: 5,
         });
     }
     loadAsync() {
         return __awaiter(this, void 0, void 0, function* () { });
     }
+    getKey(header, callback) {
+        try {
+            this._jwksClient.getSigningKey(header.kid, function (err, key) {
+                if (err) {
+                    callback(err, undefined);
+                    return;
+                }
+                var signingKey = key.getPublicKey();
+                callback(null, signingKey);
+            });
+        }
+        catch (err) {
+            callback(err, undefined);
+        }
+    }
+    verify(jwtStr) {
+        return new Promise((resolve, reject) => {
+            jsonwebtoken_1.default.verify(jwtStr, this.getKey.bind(this), {
+                algorithms: ['RS256'],
+                issuer: 'https://esachser.auth0.com/',
+                audience: 'https://authtestapi'
+            }, (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res);
+            });
+        });
+    }
     validate(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const token = lodash_1.default.get(params, 'token');
             const scopesNeeded = lodash_1.default.get(params, 'scope');
-            return {};
+            const res = yield this.verify(token);
+            return res;
         });
     }
 }

@@ -4,7 +4,9 @@ export declare class EsOAuth2JwtAuthenticator extends EsAuthenticator {
     private _jwksClient;
     constructor(name: string, id: string, params: any);
     loadAsync(): Promise<void>;
-    validate(params: any): Promise<{}>;
+    private getKey;
+    private verify;
+    validate(params: any): Promise<any>;
 }
 export declare const AuthenticatorContructor: IEsAuthenticatorConstructor;
 export declare const AuthenticatorSchema: {

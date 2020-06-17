@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import JwksClient from 'jwks-rsa';
-import jose from 'jose';
+import jwt from 'jsonwebtoken';
 import { EsAuthenticator, IEsAuthenticatorConstructor } from "../core/authenticators";
 
 export class EsOAuth2JwtAuthenticator extends EsAuthenticator {
@@ -19,17 +19,52 @@ export class EsOAuth2JwtAuthenticator extends EsAuthenticator {
             timeout: 5000, // Defaults to 30s
             cache: true,
             cacheMaxEntries: 5,
-            cacheMaxAge: 10 * 60 * 1000
+            cacheMaxAge: 10 * 60 * 1000,
+            rateLimit: true,
+            jwksRequestsPerMinute: 5,
         });
     }
 
     async loadAsync() { }
 
+    private getKey(header: any, callback: any) {
+        try{
+            this._jwksClient.getSigningKey(header.kid, function (err, key) {
+                if (err) {
+                    callback(err, undefined);
+                    return;
+                }
+                var signingKey = key.getPublicKey();
+                callback(null, signingKey);
+            });
+        }
+        catch (err) {
+            callback(err, undefined);
+        }        
+    }
+
+    private verify(jwtStr: string) {
+        return new Promise<any>((resolve, reject) => {
+            jwt.verify(jwtStr, this.getKey.bind(this), {
+                algorithms: ['RS256'],
+                issuer: 'https://esachser.auth0.com/',
+                audience: 'https://authtestapi'
+            }, (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res);
+            });
+        });
+    }
+
     async validate(params: any) {
         const token = _.get(params, 'token');
         const scopesNeeded = _.get(params, 'scope');
 
-        return {};
+        const res = await this.verify(token);
+
+        return res;
     }
 }
 

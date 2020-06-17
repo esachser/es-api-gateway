@@ -25,6 +25,7 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
         constructor(values, after, nextMiddleware) {
             super(after, nextMiddleware);
             this._prop = lodash_1.default.get(values, 'prop', 'auth');
+            this._tokenType = lodash_1.default.get(values, 'tokenType', 'bearer');
             const aid = lodash_1.default.get(values, 'authenticatorId');
             if (lodash_1.default.isString(aid)) {
                 this._authenticatorId = aid;
@@ -42,10 +43,20 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
                 const value = lodash_1.default.get(context.properties, this._prop);
+                if (!lodash_1.default.isString(value)) {
+                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
+                }
+                const splited = value.split(' ');
+                if (splited.length !== 2) {
+                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong number of token parts: ${splited.length}`);
+                }
+                if (lodash_1.default.lowerCase(splited[0]) !== this._tokenType) {
+                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong token type`);
+                }
                 const authenticator = authenticators_1.getAuthenticator(this._authenticatorId);
-                const info = yield (authenticator === null || authenticator === void 0 ? void 0 : authenticator.validate(value));
+                const info = yield (authenticator === null || authenticator === void 0 ? void 0 : authenticator.validate({ token: splited[1] }));
                 if (!Boolean(info)) {
-                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error`);
+                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Invalid token`);
                 }
             });
         }
@@ -66,12 +77,17 @@ exports.MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "prop",
+        "tokenType",
         "authenticatorId"
     ],
     "properties": {
         "prop": {
             "type": "string",
             "minLength": 1
+        },
+        "tokenType": {
+            "type": "string",
+            "enum": ["basic", "bearer"]
         },
         "authenticatorId": {
             "type": "string",

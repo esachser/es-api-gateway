@@ -6,6 +6,7 @@ export declare class EsAuthenticateMiddleware extends EsMiddleware {
         middleware: string;
     };
     private _prop;
+    private _tokenType;
     private _authenticatorId;
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -26,6 +27,10 @@ export declare const MiddlewareSchema: {
         prop: {
             type: string;
             minLength: number;
+        };
+        tokenType: {
+            type: string;
+            enum: string[];
         };
         authenticatorId: {
             type: string;

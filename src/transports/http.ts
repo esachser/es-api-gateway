@@ -5,7 +5,7 @@ import Router from 'koa-router';
 import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
-import { EsTransportError } from '../core/errors';
+import { EsTransportError, EsError } from '../core/errors';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -96,16 +96,30 @@ export class EsHttpTransport implements IEsTransport {
                 try {
                     // Roda o que precisa
                     await next();
+
+                    ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
+                    const statusCode = _.get(ctx.iesContext.properties, 'response.status');
+                    ctx.status = _.isNumber(statusCode) ? statusCode : 404;
+                    ctx.body = _.get(ctx.iesContext.properties, 'response.body');
                 }
                 catch (err) {
                     context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
-                    context.logger.error('Error running middlewares', _.merge({}, err.error, context.meta));
+                    if (err instanceof EsError && err.statusCode < 500) {
+                        ctx.status = err.statusCode;
+                        ctx.body = {
+                            error: err.error,
+                            error_description: err.errorDescription
+                        };
+                    }
+                    else {
+                        const nerr = new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err);
+                        ctx.status = nerr.statusCode;
+                        ctx.body = {
+                            error: nerr.error,
+                            error_description: nerr.errorDescription
+                        };
+                    }
                 }
-
-                ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
-                const statusCode = _.get(ctx.iesContext.properties, 'response.status');
-                ctx.status = _.isNumber(statusCode) ? statusCode : 404;
-                ctx.body = _.get(ctx.iesContext.properties, 'response.body');
 
                 let diff = Date.now() - init;
                 logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);

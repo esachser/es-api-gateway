@@ -77,15 +77,29 @@ let EsHttpTransport = /** @class */ (() => {
                     try {
                         // Roda o que precisa
                         yield next();
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
+                        const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                        ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
+                        ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                     }
                     catch (err) {
                         context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
-                        context.logger.error('Error running middlewares', lodash_1.default.merge({}, err.error, context.meta));
+                        if (err instanceof errors_1.EsError && err.statusCode < 500) {
+                            ctx.status = err.statusCode;
+                            ctx.body = {
+                                error: err.error,
+                                error_description: err.errorDescription
+                            };
+                        }
+                        else {
+                            const nerr = new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', err);
+                            ctx.status = nerr.statusCode;
+                            ctx.body = {
+                                error: nerr.error,
+                                error_description: nerr.errorDescription
+                            };
+                        }
                     }
-                    ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
-                    const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
-                    ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
-                    ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                     let diff = Date.now() - init;
                     logger_1.logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
                 }));
