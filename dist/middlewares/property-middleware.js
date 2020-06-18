@@ -86,7 +86,7 @@ exports.MiddlewareSchema = {
             "type": "string"
         },
         "value": {
-            "type": ["object", "number", "boolean", "string", "null"]
+            "type": ["object", "array", "number", "boolean", "string", "null"]
         },
         "expression": {
             "type": "string"

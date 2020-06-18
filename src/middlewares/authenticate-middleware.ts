@@ -8,7 +8,8 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
     static readonly middlewareName = 'EsAuthenticateMiddleware';
     static readonly meta = { middleware: EsAuthenticateMiddleware.middlewareName };
 
-    private _prop: string;
+    private _propToken: string;
+    private _propScope: string;
     private _tokenType: string;
     private _authenticatorId: string;
 
@@ -18,7 +19,8 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
     constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
         super(after, nextMiddleware);
         
-        this._prop = _.get(values, 'prop', 'auth');
+        this._propToken = _.get(values, 'propToken', 'auth');
+        this._propScope = _.get(values, 'propScope', 'scope');
         this._tokenType = _.get(values, 'tokenType', 'bearer');
         const aid = _.get(values, 'authenticatorId');
         if (_.isString(aid)) {
@@ -36,13 +38,26 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
     async loadAsync() { }
 
     async runInternal(context: IEsContext) {
-        const value = _.get(context.properties, this._prop);
+        const tokenStr = _.get(context.properties, this._propToken);
+        let scope = _.get(context.properties, this._propScope);
 
-        if (!_.isString(value)) {
+        if (!_.isString(tokenStr)) {
             throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
         }
 
-        const splited = value.split(' ');
+        if (scope !== undefined) {
+            if (!_.isArray(scope)) {
+                throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: scope MUST be an array`);
+            }
+    
+            if (!scope.every(sc => _.isString(sc))) {
+                throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: every scope MUST be string`);
+            }
+
+            scope = scope.filter(s => s.length > 0);
+        }        
+
+        const splited = tokenStr.split(' ');
         if (splited.length !== 2) {
             throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong number of token parts: ${splited.length}`);
         }
@@ -52,7 +67,7 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
 
         const authenticator = getAuthenticator(this._authenticatorId);
         
-        const info = await authenticator?.validate({token:splited[1]});
+        const info = await authenticator?.validate({token:splited[1], scope});
 
         if (!Boolean(info)) {
             throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Invalid token`);
@@ -69,12 +84,17 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "prop",
+        "propToken",
+        "propScope",
         "tokenType",
         "authenticatorId"
     ],
     "properties": {
-        "prop": {
+        "propToken": {
+            "type": "string",
+            "minLength": 1
+        },
+        "propScope": {
             "type": "string",
             "minLength": 1
         },

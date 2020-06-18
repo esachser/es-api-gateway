@@ -9,7 +9,9 @@
             "name": "Auth0 Esachser Authenticator",
             "parameters": {
                 "jwksUri": "https://esachser.auth0.com/.well-known/jwks.json",
-                "scopesProp": "scope"
+                "scopesProp": "scope",
+                "issuer": "https://esachser.auth0.com/",
+                "audience": "https://authtestapi"
             }
         }
     ]

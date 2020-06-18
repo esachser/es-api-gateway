@@ -29,9 +29,9 @@ Aspectos que devem ser vistos:
 - [**OK**] Cada Path no transporte HTTP pode ter middlewares
 - [**OK**] OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware
-  - [**Em andamento**] JWKS
+  - [**OK**] JWKS
   - Inspect
-  - Escopos via propriedade
+  - [**OK**] Escopos via propriedade
 - [**OK**] Erros na execução do middleware geram retorno padrão
 - Execute JS middleware
 - Parsers de entrada e saída
@@ -46,6 +46,8 @@ Aspectos que devem ser vistos:
 - Verificar JWS Middleware
 - Gerar JWE Middleware
 - Verificar/Decriptar JWE Middleware
+- Rate Limiting
+- Quotas
 - init_mid --> transport_mid --> execution_mid
 
 ## Outros pontos

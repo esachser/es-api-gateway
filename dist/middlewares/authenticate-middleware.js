@@ -24,7 +24,8 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
          */
         constructor(values, after, nextMiddleware) {
             super(after, nextMiddleware);
-            this._prop = lodash_1.default.get(values, 'prop', 'auth');
+            this._propToken = lodash_1.default.get(values, 'propToken', 'auth');
+            this._propScope = lodash_1.default.get(values, 'propScope', 'scope');
             this._tokenType = lodash_1.default.get(values, 'tokenType', 'bearer');
             const aid = lodash_1.default.get(values, 'authenticatorId');
             if (lodash_1.default.isString(aid)) {
@@ -42,11 +43,21 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
         }
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
-                const value = lodash_1.default.get(context.properties, this._prop);
-                if (!lodash_1.default.isString(value)) {
+                const tokenStr = lodash_1.default.get(context.properties, this._propToken);
+                let scope = lodash_1.default.get(context.properties, this._propScope);
+                if (!lodash_1.default.isString(tokenStr)) {
                     throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
                 }
-                const splited = value.split(' ');
+                if (scope !== undefined) {
+                    if (!lodash_1.default.isArray(scope)) {
+                        throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: scope MUST be an array`);
+                    }
+                    if (!scope.every(sc => lodash_1.default.isString(sc))) {
+                        throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: every scope MUST be string`);
+                    }
+                    scope = scope.filter(s => s.length > 0);
+                }
+                const splited = tokenStr.split(' ');
                 if (splited.length !== 2) {
                     throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong number of token parts: ${splited.length}`);
                 }
@@ -54,7 +65,7 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
                     throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Wrong token type`);
                 }
                 const authenticator = authenticators_1.getAuthenticator(this._authenticatorId);
-                const info = yield (authenticator === null || authenticator === void 0 ? void 0 : authenticator.validate({ token: splited[1] }));
+                const info = yield (authenticator === null || authenticator === void 0 ? void 0 : authenticator.validate({ token: splited[1], scope }));
                 if (!Boolean(info)) {
                     throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: Invalid token`);
                 }
@@ -76,12 +87,17 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "prop",
+        "propToken",
+        "propScope",
         "tokenType",
         "authenticatorId"
     ],
     "properties": {
-        "prop": {
+        "propToken": {
+            "type": "string",
+            "minLength": 1
+        },
+        "propScope": {
             "type": "string",
             "minLength": 1
         },

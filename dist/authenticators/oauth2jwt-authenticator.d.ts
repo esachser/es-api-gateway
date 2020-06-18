@@ -1,6 +1,8 @@
 import { EsAuthenticator, IEsAuthenticatorConstructor } from "../core/authenticators";
 export declare class EsOAuth2JwtAuthenticator extends EsAuthenticator {
     private _scopesProp;
+    private _issuer;
+    private _audience?;
     private _jwksClient;
     constructor(name: string, id: string, params: any);
     loadAsync(): Promise<void>;
@@ -22,6 +24,14 @@ export declare const AuthenticatorSchema: {
             format: string;
         };
         scopesProp: {
+            type: string;
+            minLength: number;
+        };
+        issuer: {
+            type: string;
+            minLength: number;
+        };
+        audience: {
             type: string;
             minLength: number;
         };

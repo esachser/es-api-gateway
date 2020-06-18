@@ -5,7 +5,8 @@ export declare class EsAuthenticateMiddleware extends EsMiddleware {
     static readonly meta: {
         middleware: string;
     };
-    private _prop;
+    private _propToken;
+    private _propScope;
     private _tokenType;
     private _authenticatorId;
     /**
@@ -24,7 +25,11 @@ export declare const MiddlewareSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        prop: {
+        propToken: {
+            type: string;
+            minLength: number;
+        };
+        propScope: {
             type: string;
             minLength: number;
         };
