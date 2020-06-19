@@ -1,16 +1,16 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
-import { NodeVM, VMScript } from 'vm2';
 import { EsMiddlewareError } from '../core/errors';
 
-const vm = new NodeVM({
-    console: 'inherit',
-    sandbox: {},
-    require: {
-        external: true,
-        root: "./"
-    }
+import vm from 'vm';
+
+const vmContext = vm.createContext({
+    '_': _,
+    ctx: {},
+    result: Error('result not set')
+}, {
+    name: 'Context Middleware'
 });
 
 export class EsConditionMiddleware extends EsMiddleware {
@@ -41,8 +41,8 @@ export class EsConditionMiddleware extends EsMiddleware {
                     throw new EsMiddlewareError(EsConditionMiddleware.middlewareName, 'condition.mids MUST be array');
                 }
 
-                const script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return Boolean(${values['conditions'][i]['conditionExpression']}); }`;
-                const compiledScript = new VMScript(script).compile();
+                const script = `'use strict';result=Boolean(${values['conditions'][i]['conditionExpression']});`;
+                const compiledScript = new vm.Script(script);
                 const conditionStructure: any = {};
                 conditionStructure['conditionExpression'] = compiledScript;
                 conditionStructure['mids'] = await createMiddleware(condition.mids, 0);
@@ -59,11 +59,12 @@ export class EsConditionMiddleware extends EsMiddleware {
         if (Array.isArray(this.values['conditions'])) {
             for (let i = 0; i < this.values['conditions'].length; i++) {
                 let condition = this.values['conditions'][i];
-                if (condition['conditionExpression'] instanceof VMScript) {
+                if (condition['conditionExpression'] instanceof vm.Script) {
                     context.logger.debug(`Testing condition ${i}`, meta);
                     try {
-                        let v = vm.run(condition['conditionExpression'])(context);
-                        if (Boolean(v)) {
+                        vmContext.ctx = context;
+                        condition['conditionExpression'].runInContext(vmContext);
+                        if (Boolean(vmContext.result)) {
                             context.logger.debug(`Condition ${i} reached`, meta);
                             await condition['mids']?.execute(context);
                             return;

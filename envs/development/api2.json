@@ -31,7 +31,7 @@
                     "data": {
                         "conditions": [
                             {
-                                "conditionExpression": "ctx.properties.metrics.timems < 3",
+                                "conditionExpression": "ctx.properties.metrics.timems < 10",
                                 "mids": [
                                     {
                                         "type": "EsPropertyMiddleware",

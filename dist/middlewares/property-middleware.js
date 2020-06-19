@@ -15,18 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
-//import { NodeVM, VMScript } from 'vm2';
 const vm_1 = __importDefault(require("vm"));
 const stringify_object_1 = __importDefault(require("stringify-object"));
 const errors_1 = require("../core/errors");
-// const vm = new NodeVM({
-//     console: 'inherit',
-//     sandbox: {},
-//     require: {
-//         external: true,
-//         root: "./"
-//     }
-// });
 const vmContext = vm_1.default.createContext({
     '_': lodash_1.default,
     ctx: {},
@@ -47,12 +38,10 @@ let EsPropertyMiddleware = /** @class */ (() => {
             let script = '';
             if (values['value'] === undefined &&
                 values['expression'] !== undefined) {
-                // script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
                 script = `'use strict';result=${values['expression']};`;
             }
             // Senão, prepara VMScript para somente devolver o valor
             else {
-                // script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
                 script = `'use strict';result=${stringify_object_1.default(values['value'])};`;
             }
             try {
@@ -68,8 +57,7 @@ let EsPropertyMiddleware = /** @class */ (() => {
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (this.vmScript !== undefined) {
-                    // context.logger.debug(`Writing to ${this.values['name']}`, _.merge({}, EsPropertyMiddleware.meta, context.meta));
-                    // _.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+                    context.logger.debug(`Writing to ${this.values['name']}`, lodash_1.default.merge({}, EsPropertyMiddleware.meta, context.meta));
                     vmContext.ctx = context;
                     this.vmScript.runInContext(vmContext);
                     lodash_1.default.set(context.properties, this.values['name'], vmContext.result);

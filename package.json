@@ -38,7 +38,6 @@
     "oas3-chow-chow": "^1.1.0",
     "raw-body": "^2.4.1",
     "stringify-object": "^3.3.0",
-    "vm2": "^3.9.2",
     "winston": "^3.2.1",
     "winston-transport": "^4.3.0",
     "workerpool": "^6.0.0"
