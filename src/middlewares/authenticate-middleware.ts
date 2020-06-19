@@ -42,7 +42,7 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
         let scope = _.get(context.properties, this._propScope);
 
         if (!_.isString(tokenStr)) {
-            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
+            throw new EsMiddlewareError(EsAuthenticateMiddleware.name, `Key Error`, undefined, 'Invalid token provided', 401);
         }
 
         if (scope !== undefined) {

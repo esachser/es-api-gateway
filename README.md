@@ -30,10 +30,10 @@ Aspectos que devem ser vistos:
 - [**OK**] OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware
   - [**OK**] JWKS
-  - Inspect
+  - [**OK**] Inspect
   - [**OK**] Escopos via propriedade
 - [**OK**] Erros na execução do middleware geram retorno padrão
-- Remover uso do vm2 para usar vm
+- [**OK**] Remover uso do vm2 para usar vm
 - Execute JS middleware
 - Parsers de entrada e saída
   - **Entrada**: Executar transformação de Buffer para JSON

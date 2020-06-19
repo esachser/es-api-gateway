@@ -9,9 +9,32 @@
             "name": "Auth0 Esachser Authenticator",
             "parameters": {
                 "jwksUri": "https://esachser.auth0.com/.well-known/jwks.json",
-                "scopesProp": "scope",
+                "scopesScript": "scopes=tokenObj?.scope?.split(' ');",
                 "issuer": "https://esachser.auth0.com/",
                 "audience": "https://authtestapi"
+            }
+        },
+        {
+            "type": "EsOAuth2JwtAuthenticator",
+            "id": "oktaesapis",
+            "name": "Okta",
+            "parameters": {
+                "jwksUri": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6/v1/keys",
+                "scopesScript": "scopes=tokenObj?.scp;",
+                "issuer": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6",
+                "audience": "http://authtestapi"
+            }
+        },
+        {
+            "type": "EsOAuth2InspectAuthenticator",
+            "id": "oktaesapisinspect",
+            "name": "Okta Inspect",
+            "parameters": {
+                "inspectUri": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6/v1/introspect",
+                "credHeader": "authorization",
+                "credValue": "Basic MG9hZnI0MnRxWDBEVHpYZG00eDY6TWc5TDFZVEZMcHZ5ckV0UXNXTjJiaVVsYXVrRzZhVVJsemJEUVNzTg==", 
+                "issuer": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6",
+                "audience": "http://authtestapi"
             }
         }
     ]

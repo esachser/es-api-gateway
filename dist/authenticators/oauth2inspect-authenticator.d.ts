@@ -1,13 +1,15 @@
 import { IEsAuthenticatorConstructor } from "../core/authenticators";
 import { EsOAuth2Authenticator } from './oauth2-authenticator';
-export declare class EsOAuth2JwtAuthenticator extends EsOAuth2Authenticator {
-    private _issuer;
+export declare class EsOAuth2InspectAuthenticator extends EsOAuth2Authenticator {
+    private _issuer?;
     private _audience?;
-    private _jwksClient;
+    private _inspectUri;
+    private _credentialHeader;
+    private _credentialValue;
+    private _cache;
     constructor(name: string, id: string, params: any);
     loadAsync(): Promise<void>;
-    private getKey;
-    protected verify(jwtStr: string): Promise<any>;
+    protected verify(tokenStr: string): Promise<any>;
 }
 export declare const AuthenticatorContructor: IEsAuthenticatorConstructor;
 export declare const AuthenticatorSchema: {
@@ -18,11 +20,15 @@ export declare const AuthenticatorSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        jwksUri: {
+        inspectUri: {
             type: string;
             format: string;
         };
-        scopesScript: {
+        credHeader: {
+            type: string;
+            minLength: number;
+        };
+        credValue: {
             type: string;
             minLength: number;
         };

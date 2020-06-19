@@ -46,7 +46,7 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
                 const tokenStr = lodash_1.default.get(context.properties, this._propToken);
                 let scope = lodash_1.default.get(context.properties, this._propScope);
                 if (!lodash_1.default.isString(tokenStr)) {
-                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Authentication error: token MUST be a string`);
+                    throw new errors_1.EsMiddlewareError(EsAuthenticateMiddleware.name, `Key Error`, undefined, 'Invalid token provided', 401);
                 }
                 if (scope !== undefined) {
                     if (!lodash_1.default.isArray(scope)) {

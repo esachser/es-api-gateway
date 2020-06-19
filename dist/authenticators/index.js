@@ -16,11 +16,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startAuthenticators = exports.loadAuthenticators = void 0;
 const authenticators_1 = require("../core/authenticators");
 const oauth2jwt_authenticator_1 = require("./oauth2jwt-authenticator");
+const oauth2inspect_authenticator_1 = require("./oauth2inspect-authenticator");
 const config_1 = require("../util/config");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 function loadAuthenticators() {
     authenticators_1.addAuthenticatorConstructor('EsOAuth2JwtAuthenticator', oauth2jwt_authenticator_1.AuthenticatorContructor, oauth2jwt_authenticator_1.AuthenticatorSchema);
+    authenticators_1.addAuthenticatorConstructor('EsOAuth2InspectAuthenticator', oauth2inspect_authenticator_1.AuthenticatorContructor, oauth2inspect_authenticator_1.AuthenticatorSchema);
 }
 exports.loadAuthenticators = loadAuthenticators;
 ;

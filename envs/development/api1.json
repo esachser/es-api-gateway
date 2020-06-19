@@ -69,16 +69,8 @@
                 {
                     "type": "EsPropertyMiddleware",
                     "data": {
-                        "name": "request.headers.authorization",
-                        "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1ERkZOREZFTUROQ1JUYzJOREkwUVVJNVEwSTFOMFl5TkVNNU1EYzJSRGd3TmpVd1F6UXhSQSJ9.eyJpc3MiOiJodHRwczovL2VzYWNoc2VyLmF1dGgwLmNvbS8iLCJzdWIiOiJ2N0kzcFMwVk82NVhwTExIb2YzYzBTdEdKT1N4ajJFZ0BjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly9hdXRodGVzdGFwaSIsImlhdCI6MTU5MjQ1NDg2MSwiZXhwIjoxNTkyNTQxMjYxLCJhenAiOiJ2N0kzcFMwVk82NVhwTExIb2YzYzBTdEdKT1N4ajJFZyIsInNjb3BlIjoicmVhZCBjcmVhdGUiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.dbJW2WRMyPd0kowrh_ReglFR8AKEhfzex6Dhy8jXeXRirSEDuIHsFekQUHfNtYONXrvnBh-mlFemDR0Twze2lj1NKIhNWdZP2ljtGxwDnACXfHvMU0B8zfl78R5juMRJtlSgfquO-N8kP1eJopep3ecK_BFH79e9TGqv0ljbqHuEdZsk_WI--fwH9yJZd_hGFS08oSXT-XV-MnaXPLNNoClomswa5OyqSWBNBkYBE2XKWnvuATlo_WHiWj9_i6AXy8WnigzecsS_m2-u4vYXUCi0yOYV6U5sClNmVpAEAkWPvbWkyKp5n_4SSYkyhse2Xae7GgvIV38jGsSciR1LPw"
-                    },
-                    "after": false
-                },
-                {
-                    "type": "EsPropertyMiddleware",
-                    "data": {
                         "name": "scope",
-                        "value": ["read", "create"]
+                        "value": ["read"]
                     },
                     "after": false
                 },
@@ -88,7 +80,7 @@
                         "propToken": "request.headers.authorization",
                         "propScope": "scope",
                         "tokenType": "bearer",
-                        "authenticatorId": "auth0authesachser"
+                        "authenticatorId": "oktaesapisinspect"
                     },
                     "after": false
                 },

@@ -3,19 +3,18 @@ import JwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
 import { EsAuthenticator, IEsAuthenticatorConstructor } from "../core/authenticators";
 import { EsAuthenticatorError } from '../core/errors';
+import { EsOAuth2Authenticator } from './oauth2-authenticator';
 
-export class EsOAuth2JwtAuthenticator extends EsAuthenticator {
-
-    private _scopesProp: string
+export class EsOAuth2JwtAuthenticator extends EsOAuth2Authenticator {
+    
     private _issuer: string
     private _audience?: string
     private _jwksClient: JwksClient.JwksClient
 
     constructor(name: string, id: string, params: any) {
-        super(name, id);
+        super(name, id, _.get(params, 'scopesScript', 'scopes=tokenObj?.scope?.split(" ");'));
 
         const jwksUri = String(_.get(params, 'jwksUri'));
-        this._scopesProp = String(_.get(params, 'scopesProp', 'scope'));
         this._issuer = String(_.get(params, 'issuer'));
         this._audience = _.get(params, 'audience');
 
@@ -48,7 +47,7 @@ export class EsOAuth2JwtAuthenticator extends EsAuthenticator {
         }        
     }
 
-    private verify(jwtStr: string) {
+    protected verify(jwtStr: string) {
         return new Promise<any>((resolve, reject) => {
             jwt.verify(jwtStr, this.getKey.bind(this), {
                 algorithms: ['RS256'],
@@ -62,43 +61,6 @@ export class EsOAuth2JwtAuthenticator extends EsAuthenticator {
             });
         });
     }
-
-    async validate(params: any) {
-        const token = _.get(params, 'token');
-        const scopesNeeded = _.get(params, 'scope');
-
-        const res = await this.verify(token);
-        const scopesHadStr = _.get(res, this._scopesProp);
-        
-        // Se os escopos
-        if (scopesNeeded !== undefined) {
-            if (scopesHadStr === undefined) {
-                throw new EsAuthenticatorError(EsOAuth2JwtAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
-            }
-
-            if (!_.isArray(scopesNeeded)) {
-                throw new EsAuthenticatorError(EsOAuth2JwtAuthenticator.name, 'scopes MUST be array');
-            }
-
-            if (!_.isString(scopesHadStr)) {
-                throw new EsAuthenticatorError(EsOAuth2JwtAuthenticator.name, 'scopes are not string');
-            }
-
-            const scopesHad = scopesHadStr.split(' ');
-
-            if (scopesHad.length < scopesNeeded.length) {
-                throw new EsAuthenticatorError(EsOAuth2JwtAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
-            }
-
-            const containScopes = scopesNeeded.every(scope => scopesHad.includes(scope));
-
-            if (!containScopes) {
-                throw new EsAuthenticatorError(EsOAuth2JwtAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
-            }
-        }
-
-        return res;
-    }
 }
 
 export const AuthenticatorContructor: IEsAuthenticatorConstructor = EsOAuth2JwtAuthenticator;
@@ -111,7 +73,7 @@ export const AuthenticatorSchema = {
     "additionalProperties": false,
     "required": [
         "jwksUri",
-        "scopesProp",
+        "scopesScript",
         "issuer"
     ],
     "properties": {
@@ -119,7 +81,7 @@ export const AuthenticatorSchema = {
             "type": "string",
             "format": "uri"
         },
-        "scopesProp": {
+        "scopesScript": {
             "type": "string",
             "minLength": 1
         },
