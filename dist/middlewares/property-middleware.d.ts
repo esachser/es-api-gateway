@@ -1,5 +1,6 @@
+/// <reference types="node" />
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-import { VMScript } from 'vm2';
+import vm from 'vm';
 export declare class EsPropertyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsPropertyMiddleware";
@@ -7,7 +8,7 @@ export declare class EsPropertyMiddleware extends EsMiddleware {
         middleware: string;
     };
     values: any;
-    readonly vmScript?: VMScript;
+    readonly vmScript?: vm.Script;
     /**
      * Constrói o middleware a partir dos parâmetros
      */

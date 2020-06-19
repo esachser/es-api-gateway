@@ -70,14 +70,23 @@
                     "type": "EsPropertyMiddleware",
                     "data": {
                         "name": "request.headers.authorization",
-                        "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1ERkZOREZFTUROQ1JUYzJOREkwUVVJNVEwSTFOMFl5TkVNNU1EYzJSRGd3TmpVd1F6UXhSQSJ9.eyJpc3MiOiJodHRwczovL2VzYWNoc2VyLmF1dGgwLmNvbS8iLCJzdWIiOiI0dmVLQXBxSlFVUHJaTEdmUVJoNGExWGkwRFB0N1d2WkBjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly9hdXRodGVzdGFwaSIsImlhdCI6MTU5MjM2MzQ1NywiZXhwIjoxNTkyNDQ5ODU3LCJhenAiOiI0dmVLQXBxSlFVUHJaTEdmUVJoNGExWGkwRFB0N1d2WiIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyJ9.Cja5VHLeih_heWL5da6FF5SAqt9YhN50Rf0tPvE70AZdRzXXmb95Hs0E7v9xLAc5HcKWhNDzX7RjaMOReyHUElrDkknwgREYgqIkE1xdyTkeJ_14T7Y-DDaZnH3XecQaHTRVpNefZKHf_HS7dDJGw9H476YhhdBkQrjHV1mI6PLoU58ruy3AGkmRstxBiovzOPby6hSFQ21roxtyKylnGVCi-5DhvBnAHr-VW7YbmxGhyp915E_luO1zyNCxdDNQGSvcp2GARMmhLE0gHQpF5i-QXf_tuoZcv2C8MYakS2nMtyr1OVsKy1eSMuPYcszkIxbM79KpucVunvFbPT1m3Q"
+                        "value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1ERkZOREZFTUROQ1JUYzJOREkwUVVJNVEwSTFOMFl5TkVNNU1EYzJSRGd3TmpVd1F6UXhSQSJ9.eyJpc3MiOiJodHRwczovL2VzYWNoc2VyLmF1dGgwLmNvbS8iLCJzdWIiOiJ2N0kzcFMwVk82NVhwTExIb2YzYzBTdEdKT1N4ajJFZ0BjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly9hdXRodGVzdGFwaSIsImlhdCI6MTU5MjQ1NDg2MSwiZXhwIjoxNTkyNTQxMjYxLCJhenAiOiJ2N0kzcFMwVk82NVhwTExIb2YzYzBTdEdKT1N4ajJFZyIsInNjb3BlIjoicmVhZCBjcmVhdGUiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.dbJW2WRMyPd0kowrh_ReglFR8AKEhfzex6Dhy8jXeXRirSEDuIHsFekQUHfNtYONXrvnBh-mlFemDR0Twze2lj1NKIhNWdZP2ljtGxwDnACXfHvMU0B8zfl78R5juMRJtlSgfquO-N8kP1eJopep3ecK_BFH79e9TGqv0ljbqHuEdZsk_WI--fwH9yJZd_hGFS08oSXT-XV-MnaXPLNNoClomswa5OyqSWBNBkYBE2XKWnvuATlo_WHiWj9_i6AXy8WnigzecsS_m2-u4vYXUCi0yOYV6U5sClNmVpAEAkWPvbWkyKp5n_4SSYkyhse2Xae7GgvIV38jGsSciR1LPw"
+                    },
+                    "after": false
+                },
+                {
+                    "type": "EsPropertyMiddleware",
+                    "data": {
+                        "name": "scope",
+                        "value": ["read", "create"]
                     },
                     "after": false
                 },
                 {
                     "type": "EsAuthenticateMiddleware",
                     "data": {
-                        "prop": "request.headers.authorization",
+                        "propToken": "request.headers.authorization",
+                        "propScope": "scope",
                         "tokenType": "bearer",
                         "authenticatorId": "auth0authesachser"
                     },

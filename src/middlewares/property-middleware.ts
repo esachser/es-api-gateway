@@ -1,17 +1,17 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import _ from 'lodash';
-import { NodeVM, VMScript } from 'vm2';
+import vm from 'vm';
 import { logger } from '../util/logger';
 import stringifyObject from 'stringify-object';
 import { EsMiddlewareError } from '../core/errors';
 
-const vm = new NodeVM({
-    console: 'inherit',
-    sandbox: {},
-    require: {
-        external: true,
-        root: "./"
-    }
+
+const vmContext = vm.createContext({
+    '_': _,
+    ctx: {},
+    result: Error('result not set')
+}, {
+    name: 'Property Middleware'
 });
 
 export class EsPropertyMiddleware extends EsMiddleware {
@@ -21,7 +21,7 @@ export class EsPropertyMiddleware extends EsMiddleware {
 
     values: any;
 
-    readonly vmScript?: VMScript;
+    readonly vmScript?: vm.Script;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -35,15 +35,15 @@ export class EsPropertyMiddleware extends EsMiddleware {
         let script = '';
         if (values['value'] === undefined &&
             values['expression'] !== undefined) {
-            script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
+            script = `'use strict';result=${values['expression']};`;
         }
         // Senão, prepara VMScript para somente devolver o valor
         else {
-            script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
+            script = `'use strict';result=${stringifyObject(values['value'])};`;
         }
 
         try {
-            this.vmScript = new VMScript(script).compile();
+            this.vmScript = new vm.Script(script);
         }
         catch (err) {
             throw new EsMiddlewareError(EsPropertyMiddleware.middlewareName, 'Error compiling property script', err);
@@ -55,7 +55,9 @@ export class EsPropertyMiddleware extends EsMiddleware {
     async runInternal(context: IEsContext) {
         if (this.vmScript !== undefined) {
             context.logger.debug(`Writing to ${this.values['name']}`, _.merge({}, EsPropertyMiddleware.meta, context.meta));
-            _.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+            vmContext.ctx = context;
+            this.vmScript.runInContext(vmContext);
+            _.set(context.properties, this.values['name'], vmContext.result);
         }
     }
 };

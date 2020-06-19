@@ -15,16 +15,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
-const vm2_1 = require("vm2");
+//import { NodeVM, VMScript } from 'vm2';
+const vm_1 = __importDefault(require("vm"));
 const stringify_object_1 = __importDefault(require("stringify-object"));
 const errors_1 = require("../core/errors");
-const vm = new vm2_1.NodeVM({
-    console: 'inherit',
-    sandbox: {},
-    require: {
-        external: true,
-        root: "./"
-    }
+// const vm = new NodeVM({
+//     console: 'inherit',
+//     sandbox: {},
+//     require: {
+//         external: true,
+//         root: "./"
+//     }
+// });
+const vmContext = vm_1.default.createContext({
+    '_': lodash_1.default,
+    ctx: {},
+    result: Error('result not set')
+}, {
+    name: 'Property Middleware'
 });
 let EsPropertyMiddleware = /** @class */ (() => {
     class EsPropertyMiddleware extends core_1.EsMiddleware {
@@ -39,14 +47,16 @@ let EsPropertyMiddleware = /** @class */ (() => {
             let script = '';
             if (values['value'] === undefined &&
                 values['expression'] !== undefined) {
-                script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
+                // script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${values['expression']}; }`;
+                script = `'use strict';result=${values['expression']};`;
             }
             // Senão, prepara VMScript para somente devolver o valor
             else {
-                script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${stringify_object_1.default(values['value'])}; }`;
+                // script = `'use strict';const _=require('lodash');module.exports=function(ctx){ return ${stringifyObject(values['value'])}; }`;
+                script = `'use strict';result=${stringify_object_1.default(values['value'])};`;
             }
             try {
-                this.vmScript = new vm2_1.VMScript(script).compile();
+                this.vmScript = new vm_1.default.Script(script);
             }
             catch (err) {
                 throw new errors_1.EsMiddlewareError(EsPropertyMiddleware.middlewareName, 'Error compiling property script', err);
@@ -58,8 +68,11 @@ let EsPropertyMiddleware = /** @class */ (() => {
         runInternal(context) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (this.vmScript !== undefined) {
-                    context.logger.debug(`Writing to ${this.values['name']}`, lodash_1.default.merge({}, EsPropertyMiddleware.meta, context.meta));
-                    lodash_1.default.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+                    // context.logger.debug(`Writing to ${this.values['name']}`, _.merge({}, EsPropertyMiddleware.meta, context.meta));
+                    // _.set(context.properties, this.values['name'], vm.run(this.vmScript)(context));
+                    vmContext.ctx = context;
+                    this.vmScript.runInContext(vmContext);
+                    lodash_1.default.set(context.properties, this.values['name'], vmContext.result);
                 }
             });
         }

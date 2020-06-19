@@ -66,7 +66,6 @@ export class EsHttpTransport implements IEsTransport {
                 const context: IEsContext = {
                     properties: {
                         request: {
-                            httpctx: ctx,
                             headers: ctx.request.headers,
                             params: ctx.params,
                             query: ctx.query,
@@ -75,7 +74,8 @@ export class EsHttpTransport implements IEsTransport {
                             body: ctx.request.body,
                             parsedBody: ctx.request.parsedBody,
                             routePrefix: this.routeContext
-                        }
+                        },
+                        httpctx: ctx
                     },
                     body: ctx.request.body,
                     logger: this.apiLogger,
@@ -122,7 +122,7 @@ export class EsHttpTransport implements IEsTransport {
                 }
 
                 let diff = Date.now() - init;
-                logger.info(`Call ${ctx.iesContext.properties.request.httpctx.path} ended in ${diff}ms`);
+                logger.info(`Call ${ctx.path} ended in ${diff}ms`);
             });
         }
         catch (err) {
