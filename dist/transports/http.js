@@ -83,7 +83,6 @@ let EsHttpTransport = /** @class */ (() => {
                         ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
                     }
                     catch (err) {
-                        context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
                         if (err instanceof errors_1.EsError && err.statusCode < 500) {
                             ctx.status = err.statusCode;
                             ctx.body = {
@@ -92,13 +91,15 @@ let EsHttpTransport = /** @class */ (() => {
                             };
                         }
                         else {
-                            const nerr = new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', err);
+                            const nerr = new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
                             ctx.status = nerr.statusCode;
                             ctx.body = {
                                 error: nerr.error,
                                 error_description: nerr.errorDescription
                             };
+                            err = nerr;
                         }
+                        context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
                     }
                     let diff = Date.now() - init;
                     logger_1.logger.info(`Call ${ctx.path} ended in ${diff}ms`);

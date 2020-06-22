@@ -36,7 +36,7 @@ export class EsExecJsMiddleware extends EsMiddleware {
             this.vmScript = new vm.Script(script);
         }
         catch (err) {
-            throw new EsMiddlewareError(EsExecJsMiddleware.middlewareName, 'Error compiling ExecJs script', err);
+            throw new EsMiddlewareError(EsExecJsMiddleware.name, 'Error compiling ExecJs script', { message: err.message, stack: err.stack });
         }
     }
 
@@ -46,7 +46,7 @@ export class EsExecJsMiddleware extends EsMiddleware {
         if (this.vmScript !== undefined) {
             context.logger.debug(`Running script`, _.merge({}, EsExecJsMiddleware.meta, context.meta));
             vmContext.ctx = context;
-            this.vmScript.runInContext(vmContext);
+            await this.vmScript.runInContext(vmContext);
         }
     }
 };

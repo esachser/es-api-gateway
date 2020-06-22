@@ -34,7 +34,7 @@ Aspectos que devem ser vistos:
   - [**OK**] Escopos via propriedade
 - [**OK**] Erros na execução do middleware geram retorno padrão
 - [**OK**] Remover uso do vm2 para usar vm
-- Execute JS middleware
+- [**OK**] Execute JS middleware
 - Parsers de entrada e saída
   - **Entrada**: Executar transformação de Buffer para JSON
   - **Saída**: Executar transformação de JSON para BUffer
@@ -47,6 +47,7 @@ Aspectos que devem ser vistos:
 - Verificar JWS Middleware
 - Gerar JWE Middleware
 - Verificar/Decriptar JWE Middleware
+- Salvar no Redis um registro Middleware
 - Rate Limiting
 - Quotas
 - init_mid --> transport_mid --> execution_mid

@@ -39,7 +39,7 @@ let EsExecJsMiddleware = /** @class */ (() => {
                 this.vmScript = new vm_1.default.Script(script);
             }
             catch (err) {
-                throw new errors_1.EsMiddlewareError(EsExecJsMiddleware.middlewareName, 'Error compiling ExecJs script', err);
+                throw new errors_1.EsMiddlewareError(EsExecJsMiddleware.name, 'Error compiling ExecJs script', { message: err.message, stack: err.stack });
             }
         }
         loadAsync() {
@@ -50,7 +50,7 @@ let EsExecJsMiddleware = /** @class */ (() => {
                 if (this.vmScript !== undefined) {
                     context.logger.debug(`Running script`, lodash_1.default.merge({}, EsExecJsMiddleware.meta, context.meta));
                     vmContext.ctx = context;
-                    this.vmScript.runInContext(vmContext);
+                    yield this.vmScript.runInContext(vmContext);
                 }
             });
         }

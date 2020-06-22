@@ -103,7 +103,6 @@ export class EsHttpTransport implements IEsTransport {
                     ctx.body = _.get(ctx.iesContext.properties, 'response.body');
                 }
                 catch (err) {
-                    context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
                     if (err instanceof EsError && err.statusCode < 500) {
                         ctx.status = err.statusCode;
                         ctx.body = {
@@ -112,13 +111,15 @@ export class EsHttpTransport implements IEsTransport {
                         };
                     }
                     else {
-                        const nerr = new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err);
+                        const nerr = new EsTransportError(EsHttpTransport.name, 'Error running middlewares', {message: err.message});
                         ctx.status = nerr.statusCode;
                         ctx.body = {
                             error: nerr.error,
                             error_description: nerr.errorDescription
                         };
+                        err = nerr;
                     }
+                    context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
                 }
 
                 let diff = Date.now() - init;

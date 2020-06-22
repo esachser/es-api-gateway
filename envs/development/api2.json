@@ -101,6 +101,13 @@
             }
         },
         {
+            "type":"EsExecJsMiddleware",
+            "after": true,
+            "data": {
+                "script": "(async () => { _.set(ctx.properties, 'response.headers.scriptasync', await Promise.resolve('funcionou')); })();"
+            }
+        },
+        {
             "type": "EsSequenceMiddleware",
             "data": {
                 "mids": [
