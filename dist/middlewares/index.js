@@ -17,6 +17,7 @@ const openapiverify_middleware_1 = require("./openapiverify-middleware");
 const throw_middleware_1 = require("./throw-middleware");
 const catch_middleware_1 = require("./catch-middleware");
 const authenticate_middleware_1 = require("./authenticate-middleware");
+const execjs_middleware_1 = require("./execjs-middleware");
 const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -38,6 +39,7 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsThrowMiddleware', throw_middleware_1.MiddlewareCtor, throw_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsCatchMiddleware', catch_middleware_1.MiddlewareCtor, catch_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsAuthenticateMiddleware', authenticate_middleware_1.MiddlewareCtor, authenticate_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsExecJsMiddleware', execjs_middleware_1.MiddlewareCtor, execjs_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

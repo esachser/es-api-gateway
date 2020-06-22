@@ -14,6 +14,7 @@ import { MiddlewareCtor as EsOpenApiVerifyMiddlewareContructor, MiddlewareSchema
 import { MiddlewareCtor as EsThrowMiddlewareContructor, MiddlewareSchema as EsThrowSchema } from './throw-middleware';
 import { MiddlewareCtor as EsCatchMiddlewareContructor, MiddlewareSchema as EsCatchSchema } from './catch-middleware';
 import { MiddlewareCtor as EsAuthenticateMiddlewareContructor, MiddlewareSchema as EsAuthenticateSchema } from './authenticate-middleware';
+import { MiddlewareCtor as EsExecJsMiddlewareContructor, MiddlewareSchema as EsExecJsSchema } from './execjs-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -39,6 +40,7 @@ export function loadMiddlewares() {
     addMiddleware('EsThrowMiddleware', EsThrowMiddlewareContructor, EsThrowSchema);
     addMiddleware('EsCatchMiddleware', EsCatchMiddlewareContructor, EsCatchSchema);
     addMiddleware('EsAuthenticateMiddleware', EsAuthenticateMiddlewareContructor, EsAuthenticateSchema);
+    addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
 };
 
 export function loadCustomMiddlewares() {

@@ -94,6 +94,13 @@
     ],
     "execution": [
         {
+            "type":"EsExecJsMiddleware",
+            "after": true,
+            "data": {
+                "script": "_.set(ctx.properties, 'response.headers.testscript', 'funcionou');"
+            }
+        },
+        {
             "type": "EsSequenceMiddleware",
             "data": {
                 "mids": [
