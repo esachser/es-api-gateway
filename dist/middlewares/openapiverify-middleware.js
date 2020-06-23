@@ -18,6 +18,7 @@ const lodash_1 = __importDefault(require("lodash"));
 const swagger_parser_1 = __importDefault(require("@apidevtools/swagger-parser"));
 const oas3_chow_chow_1 = __importDefault(require("oas3-chow-chow"));
 const errors_1 = require("../core/errors");
+const parsers_1 = require("../core/parsers");
 let EsOpenApiVerifyMiddleware = /** @class */ (() => {
     class EsOpenApiVerifyMiddleware extends core_1.EsMiddleware {
         /**
@@ -44,7 +45,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                         this._throw = lodash_1.default.get(values, 'throw');
                         this._propMethod = lodash_1.default.get(values, 'method', 'request.method');
                         this._propUrl = lodash_1.default.get(values, 'url', 'request.path');
-                        this._propBody = lodash_1.default.get(values, 'body', 'request.parsedBody');
+                        this._propBody = lodash_1.default.get(values, 'body', 'request.body');
                         this._propHeaders = lodash_1.default.get(values, 'headers', 'request.headers');
                         this._propQuery = lodash_1.default.get(values, 'query', 'request.query');
                         this._propParams = lodash_1.default.get(values, 'params', 'request.params');
@@ -72,7 +73,8 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                     }
                     try {
                         // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
-                        const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
+                        const json = yield parsers_1.decodeToObject(body);
+                        const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body: json, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
                         if (this._propResult !== undefined) {
                             lodash_1.default.set(context.properties, this._propResult, reqMeta);
@@ -83,10 +85,10 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                             lodash_1.default.set(context.properties, this._propResult, undefined);
                         }
                         if (Boolean(this._throw)) {
-                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', { message: err.message, name: err.name, stack: err.stack });
+                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', { message: err.message, name: err.name, stack: err.stack }, 'Invalid body or parameters', 400);
                         }
                         else {
-                            context.logger.error('Error verifying OpenAPI Request', lodash_1.default.merge({}, err, EsOpenApiVerifyMiddleware.meta));
+                            context.logger.error('Error verifying OpenAPI Request', lodash_1.default.merge({ message: err.message, name: err.name, stack: err.stack }, EsOpenApiVerifyMiddleware.meta));
                         }
                     }
                 }

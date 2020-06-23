@@ -19,7 +19,6 @@ const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
-const parsers_1 = require("../core/parsers");
 ;
 let EsHttpTransport = /** @class */ (() => {
     class EsHttpTransport {
@@ -71,9 +70,6 @@ let EsHttpTransport = /** @class */ (() => {
                             uid: nanoid_1.nanoid(12)
                         }
                     };
-                    const json = yield parsers_1.decodeToObject(context.properties.request.body);
-                    //_.set(context.properties, 'request.body', json);
-                    lodash_1.default.set(context.properties, 'request.parsedBody', json);
                     logger_1.logger.info(`Started api with path ${context.properties.request.path}`);
                     ctx.iesContext = context;
                     //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
@@ -95,7 +91,9 @@ let EsHttpTransport = /** @class */ (() => {
                             };
                         }
                         else {
-                            const nerr = new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
+                            const nerr = err instanceof errors_1.EsError ?
+                                new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
+                                new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
                             ctx.status = nerr.statusCode;
                             ctx.body = {
                                 error: nerr.error,

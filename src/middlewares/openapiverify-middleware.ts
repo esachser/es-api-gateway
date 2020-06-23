@@ -4,6 +4,7 @@ import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
 import { EsMiddlewareError } from '../core/errors';
+import { decodeToObject } from '../core/parsers';
 
 export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -39,7 +40,7 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
                 this._throw = _.get(values, 'throw');
                 this._propMethod = _.get(values, 'method', 'request.method');
                 this._propUrl = _.get(values, 'url', 'request.path');
-                this._propBody = _.get(values, 'body', 'request.parsedBody');
+                this._propBody = _.get(values, 'body', 'request.body');
                 this._propHeaders = _.get(values, 'headers', 'request.headers');
                 this._propQuery = _.get(values, 'query', 'request.query');
                 this._propParams = _.get(values, 'params', 'request.params');
@@ -68,8 +69,9 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
 
             try {
                 // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
+                const json = await decodeToObject(body);
                 
-                const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body, path: params, header: headers, query });
+                const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body: json, path: params, header: headers, query });
                 context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));
                 if (this._propResult !== undefined) {
                     _.set(context.properties, this._propResult, reqMeta);
@@ -80,10 +82,10 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
                     _.set(context.properties, this._propResult, undefined);
                 }
                 if (Boolean(this._throw)) {
-                    throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', {message: err.message, name: err.name, stack:err.stack});
+                    throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', { message: err.message, name: err.name, stack:err.stack }, 'Invalid body or parameters', 400);
                 }
                 else {
-                    context.logger.error('Error verifying OpenAPI Request', _.merge({}, err, EsOpenApiVerifyMiddleware.meta));
+                    context.logger.error('Error verifying OpenAPI Request', _.merge({message: err.message, name: err.name, stack:err.stack}, EsOpenApiVerifyMiddleware.meta));
                 }
             }
         }

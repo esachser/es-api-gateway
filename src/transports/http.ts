@@ -87,10 +87,6 @@ export class EsHttpTransport implements IEsTransport {
                     }
                 };
 
-                const json = await decodeToObject(context.properties.request.body);
-                //_.set(context.properties, 'request.body', json);
-                _.set(context.properties, 'request.parsedBody', json);
-
                 logger.info(`Started api with path ${context.properties.request.path}`);
 
                 ctx.iesContext = context;
@@ -116,7 +112,10 @@ export class EsHttpTransport implements IEsTransport {
                         };
                     }
                     else {
-                        const nerr = new EsTransportError(EsHttpTransport.name, 'Error running middlewares', {message: err.message});
+                        const nerr = err instanceof EsError ?
+                            new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
+                            new EsTransportError(EsHttpTransport.name, 'Error running middlewares', {message: err.message});
+                            
                         ctx.status = nerr.statusCode;
                         ctx.body = {
                             error: nerr.error,
