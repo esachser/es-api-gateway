@@ -58,7 +58,7 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
         if (this._oasValidator !== undefined) {
             const method = _.get(context.properties, this._propMethod);
             let path = _.get(context.properties, this._propUrl, '');
-            const body = _.get(context.properties, this._propBody, {});
+            const body = _.get(context.properties, this._propBody);
             const headers = _.get(context.properties, this._propHeaders);
             const query = _.get(context.properties, this._propQuery, {});
             const params = _.get(context.properties, this._propParams, {});
@@ -69,7 +69,9 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
 
             try {
                 // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
-                const json = await decodeToObject(body);
+                const json = await decodeToObject(body, { 
+                    parser: 'EsJsonParser'
+                });
                 
                 const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body: json, path: params, header: headers, query });
                 context.logger.debug('OAS Validator result', _.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));

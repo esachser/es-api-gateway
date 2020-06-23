@@ -5,7 +5,7 @@ import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
-import { decodeToObject } from '../core/parsers';
+import { decodeToObject, encodeToStream } from '../core/parsers';
 import stream from 'stream';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -102,6 +102,15 @@ export class EsHttpTransport implements IEsTransport {
                     const statusCode = _.get(ctx.iesContext.properties, 'response.status');
                     ctx.status = _.isNumber(statusCode) ? statusCode : 404;
                     ctx.body = _.get(ctx.iesContext.properties, 'response.body');
+                    //const encoding = 'deflate';
+                    //ctx.set('content-encoding', encoding);
+                    //ctx.remove('content-length');
+                    // ctx.body = encodeToStream(Buffer.from(_.get(ctx.iesContext.properties, 'response.body')), { 
+                    //     parser: 'Compression', 
+                    //     opts: {
+                    //         encoding
+                    //     }
+                    // });
                 }
                 catch (err) {
                     if (err instanceof EsError && err.statusCode < 500) {
@@ -115,7 +124,7 @@ export class EsHttpTransport implements IEsTransport {
                         const nerr = err instanceof EsError ?
                             new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
                             new EsTransportError(EsHttpTransport.name, 'Error running middlewares', {message: err.message});
-                            
+
                         ctx.status = nerr.statusCode;
                         ctx.body = {
                             error: nerr.error,

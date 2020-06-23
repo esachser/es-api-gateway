@@ -17,9 +17,11 @@ const envs_1 = require("./envs");
 const http_server_1 = require("./util/http-server");
 const schemas_1 = require("./core/schemas");
 const authenticators_1 = require("./authenticators");
+const parsers_1 = require("./parsers");
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         yield config_1.loadConfig();
+        parsers_1.loadParsers();
         middlewares_1.loadMiddlewares();
         middlewares_1.loadCustomMiddlewares();
         transports_1.loadTransports();

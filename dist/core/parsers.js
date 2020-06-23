@@ -7,15 +7,8 @@ exports.encodeToStream = exports.decodeToObject = exports.addParser = void 0;
 const logger_1 = require("../util/logger");
 const stream_1 = __importDefault(require("stream"));
 const util_1 = __importDefault(require("util"));
-const JSONStream_1 = __importDefault(require("JSONStream"));
-const lodash_1 = __importDefault(require("lodash"));
 const pipeline = util_1.default.promisify(stream_1.default.pipeline);
-const parsers = {
-    'JSONParser': {
-        decode: JSONStream_1.default.parse,
-        encode: JSONStream_1.default.stringify
-    }
-};
+const parsers = {};
 function addParser(type, parser) {
     try {
         logger_1.logger.info(`Loading ${type} Parser`);
@@ -27,25 +20,18 @@ function addParser(type, parser) {
 }
 exports.addParser = addParser;
 function decodeToObject(data, ...parsersDefs) {
+    if (data === undefined) {
+        return Promise.resolve(data);
+    }
     if (data instanceof Buffer) {
+        if (data.length === 0) {
+            return Promise.resolve(undefined);
+        }
         data = stream_1.default.Readable.from(data);
     }
     const ndata = data;
     return new Promise((resolve, reject) => {
         try {
-            const jsonstream = JSONStream_1.default.parse('$*');
-            const result = {};
-            jsonstream.on('data', data => {
-                const key = data.key;
-                const value = data.value;
-                lodash_1.default.set(result, key, value);
-            });
-            jsonstream.on('end', data => {
-                resolve(result);
-            });
-            jsonstream.on('error', err => {
-                reject(err);
-            });
             let st = ndata;
             if (parsersDefs.length > 0) {
                 for (const p of parsersDefs) {
@@ -58,7 +44,26 @@ function decodeToObject(data, ...parsersDefs) {
                     }
                 }
             }
-            st.pipe(jsonstream);
+            let result = {};
+            st.on('aborted', err => {
+                reject(err);
+            });
+            st.on('close', err => {
+                st.removeAllListeners('aborted');
+                st.removeAllListeners('close');
+                st.removeAllListeners('error');
+                st.removeAllListeners('data');
+                st.removeAllListeners('end');
+            });
+            st.on('error', err => {
+                reject(err);
+            });
+            st.on('data', data => {
+                result = data;
+            });
+            st.on('end', data => {
+                resolve(result);
+            });
         }
         catch (err) {
             reject(err);
@@ -67,6 +72,9 @@ function decodeToObject(data, ...parsersDefs) {
 }
 exports.decodeToObject = decodeToObject;
 function encodeToStream(data, ...parsersDefs) {
+    if (data === undefined) {
+        return data;
+    }
     if (data instanceof Buffer) {
         data = stream_1.default.Readable.from(data);
     }
@@ -78,7 +86,7 @@ function encodeToStream(data, ...parsersDefs) {
                 throw Error('No parser found');
             }
             else {
-                st = st.pipe(parser.decode(p.opts));
+                st = st.pipe(parser.encode(p.opts));
             }
         }
     }

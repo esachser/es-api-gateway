@@ -3,8 +3,7 @@ import stream from 'stream';
 import util from 'util';
 import JSONStream from 'JSONStream';
 import _ from "lodash";
-import es from 'event-stream';
-
+import zlib from 'zlib';
 
 const pipeline = util.promisify(stream.pipeline);
 
@@ -13,12 +12,7 @@ export interface IEsParser {
     encode(opts?: any): NodeJS.ReadWriteStream
 }
 
-const parsers: { [id: string]: IEsParser } = {
-    'JSONParser': {
-        decode: JSONStream.parse,
-        encode: JSONStream.stringify
-    }
-};
+const parsers: { [id: string]: IEsParser } = { };
 
 export function addParser(type: string, parser: IEsParser) {
     try {
@@ -30,28 +24,19 @@ export function addParser(type: string, parser: IEsParser) {
     }
 }
 
-export function decodeToObject(data: NodeJS.ReadableStream | Buffer, ...parsersDefs: Array<{ parser: string, opts?: any }>): Promise<any> {
+export function decodeToObject(data: NodeJS.ReadableStream | Buffer | undefined, ...parsersDefs: Array<{ parser: string, opts?: any }>): Promise<any> {
+    if (data === undefined) {
+        return Promise.resolve(data);
+    }
     if (data instanceof Buffer) {
+        if (data.length === 0) {
+            return Promise.resolve(undefined);
+        }
         data = stream.Readable.from(data) as NodeJS.ReadableStream;
     }
     const ndata = data;
     return new Promise((resolve, reject) => {
-        try {
-            const jsonstream = JSONStream.parse('$*');
-            const result: any = {};
-            jsonstream.on('data', data => {
-                const key = data.key;
-                const value = data.value;
-                _.set(result, key, value);
-            });
-            jsonstream.on('end', data => {
-                resolve(result)
-            });
-
-            jsonstream.on('error', err => {
-                reject(err);
-            });
-
+        try { 
             let st = ndata;
             if (parsersDefs.length > 0) {
                 for (const p of parsersDefs) {
@@ -64,7 +49,31 @@ export function decodeToObject(data: NodeJS.ReadableStream | Buffer, ...parsersD
                     }
                 }
             }
-            st.pipe(jsonstream);
+            let result: any = {};
+
+            st.on('aborted', err => {
+                reject(err);
+            });
+
+            st.on('close', err => {
+                st.removeAllListeners('aborted');
+                st.removeAllListeners('close');
+                st.removeAllListeners('error');
+                st.removeAllListeners('data');
+                st.removeAllListeners('end');
+            });
+
+            st.on('error', err => {
+                reject(err);
+            });
+
+            st.on('data', data => {
+                result = data;
+            });
+
+            st.on('end', data => {
+                resolve(result);
+            });            
         }
         catch (err) {
             reject(err);
@@ -73,10 +82,14 @@ export function decodeToObject(data: NodeJS.ReadableStream | Buffer, ...parsersD
 }
 
 
-export function encodeToStream(data: NodeJS.ReadableStream | Buffer, ...parsersDefs: Array<{ parser: string, opts?: any }>) {
+export function encodeToStream(data: NodeJS.ReadableStream | Buffer | undefined, ...parsersDefs: Array<{ parser: string, opts?: any }>) {
+    if (data === undefined) {
+        return data;
+    }
     if (data instanceof Buffer) {
         data = stream.Readable.from(data);
     }
+    
     let st = data;
     if (parsersDefs.length > 0) {
         for (const p of parsersDefs) {
@@ -85,7 +98,7 @@ export function encodeToStream(data: NodeJS.ReadableStream | Buffer, ...parsersD
                 throw Error('No parser found');
             }
             else {
-                st = st.pipe(parser.decode(p.opts));
+                st = st.pipe(parser.encode(p.opts));
             }
         }
     }

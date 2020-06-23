@@ -39,22 +39,14 @@ export function loadHttpServer() {
         }
     });
 
-    // app.use(koaBody({
-    //     includeUnparsed: true,
-    // }));
-
-    // app.use(async (ctx, next) => {
-    //     if (ctx.request.body !== undefined) {
-    //         const raw = ctx.request.body[unparsed];
-    //         ctx.request.parsedBody = ctx.request.body;
-    //         ctx.request.body = raw;
-    //     }
-    //     return next();
-    // });
-
     // Cria um buffer da entrada, que pode ser transformado em stream para leitura
     app.use(async (ctx,next) => {
-        ctx.request.body = await getRawBody(ctx.req);
+        if (ctx.req.readableLength > 0) {
+            ctx.request.body = await getRawBody(ctx.req);
+        }
+        else {
+            ctx.request.body = undefined;
+        }
         return next();
     });
 

@@ -81,6 +81,15 @@ let EsHttpTransport = /** @class */ (() => {
                         const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                         ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
                         ctx.body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
+                        //const encoding = 'deflate';
+                        //ctx.set('content-encoding', encoding);
+                        //ctx.remove('content-length');
+                        // ctx.body = encodeToStream(Buffer.from(_.get(ctx.iesContext.properties, 'response.body')), { 
+                        //     parser: 'Compression', 
+                        //     opts: {
+                        //         encoding
+                        //     }
+                        // });
                     }
                     catch (err) {
                         if (err instanceof errors_1.EsError && err.statusCode < 500) {

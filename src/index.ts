@@ -6,9 +6,11 @@ import { loadEnv } from './envs';
 import { loadHttpServer } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
+import { loadParsers } from './parsers';
 
 async function start() {
     await loadConfig();
+    loadParsers();
     loadMiddlewares();
     loadCustomMiddlewares();
     loadTransports();
