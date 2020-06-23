@@ -25,7 +25,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Criar Throw Error Middleware
 - [**OK**] Criar Catch Error Middleware
   - Setar tipo de response padrão por path
-- [**Não faz sentido**]ForEach Middleware
+- [**Não faz sentido**] ForEach Middleware
 - [**OK**] Cada Path no transporte HTTP pode ter middlewares
 - [**OK**] OpenAPIVerify Middleware deve retornar erro ou setar variável
 - Criar OAuth2 Middleware

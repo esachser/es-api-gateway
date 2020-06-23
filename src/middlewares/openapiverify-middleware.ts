@@ -80,7 +80,7 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
                     _.set(context.properties, this._propResult, undefined);
                 }
                 if (Boolean(this._throw)) {
-                    throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
+                    throw new EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', {message: err.message, name: err.name, stack:err.stack});
                 }
                 else {
                     context.logger.error('Error verifying OpenAPI Request', _.merge({}, err, EsOpenApiVerifyMiddleware.meta));

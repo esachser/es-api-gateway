@@ -39,18 +39,18 @@ export function loadHttpServer() {
         }
     });
 
-    app.use(koaBody({
-        includeUnparsed: true,
-    }));
+    // app.use(koaBody({
+    //     includeUnparsed: true,
+    // }));
 
-    app.use(async (ctx, next) => {
-        if (ctx.request.body !== undefined) {
-            const raw = ctx.request.body[unparsed];
-            ctx.request.parsedBody = ctx.request.body;
-            ctx.request.body = raw;
-        }
-        return next();
-    });
+    // app.use(async (ctx, next) => {
+    //     if (ctx.request.body !== undefined) {
+    //         const raw = ctx.request.body[unparsed];
+    //         ctx.request.parsedBody = ctx.request.body;
+    //         ctx.request.body = raw;
+    //     }
+    //     return next();
+    // });
 
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     

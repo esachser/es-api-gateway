@@ -16,7 +16,6 @@ exports.loadHttpServer = exports.httpRouter = void 0;
 const koa_1 = __importDefault(require("koa"));
 const koa_router_1 = __importDefault(require("koa-router"));
 const koa_helmet_1 = __importDefault(require("koa-helmet"));
-const koa_body_1 = __importDefault(require("koa-body"));
 const config_1 = require("./config");
 const logger_1 = require("./logger");
 const unparsed = Symbol.for('unparsedBody');
@@ -39,17 +38,17 @@ function loadHttpServer() {
             };
         }
     }));
-    app.use(koa_body_1.default({
-        includeUnparsed: true,
-    }));
-    app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
-        if (ctx.request.body !== undefined) {
-            const raw = ctx.request.body[unparsed];
-            ctx.request.parsedBody = ctx.request.body;
-            ctx.request.body = raw;
-        }
-        return next();
-    }));
+    // app.use(koaBody({
+    //     includeUnparsed: true,
+    // }));
+    // app.use(async (ctx, next) => {
+    //     if (ctx.request.body !== undefined) {
+    //         const raw = ctx.request.body[unparsed];
+    //         ctx.request.parsedBody = ctx.request.body;
+    //         ctx.request.body = raw;
+    //     }
+    //     return next();
+    // });
     app.use(exports.httpRouter.routes()).use(exports.httpRouter.allowedMethods());
     const server = app.listen(config_1.configuration.httpPort || 3000, () => {
         const { port } = server.address();

@@ -83,7 +83,7 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                             lodash_1.default.set(context.properties, this._propResult, undefined);
                         }
                         if (Boolean(this._throw)) {
-                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', err);
+                            throw new errors_1.EsMiddlewareError(EsOpenApiVerifyMiddleware.middlewareName, 'Error verifying OpenAPI Request', { message: err.message, name: err.name, stack: err.stack });
                         }
                         else {
                             context.logger.error('Error verifying OpenAPI Request', lodash_1.default.merge({}, err, EsOpenApiVerifyMiddleware.meta));

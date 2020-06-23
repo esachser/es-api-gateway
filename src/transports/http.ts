@@ -6,6 +6,7 @@ import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
+import { decodeToObject } from '../core/parsers';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -71,10 +72,11 @@ export class EsHttpTransport implements IEsTransport {
                             query: ctx.query,
                             path: allPath.substr(routeContextSize),
                             method: ctx.method,
-                            body: ctx.request.body,
+                            body: ctx.req,
                             parsedBody: ctx.request.parsedBody,
                             routePrefix: this.routeContext
                         },
+                        req: ctx.req,
                         httpctx: ctx
                     },
                     body: ctx.request.body,
@@ -85,6 +87,10 @@ export class EsHttpTransport implements IEsTransport {
                         uid: nanoid(12)
                     }
                 };
+
+                const json = await decodeToObject(context.properties.req);
+                //_.set(context.properties, 'request.body', json);
+                _.set(context.properties, 'request.parsedBody', json);
 
                 logger.info(`Started api with path ${context.properties.request.path}`);
 
