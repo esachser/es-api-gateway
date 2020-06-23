@@ -19,7 +19,6 @@ const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
-const parsers_1 = require("../core/parsers");
 const stream_1 = __importDefault(require("stream"));
 class ReadableFrom extends stream_1.default.Readable {
     constructor(opts, r) {
@@ -82,14 +81,13 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 if (path.startsWith('/')) {
                     path = path.substr(1);
                 }
-                const rbody = new ReadableFrom({}, parsers_1.encodeToStream(body, { parser: 'JSONParser' }));
                 try {
                     // Deleta host para evitar problemas na conexão https
                     delete headers['host'];
                     const res = yield this.got(path, {
                         prefixUrl,
                         method,
-                        body: rbody,
+                        body,
                         headers,
                         searchParams: query,
                         encoding,

@@ -57,11 +57,10 @@ let EsHttpTransport = /** @class */ (() => {
                                 query: ctx.query,
                                 path: allPath.substr(routeContextSize),
                                 method: ctx.method,
-                                body: ctx.req,
+                                body: ctx.request.body,
                                 parsedBody: ctx.request.parsedBody,
                                 routePrefix: this.routeContext
                             },
-                            req: ctx.req,
                             httpctx: ctx
                         },
                         body: ctx.request.body,
@@ -72,8 +71,7 @@ let EsHttpTransport = /** @class */ (() => {
                             uid: nanoid_1.nanoid(12)
                         }
                     };
-                    const json = yield parsers_1.decodeToObject(context.properties.req);
-                    const json2 = yield parsers_1.decodeToObject(context.properties.req);
+                    const json = yield parsers_1.decodeToObject(context.properties.request.body);
                     //_.set(context.properties, 'request.body', json);
                     lodash_1.default.set(context.properties, 'request.parsedBody', json);
                     logger_1.logger.info(`Started api with path ${context.properties.request.path}`);

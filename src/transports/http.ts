@@ -1,12 +1,12 @@
 import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
 import { httpRouter } from '../util/http-server';
 import _ from 'lodash';
-import Router from 'koa-router';
 import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import { decodeToObject } from '../core/parsers';
+import stream from 'stream';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -72,11 +72,10 @@ export class EsHttpTransport implements IEsTransport {
                             query: ctx.query,
                             path: allPath.substr(routeContextSize),
                             method: ctx.method,
-                            body: ctx.req,
+                            body: ctx.request.body,
                             parsedBody: ctx.request.parsedBody,
                             routePrefix: this.routeContext
                         },
-                        req: ctx.req,
                         httpctx: ctx
                     },
                     body: ctx.request.body,
@@ -88,7 +87,7 @@ export class EsHttpTransport implements IEsTransport {
                     }
                 };
 
-                const json = await decodeToObject(context.properties.req);
+                const json = await decodeToObject(context.properties.request.body);
                 //_.set(context.properties, 'request.body', json);
                 _.set(context.properties, 'request.parsedBody', json);
 

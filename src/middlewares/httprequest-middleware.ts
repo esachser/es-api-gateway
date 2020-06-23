@@ -87,15 +87,13 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
             path = path.substr(1);
         }
 
-        const rbody = new ReadableFrom({},encodeToStream(body, { parser: 'JSONParser' }));
-
         try {
             // Deleta host para evitar problemas na conexão https
             delete headers['host'];
             const res = await this.got(path, {
                 prefixUrl,
                 method,
-                body: rbody,
+                body,
                 headers,
                 searchParams: query,
                 encoding,

@@ -52,6 +52,12 @@ export function loadHttpServer() {
     //     return next();
     // });
 
+    // Cria um buffer da entrada, que pode ser transformado em stream para leitura
+    app.use(async (ctx,next) => {
+        ctx.request.body = await getRawBody(ctx.req);
+        return next();
+    });
+
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     
     const server = app.listen(configuration.httpPort || 3000, () => {
