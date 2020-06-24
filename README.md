@@ -36,8 +36,15 @@ Aspectos que devem ser vistos:
 - [**OK**] Remover uso do vm2 para usar vm
 - [**OK**] Execute JS middleware
 - Parsers de entrada e saída
-  - **Entrada**: Executar transformação de Buffer para JSON
-  - **Saída**: Executar transformação de JSON para BUffer
+  - **Entrada**: Executar transformação de Buffer para any usando streams
+  - **Saída**: Executar transformação de any usando streams
+  - JSON parser
+  - Compression parser
+  - String parser
+  - Form parser
+  - XML parser
+  - Multipart parser
+  - Mime type parser
   - Sempre obedecendo um media-type
 - HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - Estudar a adição dos conceitos SOAP
