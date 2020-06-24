@@ -4,7 +4,7 @@ import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
 import { EsMiddlewareError } from '../core/errors';
-import { decodeToObject } from '../core/parsers';
+import parsers from '../core/parsers';
 
 export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -69,8 +69,10 @@ export class EsOpenApiVerifyMiddleware extends EsMiddleware {
 
             try {
                 // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
-                const json = await decodeToObject(body, { 
-                    parser: 'EsJsonParser'
+                const json = await parsers.transform(body, {
+                    bta: {
+                        parser: 'EsJson'
+                    }
                 });
                 
                 const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body: json, path: params, header: headers, query });

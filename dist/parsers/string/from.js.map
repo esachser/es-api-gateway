@@ -1,0 +1,1 @@
+{"version":3,"file":"from.js","sourceRoot":"","sources":["../../../src/parsers/string/from.ts"],"names":[],"mappings":";;AAGA,MAAM,YAAY,GAAmB;IACjC,oBAAoB,CAAC,KAAU,EAAE,IAAS;QACtC,OAAO,OAAO,CAAC,OAAO,CAAC,MAAM,CAAC,IAAI,CAAC,KAAK,CAAC,CAAC,CAAC;IAC/C,CAAC;CACJ,CAAA;AAED,kBAAe,YAAY,CAAC"}

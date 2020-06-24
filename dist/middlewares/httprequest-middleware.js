@@ -19,17 +19,6 @@ const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
-const stream_1 = __importDefault(require("stream"));
-class ReadableFrom extends stream_1.default.Readable {
-    constructor(opts, r) {
-        super(opts);
-        this._readable = r;
-    }
-    _read(size) {
-        const v = this._readable.read(size);
-        this.push(v);
-    }
-}
 let EsHttpRequestMiddleware = /** @class */ (() => {
     class EsHttpRequestMiddleware extends core_1.EsMiddleware {
         /**

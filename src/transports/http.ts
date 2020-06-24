@@ -5,8 +5,7 @@ import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
-import { decodeToObject, encodeToStream } from '../core/parsers';
-import stream from 'stream';
+import parsers from '../core/parsers';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -101,18 +100,40 @@ export class EsHttpTransport implements IEsTransport {
                     ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
                     const statusCode = _.get(ctx.iesContext.properties, 'response.status');
                     ctx.status = _.isNumber(statusCode) ? statusCode : 404;
-                    ctx.body = _.get(ctx.iesContext.properties, 'response.body');
-                    //const encoding = 'deflate';
-                    //ctx.set('content-encoding', encoding);
-                    //ctx.remove('content-length');
-                    // ctx.body = encodeToStream(Buffer.from(_.get(ctx.iesContext.properties, 'response.body')), { 
-                    //     parser: 'Compression', 
-                    //     opts: {
-                    //         encoding
+                    const body = _.get(ctx.iesContext.properties, 'response.body');
+                    // const bodyJson = await parsers.transform(body, {
+                    //     bta: {
+                    //         parser: 'EsJson'
                     //     }
+                    // });
+                    // const bodyXml = await parsers.transform(bodyJson, {
+                    //     atb: {
+                    //         parser: 'EsXml'
+                    //     }
+                    // });
+                    // ctx.set('content-type', 'application/xml');
+                    ctx.body = body;
+                    //ctx.body = _.get(ctx.iesContext.properties, 'response.body');
+                    // const encoding = 'deflate';
+                    // ctx.set('content-encoding', encoding);
+                    // ctx.remove('content-length');
+                    // ctx.body = await parsers.transform(_.get(ctx.iesContext.properties, 'response.body'), {
+                    //     btb: [
+                    //         {
+                    //             parser: 'EsCompress',
+                    //             opts: {
+                    //                 encoding
+                    //             }
+                    //         }
+                    //     ]
                     // });
                 }
                 catch (err) {
+                    for (const key in _.get(ctx.iesContext.properties, 'response.headers', {})) {
+                        ctx.remove(key);
+                    }
+                    ctx.set('host', 'es-api-gateway 0.1.0');
+                    ctx.remove('content-encoding');
                     if (err instanceof EsError && err.statusCode < 500) {
                         ctx.status = err.statusCode;
                         ctx.body = {
@@ -132,6 +153,7 @@ export class EsHttpTransport implements IEsTransport {
                         };
                         err = nerr;
                     }
+                    
                     context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
                 }
 

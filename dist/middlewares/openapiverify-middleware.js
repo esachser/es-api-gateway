@@ -18,7 +18,7 @@ const lodash_1 = __importDefault(require("lodash"));
 const swagger_parser_1 = __importDefault(require("@apidevtools/swagger-parser"));
 const oas3_chow_chow_1 = __importDefault(require("oas3-chow-chow"));
 const errors_1 = require("../core/errors");
-const parsers_1 = require("../core/parsers");
+const parsers_1 = __importDefault(require("../core/parsers"));
 let EsOpenApiVerifyMiddleware = /** @class */ (() => {
     class EsOpenApiVerifyMiddleware extends core_1.EsMiddleware {
         /**
@@ -73,8 +73,10 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
                     }
                     try {
                         // Fazer parsing do body para JSON, mesmo que venha XML ou outra coisa.
-                        const json = yield parsers_1.decodeToObject(body, {
-                            parser: 'EsJsonParser'
+                        const json = yield parsers_1.default.transform(body, {
+                            bta: {
+                                parser: 'EsJson'
+                            }
                         });
                         const reqMeta = this._oasValidator.validateRequestByPath(path, method, { body: json, path: params, header: headers, query });
                         context.logger.debug('OAS Validator result', lodash_1.default.merge({}, reqMeta, EsOpenApiVerifyMiddleware.meta, context.meta));

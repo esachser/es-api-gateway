@@ -5,22 +5,7 @@ import got, { Got } from 'got';
 import Keyv  from 'keyv';
 import { nanoid } from 'nanoid';
 import { EsMiddlewareError } from '../core/errors';
-import { encodeToStream } from '../core/parsers';
 import stream from 'stream';
-
-class ReadableFrom extends stream.Readable {
-    _readable: NodeJS.ReadableStream;
-
-    constructor(opts:stream.ReadableOptions, r: NodeJS.ReadableStream) {
-        super(opts);
-        this._readable = r;
-    }
-
-    _read(size: number) {
-        const v = this._readable.read(size);
-        this.push(v);
-    }
-}
 
 export class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;

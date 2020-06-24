@@ -1,0 +1,49 @@
+---
+    transports:
+    - type: EsHttpTransport
+      id: http
+      parameters:
+        routeContext: "/api/got/v3/teste"
+        routes:
+          "/":
+          - method: GET
+            mids: []
+          - method: POST
+            mids: []
+      mids:
+      - type: EsMetricsMiddleware
+        data:
+          prop: response.headers.timems
+    execution:
+    - type: EsPropertyMiddleware
+      after: true
+      data:
+        name: response.headers.oasRes
+        expression: ctx.properties.oasRes
+    - type: EsPropertyMiddleware
+      after: false
+      data:
+        name: request.prefixUrl
+        value: https://httpbin.org/
+    - type: EsPropertyMiddleware
+      after: false
+      data:
+        name: urlRequest
+        expression: String(ctx.properties.request?.method).toLowerCase()
+    - type: EsPropertyMiddleware
+      after: false
+      data:
+        name: urlRequest2
+        expression: _.toLower(_.toString(_.get(ctx.properties, 'request.method', '')))
+    - type: EsHttpRequestMiddleware
+      after: false
+      data:
+        cache:
+          enabled: true
+          maxAge: 100000
+          maxSize: 10000
+        prefixUrl: request.prefixUrl
+        url: urlRequest2
+    logging:
+      level: info
+    

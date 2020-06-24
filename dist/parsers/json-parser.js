@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const JSONStream_1 = __importDefault(require("JSONStream"));
 const stream_1 = __importDefault(require("stream"));
 const lodash_1 = __importDefault(require("lodash"));
 class JSONParserTransform extends stream_1.default.Transform {
@@ -35,7 +34,7 @@ class JSONParserTransform extends stream_1.default.Transform {
 }
 const EsJsonParser = {
     decode: (opts) => new JSONParserTransform(opts),
-    encode: JSONStream_1.default.stringify
+    encode: (opts) => new stream_1.default.PassThrough()
 };
 exports.default = EsJsonParser;
 //# sourceMappingURL=json-parser.js.map

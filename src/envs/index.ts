@@ -8,6 +8,7 @@ import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, crea
 import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
+import YAML from 'yaml';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -17,11 +18,25 @@ interface IEsApi {
 
 let apis: { [id: string]: IEsApi } = {};
 
+async function readFileToObject(fname: string) {
+    const fileContents = (await fsasync.readFile(fname)).toString();
+    const ext = path.extname(fname);
+
+    if (ext === '.json') {
+        return JSON.parse(fileContents);
+    }
+    else if (ext === '.yaml') {
+        return YAML.parse(fileContents);
+    }
+}
+
 async function loadApiFile(fname: string) {
-    const apiJson = JSON.parse((await fsasync.readFile(fname)).toString());
+    const apiJson = await readFileToObject(fname);
 
     logger.debug(apiJson);
-    fname = path.basename(fname, '.json');
+    const ext = path.extname(fname);
+
+    fname = path.basename(fname, ext);
 
     let api: IEsApi = apis[fname] || {
         transports: [],
@@ -86,7 +101,7 @@ async function loadApiFile(fname: string) {
 async function reloadEnv(dir: string) {
     const finfos = await fsasync.readdir(dir, { withFileTypes: true });
 
-    finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(finfo => {
+    finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml') )).forEach(finfo => {
         logger.info(`Loading API ${finfo.name}`);
 
         loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
@@ -112,7 +127,7 @@ export async function loadEnv(envName: string) {
         if (envFinfo.isDirectory()) {
             reloadEnv(envDir);
             watcher = fs.watch(envDir, (ev, fname) => {
-                if (fname.endsWith('.json')) {
+                if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
                     // reloadEnv(envDir);
                     logger.info(`Reloading ${fname}.`);
                     loadApiFile(path.resolve(envDir, fname)).catch(err => {

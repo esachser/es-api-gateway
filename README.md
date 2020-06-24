@@ -35,17 +35,19 @@ Aspectos que devem ser vistos:
 - [**OK**] Erros na execução do middleware geram retorno padrão
 - [**OK**] Remover uso do vm2 para usar vm
 - [**OK**] Execute JS middleware
-- Parsers de entrada e saída
-  - **Entrada**: Executar transformação de Buffer para any usando streams
-  - **Saída**: Executar transformação de any usando streams
-  - JSON parser
-  - Compression parser
-  - String parser
-  - Form parser
-  - XML parser
+- Parsers de entrada, saída, e transformação
+  - **Entrada**: Executar transformação de Buffer para any
+  - **Saída**: Executar transformação de any para Buffer
+  - [**OK**] JSON parser
+  - [**OK**] Compression parser
+  - [**OK**] String parser
+  - [**OK**] Form parser
+  - [**OK**] XML parser
   - Multipart parser
   - Mime type parser
-  - Sempre obedecendo um media-type
+    - Sempre obedecendo um media-type
+- [**OK**] YAML API
+- Parse Middleware
 - HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC

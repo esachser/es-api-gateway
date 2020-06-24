@@ -22,13 +22,27 @@ const logger_1 = require("../util/logger");
 const core_1 = require("../core");
 const http_server_1 = require("../util/http-server");
 const schemas_1 = require("../core/schemas");
+const yaml_1 = __importDefault(require("yaml"));
 let apis = {};
+function readFileToObject(fname) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fileContents = (yield promises_1.default.readFile(fname)).toString();
+        const ext = path_1.default.extname(fname);
+        if (ext === '.json') {
+            return JSON.parse(fileContents);
+        }
+        else if (ext === '.yaml') {
+            return yaml_1.default.parse(fileContents);
+        }
+    });
+}
 function loadApiFile(fname) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const apiJson = JSON.parse((yield promises_1.default.readFile(fname)).toString());
+        const apiJson = yield readFileToObject(fname);
         logger_1.logger.debug(apiJson);
-        fname = path_1.default.basename(fname, '.json');
+        const ext = path_1.default.extname(fname);
+        fname = path_1.default.basename(fname, ext);
         let api = apis[fname] || {
             transports: [],
             central: {},
@@ -79,7 +93,7 @@ function loadApiFile(fname) {
 function reloadEnv(dir) {
     return __awaiter(this, void 0, void 0, function* () {
         const finfos = yield promises_1.default.readdir(dir, { withFileTypes: true });
-        finfos.filter(f => f.isFile() && f.name.endsWith('.json')).forEach(finfo => {
+        finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml'))).forEach(finfo => {
             logger_1.logger.info(`Loading API ${finfo.name}`);
             loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(e => {
                 logger_1.logger.error(`Error loading file ${finfo.name}`, e);
@@ -101,7 +115,7 @@ function loadEnv(envName) {
             if (envFinfo.isDirectory()) {
                 reloadEnv(envDir);
                 watcher = fs_1.default.watch(envDir, (ev, fname) => {
-                    if (fname.endsWith('.json')) {
+                    if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
                         // reloadEnv(envDir);
                         logger_1.logger.info(`Reloading ${fname}.`);
                         loadApiFile(path_1.default.resolve(envDir, fname)).catch(err => {

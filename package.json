@@ -25,6 +25,7 @@
     "content-type": "^1.0.4",
     "decache": "^4.6.0",
     "event-stream": "^4.0.1",
+    "fast-xml-parser": "^3.17.4",
     "got": "^11.2.0",
     "ioredis": "^4.17.3",
     "jose": "^1.27.1",
@@ -42,7 +43,8 @@
     "stringify-object": "^3.3.0",
     "winston": "^3.2.1",
     "winston-transport": "^4.3.0",
-    "workerpool": "^6.0.0"
+    "workerpool": "^6.0.0",
+    "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@types/content-type": "^1.1.3",
