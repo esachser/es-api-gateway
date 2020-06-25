@@ -39,6 +39,7 @@
     "koa-router": "^8.0.8",
     "nanoid": "^3.1.9",
     "oas3-chow-chow": "^1.1.0",
+    "qs": "^6.9.4",
     "raw-body": "^2.4.1",
     "stringify-object": "^3.3.0",
     "winston": "^3.2.1",

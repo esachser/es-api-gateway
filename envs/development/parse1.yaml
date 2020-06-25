@@ -13,8 +13,20 @@ execution:
   - type: EsDecodeMiddleware
     after: false
     data:
-      destProp: response.body
       parserOpts:
         ignoreAttributes: true
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/json
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.status
+      value: 200
+  - type: EsEncodeMiddleware
+    after: false
+    data: {}
 logging:
   level: info

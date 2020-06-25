@@ -12,30 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsDecodeMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsEncodeMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const content_type_1 = __importDefault(require("content-type"));
 const parsers_1 = __importDefault(require("../core/parsers"));
-let EsDecodeMiddleware = /** @class */ (() => {
-    class EsDecodeMiddleware extends core_1.EsMiddleware {
+let EsEncodeMiddleware = /** @class */ (() => {
+    class EsEncodeMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
         constructor(values, after, nextMiddleware) {
             super(after, nextMiddleware);
-            this._sourceProp = lodash_1.default.get(values, 'sourceProp', 'request.body');
-            this._destProp = lodash_1.default.get(values, 'destProp', 'parsedBody');
-            this._contentType = lodash_1.default.get(values, 'contentType', 'request.headers.content-type');
+            this._sourceProp = lodash_1.default.get(values, 'sourceProp', 'parsedBody');
+            this._destProp = lodash_1.default.get(values, 'destProp', 'response.body');
+            this._contentType = lodash_1.default.get(values, 'contentType', 'response.headers.content-type');
             if (!lodash_1.default.isString(this._sourceProp)) {
-                throw new errors_1.EsMiddlewareError(EsDecodeMiddleware.name, 'sourceProp MUST be String');
+                throw new errors_1.EsMiddlewareError(EsEncodeMiddleware.name, 'sourceProp MUST be String');
             }
             if (!lodash_1.default.isString(this._destProp)) {
-                throw new errors_1.EsMiddlewareError(EsDecodeMiddleware.name, 'destProp MUST be String');
+                throw new errors_1.EsMiddlewareError(EsEncodeMiddleware.name, 'destProp MUST be String');
             }
             if (!lodash_1.default.isString(this._contentType)) {
-                throw new errors_1.EsMiddlewareError(EsDecodeMiddleware.name, 'contentType MUST be String');
+                throw new errors_1.EsMiddlewareError(EsEncodeMiddleware.name, 'contentType MUST be String');
             }
             this._parserOpts = lodash_1.default.get(values, 'parserOpts');
         }
@@ -50,10 +50,10 @@ let EsDecodeMiddleware = /** @class */ (() => {
                 // Só faz algo se
                 // body é buffer
                 // cType é String
-                if (lodash_1.default.isBuffer(body) && lodash_1.default.isString(cTypeStr)) {
+                if (lodash_1.default.isString(cTypeStr)) {
                     const cType = content_type_1.default.parse(cTypeStr);
                     const res = yield parsers_1.default.transform(body, {
-                        bta: {
+                        atb: {
                             parser: 'EsMediaType',
                             opts: Object.assign(Object.assign({}, this._parserOpts), { mediaType: cType === null || cType === void 0 ? void 0 : cType.type, encoding: (_a = cType === null || cType === void 0 ? void 0 : cType.parameters) === null || _a === void 0 ? void 0 : _a.charset })
                         }
@@ -63,18 +63,18 @@ let EsDecodeMiddleware = /** @class */ (() => {
             });
         }
     }
-    EsDecodeMiddleware.isInOut = true;
-    EsDecodeMiddleware.middlewareName = 'EsDecodeMiddleware';
-    EsDecodeMiddleware.meta = { middleware: EsDecodeMiddleware.middlewareName };
-    return EsDecodeMiddleware;
+    EsEncodeMiddleware.isInOut = true;
+    EsEncodeMiddleware.middlewareName = 'EsEncodeMiddleware';
+    EsEncodeMiddleware.meta = { middleware: EsEncodeMiddleware.middlewareName };
+    return EsEncodeMiddleware;
 })();
-exports.EsDecodeMiddleware = EsDecodeMiddleware;
+exports.EsEncodeMiddleware = EsEncodeMiddleware;
 ;
-exports.MiddlewareCtor = EsDecodeMiddleware;
+exports.MiddlewareCtor = EsEncodeMiddleware;
 exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsDecodeMiddleware",
-    "title": "Decode Middleware",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsEncodeMiddleware",
+    "title": "Encode Middleware",
     "type": "object",
     "additionalProperties": false,
     "properties": {
@@ -95,4 +95,4 @@ exports.MiddlewareSchema = {
         }
     }
 };
-//# sourceMappingURL=decode-middleware.js.map
+//# sourceMappingURL=encode-middleware.js.map

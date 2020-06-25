@@ -35,6 +35,7 @@ const to_3 = __importDefault(require("./form/to"));
 const from_4 = __importDefault(require("./xml/from"));
 const to_4 = __importDefault(require("./xml/to"));
 const to_5 = __importStar(require("./mediatype/to"));
+const from_5 = __importStar(require("./mediatype/from"));
 function loadParsers() {
     parsers_1.addAnyToBuffer('EsJson', from_1.default);
     parsers_1.addBufferToAny('EsJson', to_1.default);
@@ -49,6 +50,11 @@ function loadParsers() {
     to_5.addMediaTypeParserToGeneral('xml', to_4.default);
     to_5.addMediaTypeParserToGeneral('form-urlencoded', to_3.default);
     to_5.addMediaTypeParserToGeneral('json', to_1.default);
+    parsers_1.addAnyToBuffer('EsMediaType', from_5.default);
+    from_5.addMediaTypeParserFromExact('application/xml', from_4.default);
+    from_5.addMediaTypeParserFromGeneral('xml', from_4.default);
+    from_5.addMediaTypeParserFromGeneral('form-urlencoded', from_3.default);
+    from_5.addMediaTypeParserFromGeneral('json', from_1.default);
     parsers_1.addBufferToBuffer('EsCompress', compress_1.default);
     parsers_1.addBufferToBuffer('EsDecompress', decompress_1.default);
 }

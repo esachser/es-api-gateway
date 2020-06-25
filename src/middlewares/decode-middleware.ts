@@ -75,9 +75,6 @@ export const MiddlewareSchema = {
     "title": "Decode Middleware",
     "type": "object",
     "additionalProperties": false,
-    "required": [
-        "destProp",
-    ],
     "properties": {
         "sourceProp": {
             "type": "string",

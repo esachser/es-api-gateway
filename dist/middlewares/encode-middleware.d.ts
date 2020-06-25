@@ -1,7 +1,7 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsDecodeMiddleware extends EsMiddleware {
+export declare class EsEncodeMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = "EsDecodeMiddleware";
+    static readonly middlewareName = "EsEncodeMiddleware";
     static readonly meta: {
         middleware: string;
     };
