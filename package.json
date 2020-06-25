@@ -59,6 +59,7 @@
     "@types/koa-router": "^7.4.1",
     "@types/lodash": "^4.14.152",
     "@types/stringify-object": "^3.3.0",
+    "@types/type-is": "^1.6.3",
     "@types/workerpool": "^5.0.1"
   }
 }

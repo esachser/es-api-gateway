@@ -1,0 +1,20 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: http
+    parameters:
+      routeContext: "/api/parser/v1"
+      routes:
+        "/":
+          - method: POST
+            mids: []
+    mids: []
+execution:
+  - type: EsDecodeMiddleware
+    after: false
+    data:
+      destProp: response.body
+      parserOpts:
+        ignoreAttributes: true
+logging:
+  level: info

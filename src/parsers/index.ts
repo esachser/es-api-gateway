@@ -9,6 +9,8 @@ import EsFormFrom from "./form/from";
 import EsFormTo from "./form/to";
 import EsXmlFrom from "./xml/from";
 import EsXmlTo from "./xml/to";
+import EsMediaTypeTo, { addMediaTypeParserToExact, addMediaTypeParserToGeneral } from "./mediatype/to";
+import EsMediaTypeFrom, { addMediaTypeParserFromGeneral, addMediaTypeParserFromExact } from "./mediatype/from";
 
 
 export function loadParsers() {
@@ -23,6 +25,18 @@ export function loadParsers() {
 
     addAnyToBuffer('EsXml', EsXmlFrom);
     addBufferToAny('EsXml', EsXmlTo);
+
+    addBufferToAny('EsMediaType', EsMediaTypeTo);
+    addMediaTypeParserToExact('application/xml', EsXmlTo);
+    addMediaTypeParserToGeneral('xml', EsXmlTo);
+    addMediaTypeParserToGeneral('form-urlencoded', EsFormTo);
+    addMediaTypeParserToGeneral('json', EsJsonTo);
+
+    addAnyToBuffer('EsMediaType', EsMediaTypeFrom);
+    addMediaTypeParserFromExact('application/xml', EsXmlFrom);
+    addMediaTypeParserFromGeneral('xml', EsXmlFrom);
+    addMediaTypeParserFromGeneral('form-urlencoded', EsFormFrom);
+    addMediaTypeParserFromGeneral('json', EsJsonFrom);
 
     addBufferToBuffer('EsCompress', EsCompress);
     addBufferToBuffer('EsDecompress', EsDecompress);

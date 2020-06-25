@@ -38,17 +38,18 @@ Aspectos que devem ser vistos:
 - Parsers de entrada, saída, e transformação
   - **Entrada**: Executar transformação de Buffer para any
   - **Saída**: Executar transformação de any para Buffer
+  - **Transformação**: Executar transformação de Buffer para Buffer
   - [**OK**] JSON parser
   - [**OK**] Compression parser
   - [**OK**] String parser
   - [**OK**] Form parser
   - [**OK**] XML parser
-  - Multipart parser
-  - Mime type parser
+  - [**Não processará**] Multipart parser
+  - [**OK**] Media type parser
     - Sempre obedecendo um media-type
 - [**OK**] YAML API
-- Parse Middleware
-- HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
+- [**OK**] Decode Middleware
+- [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC
 - Tipos de Logger na configuração global
@@ -59,6 +60,7 @@ Aspectos que devem ser vistos:
 - Salvar no Redis um registro Middleware
 - Rate Limiting
 - Quotas
+- Limite de tamanho do body no getRawBody
 - init_mid --> transport_mid --> execution_mid
 
 ## Outros pontos
