@@ -16,6 +16,7 @@ import { MiddlewareCtor as EsCatchMiddlewareContructor, MiddlewareSchema as EsCa
 import { MiddlewareCtor as EsAuthenticateMiddlewareContructor, MiddlewareSchema as EsAuthenticateSchema } from './authenticate-middleware';
 import { MiddlewareCtor as EsExecJsMiddlewareContructor, MiddlewareSchema as EsExecJsSchema } from './execjs-middleware';
 import { MiddlewareCtor as EsDecodeMiddlewareContructor, MiddlewareSchema as EsDecodeSchema } from './decode-middleware';
+import { MiddlewareCtor as EsEncodeMiddlewareContructor, MiddlewareSchema as EsEncodeSchema } from './encode-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -43,6 +44,7 @@ export function loadMiddlewares() {
     addMiddleware('EsAuthenticateMiddleware', EsAuthenticateMiddlewareContructor, EsAuthenticateSchema);
     addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
     addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
+    addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
 };
 
 export function loadCustomMiddlewares() {
