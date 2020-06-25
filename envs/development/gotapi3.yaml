@@ -16,11 +16,6 @@ transports:
           prop: response.headers.timems
 execution:
   - type: EsPropertyMiddleware
-    after: true
-    data:
-      name: response.headers.oasRes
-      expression: ctx.properties.oasRes
-  - type: EsPropertyMiddleware
     after: false
     data:
       name: request.prefixUrl
@@ -44,5 +39,23 @@ execution:
         maxSize: 10000
       prefixUrl: request.prefixUrl
       url: urlRequest2
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/json
+  - type: EsDecodeMiddleware
+    after: false
+    data: 
+      sourceProp: response.body
+      contentType: response.headers.content-type
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/xml
+  - type: EsEncodeMiddleware
+    after: false
+    data: {}
 logging:
   level: info

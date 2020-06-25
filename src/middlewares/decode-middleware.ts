@@ -48,7 +48,7 @@ export class EsDecodeMiddleware extends EsMiddleware {
         // Só faz algo se
         // body é buffer
         // cType é String
-        if (_.isBuffer(body) && _.isString(cTypeStr)) {
+        if ((_.isBuffer(body) || _.isString(body)) && _.isString(cTypeStr)) {
             const cType = contentType.parse(cTypeStr);
 
             const res = await parsers.transform(body, {

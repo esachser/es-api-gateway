@@ -50,7 +50,7 @@ let EsDecodeMiddleware = /** @class */ (() => {
                 // Só faz algo se
                 // body é buffer
                 // cType é String
-                if (lodash_1.default.isBuffer(body) && lodash_1.default.isString(cTypeStr)) {
+                if ((lodash_1.default.isBuffer(body) || lodash_1.default.isString(body)) && lodash_1.default.isString(cTypeStr)) {
                     const cType = content_type_1.default.parse(cTypeStr);
                     const res = yield parsers_1.default.transform(body, {
                         bta: {

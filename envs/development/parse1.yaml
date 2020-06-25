@@ -20,13 +20,13 @@ execution:
     data:
       name: response.headers.content-type
       value: application/json
+  - type: EsEncodeMiddleware
+    after: false
+    data: {}
   - type: EsPropertyMiddleware
     after: false
     data:
       name: response.status
       value: 200
-  - type: EsEncodeMiddleware
-    after: false
-    data: {}
 logging:
   level: info

@@ -49,6 +49,7 @@ Aspectos que devem ser vistos:
     - Sempre obedecendo um media-type
 - [**OK**] YAML API
 - [**OK**] Decode Middleware
+- [**OK**] Encode Middleware
 - [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC
