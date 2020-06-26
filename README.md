@@ -46,14 +46,13 @@ Aspectos que devem ser vistos:
   - [**OK**] XML parser
   - [**Não processará**] Multipart parser
   - [**OK**] Media type parser
-    - Sempre obedecendo um media-type
+    - [**OK**] Sempre obedecendo um media-type
 - [**OK**] YAML API
 - [**OK**] Decode Middleware
 - [**OK**] Encode Middleware
 - [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
-- Estudar a adição dos conceitos SOAP
 - Estudar chamada de GRPC
-- Tipos de Logger na configuração global
+  - Adicionar middleware cliente GRPC
 - Gerar JWS Middleware
 - Verificar JWS Middleware
 - Gerar JWE Middleware
@@ -63,6 +62,15 @@ Aspectos que devem ser vistos:
 - Quotas
 - Limite de tamanho do body no getRawBody
 - init_mid --> transport_mid --> execution_mid
+- Adicionar transporte GRPC
+- Adicionar transporte Kafka
+- Adicionar transporte Redis Pub/Sub
+- Adicionar transporte Redis Streams
+- Adicionar transportes de filas
+  - AMQP
+  - MQTT
+- Estudar a adição dos conceitos SOAP
+- Tipos de Logger na configuração global
 
 ## Outros pontos
 
