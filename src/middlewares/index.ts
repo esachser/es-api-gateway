@@ -17,6 +17,7 @@ import { MiddlewareCtor as EsAuthenticateMiddlewareContructor, MiddlewareSchema 
 import { MiddlewareCtor as EsExecJsMiddlewareContructor, MiddlewareSchema as EsExecJsSchema } from './execjs-middleware';
 import { MiddlewareCtor as EsDecodeMiddlewareContructor, MiddlewareSchema as EsDecodeSchema } from './decode-middleware';
 import { MiddlewareCtor as EsEncodeMiddlewareContructor, MiddlewareSchema as EsEncodeSchema } from './encode-middleware';
+import { MiddlewareCtor as EsGrpcRequestMiddlewareContructor, MiddlewareSchema as EsGrpcRequestSchema } from './grpcrequest-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -45,6 +46,7 @@ export function loadMiddlewares() {
     addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
     addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
     addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
+    addMiddleware('EsGrpcRequestMiddleware', EsGrpcRequestMiddlewareContructor, EsGrpcRequestSchema);
 };
 
 export function loadCustomMiddlewares() {

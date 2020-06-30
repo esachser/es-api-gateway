@@ -6,7 +6,7 @@ class EsError {
         this.error = error || 'Error';
         this.errorDescription = errorDescription || 'Contact administrator for more details';
         this.statusCode = statusCode || 500;
-        this.innerError = innerError;
+        this.innerError = Object.assign({ message: innerError === null || innerError === void 0 ? void 0 : innerError.message, stack: innerError === null || innerError === void 0 ? void 0 : innerError.stack, code: innerError === null || innerError === void 0 ? void 0 : innerError.code }, innerError);
         Error.captureStackTrace(this);
     }
 }

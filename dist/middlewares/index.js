@@ -20,6 +20,7 @@ const authenticate_middleware_1 = require("./authenticate-middleware");
 const execjs_middleware_1 = require("./execjs-middleware");
 const decode_middleware_1 = require("./decode-middleware");
 const encode_middleware_1 = require("./encode-middleware");
+const grpcrequest_middleware_1 = require("./grpcrequest-middleware");
 const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -44,6 +45,7 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsExecJsMiddleware', execjs_middleware_1.MiddlewareCtor, execjs_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsDecodeMiddleware', decode_middleware_1.MiddlewareCtor, decode_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsEncodeMiddleware', encode_middleware_1.MiddlewareCtor, encode_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsGrpcRequestMiddleware', grpcrequest_middleware_1.MiddlewareCtor, grpcrequest_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

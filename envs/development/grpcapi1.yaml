@@ -1,0 +1,86 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: http
+    parameters:
+      routeContext: "/api/grpc/v1/teste"
+      routes:
+        "/":
+          - method: GET
+            mids: []
+          - method: POST
+            mids: []
+    mids:
+      - type: EsMetricsMiddleware
+        data:
+          prop: response.headers.timems
+execution:
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: package
+      value: first
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: service
+      value: Greeter
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: method
+      value: Hello
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: addr
+      value: localhost:8080
+  - type: EsDecodeMiddleware
+    after: false
+    data:
+      parserOpts: {}
+  - type: EsSequenceMiddleware
+    after: false
+    data: 
+      mids:
+        - 
+          - type: EsMetricsMiddleware
+            data:
+              prop: response.headers.timerequest
+          - type: EsGrpcRequestMiddleware
+            after: false
+            data:
+              proto: 
+                options:
+                  go_package: ".;first"
+                nested:
+                  first:
+                    nested:
+                      Greeter:
+                        methods:
+                          Hello:
+                            requestType: HelloRequest
+                            responseType: HelloResponse
+                      HelloRequest:
+                        fields:
+                          name:
+                            type: string
+                            id: 1
+                      HelloResponse:
+                        fields:
+                          name:
+                            type: string
+                            id: 1
+              packageProp: package
+              serviceProp: service
+              methodProp: method
+              addressProp: addr
+              headersProp: headers
+              bodyProp: parsedBody
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.status
+      value: 200
+logging:
+  level: info

@@ -12,7 +12,7 @@ export abstract class EsError {
         this.error = error || 'Error';
         this.errorDescription = errorDescription || 'Contact administrator for more details';
         this.statusCode = statusCode || 500;
-        this.innerError = innerError;
+        this.innerError = { message: innerError?.message, stack: innerError?.stack, code: innerError?.code, ...innerError };
         Error.captureStackTrace(this);
     }
 }

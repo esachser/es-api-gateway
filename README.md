@@ -52,7 +52,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Encode Middleware
 - [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - Estudar chamada de GRPC
-  - Adicionar middleware cliente GRPC
+  - [**OK**] Adicionar middleware cliente GRPC - sem SSL ainda.
 - Gerar JWS Middleware
 - Verificar JWS Middleware
 - Gerar JWE Middleware
@@ -61,6 +61,7 @@ Aspectos que devem ser vistos:
 - Rate Limiting
 - Quotas
 - Limite de tamanho do body no getRawBody
+- Compound Middleware
 - init_mid --> transport_mid --> execution_mid
 - Adicionar transporte GRPC
 - Adicionar transporte Kafka
@@ -69,6 +70,7 @@ Aspectos que devem ser vistos:
 - Adicionar transportes de filas
   - AMQP
   - MQTT
+- Adicionar certificados de uso para clientes
 - Estudar a adição dos conceitos SOAP
 - Tipos de Logger na configuração global
 
