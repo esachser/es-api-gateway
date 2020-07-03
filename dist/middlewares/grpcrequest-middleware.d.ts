@@ -13,6 +13,11 @@ export declare class EsGrpcRequestMiddleware extends EsMiddleware {
     private _headersProp;
     private _addrProp;
     private _resultProp;
+    private _keyFile;
+    private _keyPassProp;
+    private _certFile;
+    private _certChainFile;
+    private _enableSsl;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
@@ -57,6 +62,25 @@ export declare const MiddlewareSchema: {
             minLegth: number;
         };
         resultProp: {
+            type: string;
+            minLegth: number;
+        };
+        enableSsl: {
+            type: string;
+        };
+        keyFile: {
+            type: string;
+            minLegth: number;
+        };
+        keyPassProp: {
+            type: string;
+            minLegth: number;
+        };
+        certFile: {
+            type: string;
+            minLegth: number;
+        };
+        certChainFile: {
             type: string;
             minLegth: number;
         };

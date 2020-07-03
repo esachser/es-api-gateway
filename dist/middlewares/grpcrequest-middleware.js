@@ -19,6 +19,7 @@ const errors_1 = require("../core/errors");
 const tmp_1 = __importDefault(require("tmp"));
 const promises_1 = __importDefault(require("fs/promises"));
 const proto_loader_1 = require("@grpc/proto-loader");
+const certs_1 = require("../util/certs");
 const grpc = require('@grpc/grpc-js');
 let EsGrpcRequestMiddleware = /** @class */ (() => {
     class EsGrpcRequestMiddleware extends core_1.EsMiddleware {
@@ -35,6 +36,11 @@ let EsGrpcRequestMiddleware = /** @class */ (() => {
             this._addrProp = lodash_1.default.get(values, 'addressProp', 'request.path');
             // this._credProp = _.get(values, 'headersProp', 'request.headers');
             this._resultProp = lodash_1.default.get(values, 'resultProp', 'response.body');
+            this._keyFile = lodash_1.default.get(values, 'keyFile', 'server.key');
+            this._keyPassProp = lodash_1.default.get(values, 'keyPassProp', 'keypass');
+            this._certFile = lodash_1.default.get(values, 'certFile', 'server.crt');
+            this._certChainFile = lodash_1.default.get(values, 'certChainFile', 'server.crt');
+            this._enableSsl = lodash_1.default.get(values, 'enableSsl', false);
             if (!lodash_1.default.isString(this._pkgProp)) {
                 throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'packageProp MUST be String');
             }
@@ -55,6 +61,21 @@ let EsGrpcRequestMiddleware = /** @class */ (() => {
             }
             if (!lodash_1.default.isString(this._resultProp)) {
                 throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'resultProp MUST be String');
+            }
+            if (!lodash_1.default.isString(this._keyFile)) {
+                throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'keyFile MUST be String');
+            }
+            if (!lodash_1.default.isString(this._keyPassProp)) {
+                throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'keyPassProp MUST be String');
+            }
+            if (!lodash_1.default.isString(this._certFile)) {
+                throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'certFile MUST be String');
+            }
+            if (!lodash_1.default.isString(this._certChainFile)) {
+                throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'certChainFile MUST be String');
+            }
+            if (!lodash_1.default.isBoolean(this._enableSsl)) {
+                throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'enableSsl MUST be Boolean');
             }
         }
         loadAsync(values) {
@@ -105,8 +126,21 @@ let EsGrpcRequestMiddleware = /** @class */ (() => {
                     if (!lodash_1.default.isString(addr)) {
                         throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'address MUST be string');
                     }
+                    let cred = grpc.credentials.createInsecure();
+                    if (this._enableSsl) {
+                        const pass = lodash_1.default.get(context.properties, this._keyPassProp);
+                        if (!lodash_1.default.isString(pass) && !lodash_1.default.isUndefined(pass)) {
+                            throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'The key password MUST be string or undefined');
+                        }
+                        const keys = {
+                            clientKey: yield certs_1.getPrivateKey(context.meta.api, this._keyFile, pass),
+                            certificate: yield certs_1.getPublicCert(context.meta.api, this._certFile),
+                            certChain: yield certs_1.getPublicCert(context.meta.api, this._certChainFile)
+                        };
+                        cred = grpc.credentials.createSsl(Buffer.from(keys.certificate), Buffer.from(keys.clientKey), Buffer.from(keys.certChain));
+                    }
                     const ClientCtor = this._grpcObj[pkg][service];
-                    const grpcClient = new ClientCtor(addr, grpc.credentials.createInsecure());
+                    const grpcClient = new ClientCtor(addr, cred);
                     const metadata = new grpc.Metadata();
                     if (lodash_1.default.isObjectLike(headers)) {
                         for (const key of Object.keys(headers)) {
@@ -176,6 +210,25 @@ exports.MiddlewareSchema = {
             "minLegth": 1
         },
         "resultProp": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "enableSsl": {
+            "type": "boolean"
+        },
+        "keyFile": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "keyPassProp": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "certFile": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "certChainFile": {
             "type": "string",
             "minLegth": 1
         }

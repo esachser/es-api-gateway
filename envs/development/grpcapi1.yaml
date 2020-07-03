@@ -35,6 +35,11 @@ execution:
     data:
       name: addr
       value: localhost:8080
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: keypass
+      value: esapi
   - type: EsDecodeMiddleware
     after: false
     data:
@@ -77,6 +82,7 @@ execution:
               addressProp: addr
               headersProp: headers
               bodyProp: parsedBody
+              enableSsl: false 
   - type: EsPropertyMiddleware
     after: false
     data:

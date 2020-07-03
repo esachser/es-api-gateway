@@ -51,8 +51,10 @@ Aspectos que devem ser vistos:
 - [**OK**] Decode Middleware
 - [**OK**] Encode Middleware
 - [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
-- Estudar chamada de GRPC
-  - [**OK**] Adicionar middleware cliente GRPC - sem SSL ainda.
+- [**OK**] Estudar chamada de GRPC
+  - [**OK**] Adicionar middleware cliente GRPC - com SSL
+- [**OK**] Certificados em diretório
+  - [**OK**] Um diretório para cada api
 - Gerar JWS Middleware
 - Verificar JWS Middleware
 - Gerar JWE Middleware
@@ -60,8 +62,9 @@ Aspectos que devem ser vistos:
 - Salvar no Redis um registro Middleware
 - Rate Limiting
 - Quotas
+- Chamada HTTP com certificado de cliente
 - Limite de tamanho do body no getRawBody
-- Compound Middleware
+- Compound Middleware --> Middlewares personalizados
 - init_mid --> transport_mid --> execution_mid
 - Adicionar transporte GRPC
 - Adicionar transporte Kafka
@@ -73,6 +76,7 @@ Aspectos que devem ser vistos:
 - Adicionar certificados de uso para clientes
 - Estudar a adição dos conceitos SOAP
 - Tipos de Logger na configuração global
+- APIs como JWE, para encriptar informações sensíveis
 
 ## Outros pontos
 

@@ -6,6 +6,8 @@ import fsasync from 'fs/promises';
 import { load as protoLoad } from '@grpc/proto-loader';
 import { GrpcObject } from '@grpc/grpc-js';
 import { ServiceClientConstructor } from '@grpc/grpc-js/build/src/make-client';
+import { getPrivateKey, getPublicCert } from '../util/certs';
+import { logger } from '../util/logger';
 
 const grpc = require('@grpc/grpc-js');
 
@@ -23,6 +25,11 @@ export class EsGrpcRequestMiddleware extends EsMiddleware {
     private _addrProp: string;
     // private _credProp: string;
     private _resultProp: string;
+    private _keyFile: string;
+    private _keyPassProp: string;
+    private _certFile: string;
+    private _certChainFile: string;
+    private _enableSsl: boolean;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -38,6 +45,12 @@ export class EsGrpcRequestMiddleware extends EsMiddleware {
         this._addrProp = _.get(values, 'addressProp', 'request.path');
         // this._credProp = _.get(values, 'headersProp', 'request.headers');
         this._resultProp = _.get(values, 'resultProp', 'response.body');
+        this._keyFile = _.get(values, 'keyFile', 'server.key');
+        this._keyPassProp = _.get(values, 'keyPassProp', 'keypass');
+        this._certFile = _.get(values, 'certFile', 'server.crt');
+        this._certChainFile = _.get(values, 'certChainFile', 'server.crt');
+        this._enableSsl = _.get(values, 'enableSsl', false);
+
 
         if (!_.isString(this._pkgProp)) {
             throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'packageProp MUST be String');
@@ -59,6 +72,21 @@ export class EsGrpcRequestMiddleware extends EsMiddleware {
         }
         if (!_.isString(this._resultProp)) {
             throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'resultProp MUST be String');
+        }
+        if (!_.isString(this._keyFile)) {
+            throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'keyFile MUST be String');
+        }
+        if (!_.isString(this._keyPassProp)) {
+            throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'keyPassProp MUST be String');
+        }
+        if (!_.isString(this._certFile)) {
+            throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'certFile MUST be String');
+        }
+        if (!_.isString(this._certChainFile)) {
+            throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'certChainFile MUST be String');
+        }
+        if (!_.isBoolean(this._enableSsl)) {
+            throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'enableSsl MUST be Boolean');
         }
     }
 
@@ -113,8 +141,23 @@ export class EsGrpcRequestMiddleware extends EsMiddleware {
                 throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'address MUST be string');
             }
 
+            let cred = grpc.credentials.createInsecure();
+            if (this._enableSsl) {
+                const pass = _.get(context.properties, this._keyPassProp);
+                if (!_.isString(pass) && !_.isUndefined(pass)) {
+                    throw new EsMiddlewareError(EsGrpcRequestMiddleware.name, 'The key password MUST be string or undefined');
+                }
+                const keys = {
+                    clientKey: await getPrivateKey(context.meta.api, this._keyFile, pass),
+                    certificate: await getPublicCert(context.meta.api, this._certFile),
+                    certChain: await getPublicCert(context.meta.api, this._certChainFile)
+                };
+
+                cred = grpc.credentials.createSsl(Buffer.from(keys.certificate), Buffer.from(keys.clientKey), Buffer.from(keys.certChain));
+            }
+
             const ClientCtor = (this._grpcObj[pkg] as GrpcObject)[service] as ServiceClientConstructor;
-            const grpcClient = new ClientCtor(addr, grpc.credentials.createInsecure());
+            const grpcClient = new ClientCtor(addr, cred);
 
             const metadata = new grpc.Metadata();
             if (_.isObjectLike(headers)) {
@@ -180,6 +223,25 @@ export const MiddlewareSchema = {
             "minLegth": 1
         },
         "resultProp": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "enableSsl": {
+            "type": "boolean"
+        },
+        "keyFile": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "keyPassProp": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "certFile": {
+            "type": "string",
+            "minLegth": 1
+        },
+        "certChainFile": {
             "type": "string",
             "minLegth": 1
         }

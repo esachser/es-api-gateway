@@ -7,6 +7,7 @@ import { loadHttpServer } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
 import { loadParsers } from './parsers';
+import { getPublicCert, getPrivateKey } from './util/certs';
 
 async function start() {
     await loadConfig();
