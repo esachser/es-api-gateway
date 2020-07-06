@@ -53,13 +53,17 @@ Aspectos que devem ser vistos:
 - [**Usar Parse Middleware**] HttpRequest Middleware deve ter a possibilidade de fazer parsing ou não do retorno
 - [**OK**] Estudar chamada de GRPC
   - [**OK**] Adicionar middleware cliente GRPC - com SSL
+    - Por enquanto somente chamadas e respostas unárias, sem stream
 - [**OK**] Certificados em diretório
   - [**OK**] Um diretório para cada api
-- Gerar JWS Middleware
-- Verificar JWS Middleware
+- [**OK**] Load Private Key Middleware
+- [**OK**] Load Public Certificate Middleware
+- [**OK**] Gerar JWS Middleware
+- [**OK**] Verificar JWS Middleware
 - Gerar JWE Middleware
 - Verificar/Decriptar JWE Middleware
 - Salvar no Redis um registro Middleware
+- Capturar no Redis um registro Middleware
 - Rate Limiting
 - Quotas
 - Chamada HTTP com certificado de cliente
@@ -73,7 +77,11 @@ Aspectos que devem ser vistos:
 - Adicionar transportes de filas
   - AMQP
   - MQTT
-- Adicionar certificados de uso para clientes
+- Adicionar facilidades para gerar JWT
+  - Com issuer
+  - jti
+  - exp
+  - ...
 - Estudar a adição dos conceitos SOAP
 - Tipos de Logger na configuração global
 - APIs como JWE, para encriptar informações sensíveis

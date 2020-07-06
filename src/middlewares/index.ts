@@ -1,8 +1,5 @@
 import decache from 'decache';
 import fs from 'fs';
-import path from 'path';
-import { IEsMiddlewareConstructor } from '../core';
-import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
 import { MiddlewareCtor as EsPropertyMiddlewareContructor, MiddlewareSchema as EsPropertySchema } from './property-middleware';
 import { MiddlewareCtor as EsMetricsMiddlewareContructor, MiddlewareSchema as EsMetricsSchema } from './metrics-middleware';
@@ -18,6 +15,10 @@ import { MiddlewareCtor as EsExecJsMiddlewareContructor, MiddlewareSchema as EsE
 import { MiddlewareCtor as EsDecodeMiddlewareContructor, MiddlewareSchema as EsDecodeSchema } from './decode-middleware';
 import { MiddlewareCtor as EsEncodeMiddlewareContructor, MiddlewareSchema as EsEncodeSchema } from './encode-middleware';
 import { MiddlewareCtor as EsGrpcRequestMiddlewareContructor, MiddlewareSchema as EsGrpcRequestSchema } from './grpcrequest-middleware';
+import { MiddlewareCtor as EsLoadPrivateKeyMiddlewareContructor, MiddlewareSchema as EsLoadPrivateKeySchema } from './loadprivatekey-middleware';
+import { MiddlewareCtor as EsLoadPublicCertificateMiddlewareContructor, MiddlewareSchema as EsLoadPublicCertificateSchema } from './loadpubliccertificate-middleware';
+import { MiddlewareCtor as EsJwsGenerateMiddlewareContructor, MiddlewareSchema as EsJwsGenerateSchema } from './jwsgenerate-middleware';
+import { MiddlewareCtor as EsJwsVerifyMiddlewareContructor, MiddlewareSchema as EsJwsVerifySchema } from './jwsverify-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -47,6 +48,10 @@ export function loadMiddlewares() {
     addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
     addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
     addMiddleware('EsGrpcRequestMiddleware', EsGrpcRequestMiddlewareContructor, EsGrpcRequestSchema);
+    addMiddleware('EsLoadPrivateKeyMiddleware', EsLoadPrivateKeyMiddlewareContructor, EsLoadPrivateKeySchema);
+    addMiddleware('EsLoadPublicCertificateMiddleware', EsLoadPublicCertificateMiddlewareContructor, EsLoadPublicCertificateSchema);
+    addMiddleware('EsJwsGenerateMiddleware', EsJwsGenerateMiddlewareContructor, EsJwsGenerateSchema);
+    addMiddleware('EsJwsVerifyMiddleware', EsJwsVerifyMiddlewareContructor, EsJwsVerifySchema);
 };
 
 export function loadCustomMiddlewares() {
