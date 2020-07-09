@@ -23,6 +23,7 @@ import { MiddlewareCtor as EsJweGenerateMiddlewareContructor, MiddlewareSchema a
 import { MiddlewareCtor as EsJweVerifyMiddlewareContructor, MiddlewareSchema as EsJweVerifySchema } from './jweverify-middleware';
 import { MiddlewareCtor as EsRedisSetMiddlewareContructor, MiddlewareSchema as EsRedisSetSchema } from './redisset-middleware';
 import { MiddlewareCtor as EsRedisGetMiddlewareContructor, MiddlewareSchema as EsRedisGetSchema } from './redisget-middleware';
+import { MiddlewareCtor as EsRateLimiterMiddlewareContructor, MiddlewareSchema as EsRateLimiterSchema } from './ratelimiter-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -60,6 +61,7 @@ export function loadMiddlewares() {
     addMiddleware('EsJweVerifyMiddleware', EsJweVerifyMiddlewareContructor, EsJweVerifySchema);
     addMiddleware('EsRedisSetMiddleware', EsRedisSetMiddlewareContructor, EsRedisSetSchema);
     addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
+    addMiddleware('EsRateLimiterMiddleware', EsRateLimiterMiddlewareContructor, EsRateLimiterSchema);
 };
 
 export function loadCustomMiddlewares() {

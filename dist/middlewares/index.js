@@ -29,6 +29,7 @@ const jwegenerate_middleware_1 = require("./jwegenerate-middleware");
 const jweverify_middleware_1 = require("./jweverify-middleware");
 const redisset_middleware_1 = require("./redisset-middleware");
 const redisget_middleware_1 = require("./redisget-middleware");
+const ratelimiter_middleware_1 = require("./ratelimiter-middleware");
 const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -62,6 +63,7 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsJweVerifyMiddleware', jweverify_middleware_1.MiddlewareCtor, jweverify_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsRedisSetMiddleware', redisset_middleware_1.MiddlewareCtor, redisset_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsRedisGetMiddleware', redisget_middleware_1.MiddlewareCtor, redisget_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsRateLimiterMiddleware', ratelimiter_middleware_1.MiddlewareCtor, ratelimiter_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

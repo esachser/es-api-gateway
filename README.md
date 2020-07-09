@@ -64,8 +64,8 @@ Aspectos que devem ser vistos:
 - [**OK**] Verificar/Decriptar JWE Middleware
 - [**OK**] Salvar no Redis um registro Middleware
 - [**OK**] Capturar no Redis um registro Middleware
-- Rate Limiting
-- Quotas
+- Rate Limiting - Por servidor (instalação, em memória)
+- Quotas - Por alguma coisa, p.ex. usuário, ip, client_id, etc. (usa Redis)
 - Chamada HTTP com certificado de cliente
 - Limite de tamanho do body no getRawBody
 - Compound Middleware --> Middlewares personalizados
