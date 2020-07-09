@@ -25,6 +25,10 @@ const loadprivatekey_middleware_1 = require("./loadprivatekey-middleware");
 const loadpubliccertificate_middleware_1 = require("./loadpubliccertificate-middleware");
 const jwsgenerate_middleware_1 = require("./jwsgenerate-middleware");
 const jwsverify_middleware_1 = require("./jwsverify-middleware");
+const jwegenerate_middleware_1 = require("./jwegenerate-middleware");
+const jweverify_middleware_1 = require("./jweverify-middleware");
+const redisset_middleware_1 = require("./redisset-middleware");
+const redisget_middleware_1 = require("./redisget-middleware");
 const middlewares_1 = require("../core/middlewares");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -54,6 +58,10 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsLoadPublicCertificateMiddleware', loadpubliccertificate_middleware_1.MiddlewareCtor, loadpubliccertificate_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsJwsGenerateMiddleware', jwsgenerate_middleware_1.MiddlewareCtor, jwsgenerate_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsJwsVerifyMiddleware', jwsverify_middleware_1.MiddlewareCtor, jwsverify_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsJweGenerateMiddleware', jwegenerate_middleware_1.MiddlewareCtor, jwegenerate_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsJweVerifyMiddleware', jweverify_middleware_1.MiddlewareCtor, jweverify_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsRedisSetMiddleware', redisset_middleware_1.MiddlewareCtor, redisset_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsRedisGetMiddleware', redisget_middleware_1.MiddlewareCtor, redisget_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

@@ -60,10 +60,10 @@ Aspectos que devem ser vistos:
 - [**OK**] Load Public Certificate Middleware
 - [**OK**] Gerar JWS Middleware
 - [**OK**] Verificar JWS Middleware
-- Gerar JWE Middleware
-- Verificar/Decriptar JWE Middleware
-- Salvar no Redis um registro Middleware
-- Capturar no Redis um registro Middleware
+- [**OK**] Gerar JWE Middleware
+- [**OK**] Verificar/Decriptar JWE Middleware
+- [**OK**] Salvar no Redis um registro Middleware
+- [**OK**] Capturar no Redis um registro Middleware
 - Rate Limiting
 - Quotas
 - Chamada HTTP com certificado de cliente
@@ -82,6 +82,7 @@ Aspectos que devem ser vistos:
   - jti
   - exp
   - ...
+- Trocar o verificador de OpenAPI
 - Estudar a adição dos conceitos SOAP
 - Tipos de Logger na configuração global
 - APIs como JWE, para encriptar informações sensíveis
@@ -91,4 +92,5 @@ Aspectos que devem ser vistos:
 Outros pontos a serem verificados:
 
 - Verificar concorrência nos *creators*
-
+- Criar testes para todo o sistema
+- Criar "Vault" para salvar infos das APIs

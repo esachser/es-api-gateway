@@ -19,6 +19,10 @@ import { MiddlewareCtor as EsLoadPrivateKeyMiddlewareContructor, MiddlewareSchem
 import { MiddlewareCtor as EsLoadPublicCertificateMiddlewareContructor, MiddlewareSchema as EsLoadPublicCertificateSchema } from './loadpubliccertificate-middleware';
 import { MiddlewareCtor as EsJwsGenerateMiddlewareContructor, MiddlewareSchema as EsJwsGenerateSchema } from './jwsgenerate-middleware';
 import { MiddlewareCtor as EsJwsVerifyMiddlewareContructor, MiddlewareSchema as EsJwsVerifySchema } from './jwsverify-middleware';
+import { MiddlewareCtor as EsJweGenerateMiddlewareContructor, MiddlewareSchema as EsJweGenerateSchema } from './jwegenerate-middleware';
+import { MiddlewareCtor as EsJweVerifyMiddlewareContructor, MiddlewareSchema as EsJweVerifySchema } from './jweverify-middleware';
+import { MiddlewareCtor as EsRedisSetMiddlewareContructor, MiddlewareSchema as EsRedisSetSchema } from './redisset-middleware';
+import { MiddlewareCtor as EsRedisGetMiddlewareContructor, MiddlewareSchema as EsRedisGetSchema } from './redisget-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -52,6 +56,10 @@ export function loadMiddlewares() {
     addMiddleware('EsLoadPublicCertificateMiddleware', EsLoadPublicCertificateMiddlewareContructor, EsLoadPublicCertificateSchema);
     addMiddleware('EsJwsGenerateMiddleware', EsJwsGenerateMiddlewareContructor, EsJwsGenerateSchema);
     addMiddleware('EsJwsVerifyMiddleware', EsJwsVerifyMiddlewareContructor, EsJwsVerifySchema);
+    addMiddleware('EsJweGenerateMiddleware', EsJweGenerateMiddlewareContructor, EsJweGenerateSchema);
+    addMiddleware('EsJweVerifyMiddleware', EsJweVerifyMiddlewareContructor, EsJweVerifySchema);
+    addMiddleware('EsRedisSetMiddleware', EsRedisSetMiddlewareContructor, EsRedisSetSchema);
+    addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
 };
 
 export function loadCustomMiddlewares() {

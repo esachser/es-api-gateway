@@ -18,6 +18,16 @@ execution:
   - type: EsPropertyMiddleware
     after: false
     data:
+      name: rdest
+      value: methodd
+  - type: EsRedisGetMiddleware
+    after: false
+    data: 
+      destProp: response.headers.mcall
+      redisSourceProp: rdest
+  - type: EsPropertyMiddleware
+    after: false
+    data:
       name: package
       value: first
   - type: EsPropertyMiddleware
@@ -83,6 +93,17 @@ execution:
               headersProp: headers
               bodyProp: parsedBody
               enableSsl: false 
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: ttl
+      value: 30000
+  - type: EsRedisSetMiddleware
+    after: false
+    data: 
+      sourceProp: method
+      redisDestProp: rdest
+      ttlProp: ttl
   - type: EsPropertyMiddleware
     after: false
     data:

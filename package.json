@@ -43,10 +43,11 @@
     "node-forge": "^0.9.1",
     "oas3-chow-chow": "^1.1.0",
     "qs": "^6.9.4",
+    "rate-limiter-flexible": "^2.1.7",
     "raw-body": "^2.4.1",
     "stringify-object": "^3.3.0",
     "tmp": "^0.2.1",
-    "winston": "^3.2.1",
+    "winston": "^3.3.3",
     "winston-transport": "^4.3.0",
     "workerpool": "^6.0.0",
     "yaml": "^1.10.0"

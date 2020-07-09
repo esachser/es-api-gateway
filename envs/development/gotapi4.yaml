@@ -1,0 +1,113 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: http
+    parameters:
+      routeContext: "/api/got/v4/teste"
+      routes:
+        "/":
+          - method: GET
+            mids: []
+          - method: POST
+            mids: []
+    mids:
+      - type: EsMetricsMiddleware
+        data:
+          prop: response.headers.timems
+execution:
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: request.prefixUrl
+      value: https://httpbin.org/
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: urlRequest
+      expression: String(ctx.properties.request?.method).toLowerCase()
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: urlRequest2
+      expression: _.toLower(_.toString(_.get(ctx.properties, 'request.method', '')))
+  - type: EsHttpRequestMiddleware
+    after: false
+    data:
+      cache:
+        enabled: true
+        maxAge: 100000
+        maxSize: 10000
+      prefixUrl: request.prefixUrl
+      url: urlRequest2
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/json
+  - type: EsDecodeMiddleware
+    after: false
+    data: 
+      sourceProp: response.body
+      contentType: response.headers.content-type
+  # - type: EsPropertyMiddleware
+  #   after: false
+  #   data:
+  #     name: key
+  #     value: "abcdefghijabcdefghijabcdefghija\x01"
+  # - type: EsPropertyMiddleware
+  #   after: false
+  #   data:
+  #     name: jwealg
+  #     value: dir
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: keypass
+      value: "esapi"
+  - type: EsLoadPrivateKeyMiddleware
+    after: false
+    data:
+      keyFile: server.key
+      keyPassProp: "keypass"
+      destProp: key
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: jwealg
+      value: RSA-OAEP
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: jweenc
+      value: A128CBC-HS256
+  - type: EsJweGenerateMiddleware
+    after: false
+    data:
+      payloadProp: response.body
+      keyProp: key
+      algProp: jwealg
+      encProp: jweenc
+      destProp: response.headers.jwe
+  # - type: EsPropertyMiddleware
+  #   after: false
+  #   data:
+  #     name: jwsverifyopts
+  #     expression: "{algorithms: [ctx.properties.jwsalg]}"
+  - type: EsJweVerifyMiddleware
+    after: false
+    data:
+      payloadProp: response.headers.jwe
+      keyProp: key
+      algProp: jwealg
+      encProp: jweenc
+      verifyOptsProp: jwsverifyopts
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/xml
+  - type: EsEncodeMiddleware
+    after: false
+    data: {}
+logging:
+  level: info
