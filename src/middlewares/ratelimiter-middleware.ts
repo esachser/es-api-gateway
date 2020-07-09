@@ -51,7 +51,7 @@ export class EsRateLimiterMiddleware extends EsMiddleware {
                 _.set(context.properties, this._destProp, err);
                 throw new EsMiddlewareError(EsRateLimiterMiddleware.name, `Maximum rate reached`, err, `Wait ${err.msBeforeNext}ms and try again`, 429);
             }
-            throw new EsMiddlewareError(EsRateLimiterMiddleware.name, 'Error running rateLimiter', err)
+            throw new EsMiddlewareError(EsRateLimiterMiddleware.name, 'Error running rateLimiter', err);
         }
     }
 };

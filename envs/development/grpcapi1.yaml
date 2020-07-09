@@ -17,8 +17,22 @@ transports:
       - type: EsRateLimiterMiddleware
         after: false
         data: 
-          points: 2
-          duration: 10
+          points: 100
+          duration: 1
+      - type: EsPropertyMiddleware
+        after: false
+        data:
+          name: quotakey
+          value: bla
+      - type: EsQuotaLimiterMiddleware
+        after: false
+        data: 
+          sourceProp: quotakey
+          quotas:
+            - points: 3
+              duration: 10
+            - points: 3
+              duration: 20
 execution:
   - type: EsPropertyMiddleware
     after: false
