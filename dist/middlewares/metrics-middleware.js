@@ -20,7 +20,7 @@ let EsMetricsMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
+        constructor(values, after, api, nextMiddleware) {
             // Verifica values contra o esquema.
             this.values = values;
             this.next = nextMiddleware;

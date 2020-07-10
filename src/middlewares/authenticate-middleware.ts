@@ -16,8 +16,8 @@ export class EsAuthenticateMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
         
         this._propToken = _.get(values, 'propToken', 'auth');
         this._propScope = _.get(values, 'propScope', 'scope');

@@ -21,9 +21,10 @@ let EsCatchMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
+        constructor(values, after, api, nextMiddleware) {
             // Verifica values contra o esquema.
             this.next = nextMiddleware;
+            this.api = api;
         }
         loadAsync(values) {
             return __awaiter(this, void 0, void 0, function* () {

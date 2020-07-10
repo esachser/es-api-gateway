@@ -16,8 +16,8 @@ export class EsRedisGetMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
 
         this._destProp = _.get(values, 'destProp');
         this._redisSourceProp = _.get(values, 'redisSourceProp');

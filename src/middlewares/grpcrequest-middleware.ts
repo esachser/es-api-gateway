@@ -34,8 +34,8 @@ export class EsGrpcRequestMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
 
         this._pkgProp = _.get(values, 'packageProp', 'request.package');
         this._serviceProp = _.get(values, 'serviceProp', 'request.service');

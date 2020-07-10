@@ -33,9 +33,10 @@ function applyMixins(derivedCtor, baseCtors) {
 exports.applyMixins = applyMixins;
 ;
 class EsMiddleware {
-    constructor(after, nextMiddleware) {
+    constructor(after, api, nextMiddleware) {
         this.after = after;
         this.next = nextMiddleware;
+        this.api = api;
     }
     execute(context) {
         var _a, _b;
@@ -52,7 +53,7 @@ class EsMiddleware {
     }
 }
 exports.EsMiddleware = EsMiddleware;
-function createMiddleware(arr, idx) {
+function createMiddleware(arr, idx, api) {
     return __awaiter(this, void 0, void 0, function* () {
         if (idx >= arr.length) {
             return undefined;
@@ -68,7 +69,7 @@ function createMiddleware(arr, idx) {
         if (!v) {
             throw new errors_1.EsMiddlewareError(type, `${type} parameters are invalid`);
         }
-        const mid = new ctor(data, Boolean(after), yield createMiddleware(arr, idx + 1));
+        const mid = new ctor(data, Boolean(after), api, yield createMiddleware(arr, idx + 1, api));
         yield mid.loadAsync(data);
         return mid;
     });

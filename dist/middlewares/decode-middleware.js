@@ -23,8 +23,8 @@ let EsDecodeMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._sourceProp = lodash_1.default.get(values, 'sourceProp', 'request.body');
             this._destProp = lodash_1.default.get(values, 'destProp', 'parsedBody');
             this._contentType = lodash_1.default.get(values, 'contentType', 'request.headers.content-type');

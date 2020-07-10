@@ -24,8 +24,8 @@ let EsOpenApiVerifyMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._propMethod = '';
             this._propUrl = '';
             this._propBody = '';

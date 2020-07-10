@@ -15,8 +15,8 @@ export class EsSequenceMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
         this.values['mids'] = [];
@@ -27,10 +27,10 @@ export class EsSequenceMiddleware extends EsMiddleware {
             for (let i=0; i < values['mids'].length; i++) {
                 let ms = values['mids'][i];
                 if (Array.isArray(ms)) {
-                    this.values['mids'][i] =  await createMiddleware(ms, 0);
+                    this.values['mids'][i] =  await createMiddleware(ms, 0, this.api);
                 }
                 else {
-                    this.values['mids'][i] = await createMiddleware([ms], 0);
+                    this.values['mids'][i] = await createMiddleware([ms], 0, this.api);
                 }
             }
         }

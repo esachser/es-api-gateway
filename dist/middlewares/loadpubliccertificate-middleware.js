@@ -22,8 +22,8 @@ let EsLoadPublicCerficateMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._certFile = lodash_1.default.get(values, 'certFile', 'server.crt');
             this._destProp = lodash_1.default.get(values, 'destProp', 'publicCert');
             if (!lodash_1.default.isString(this._certFile)) {

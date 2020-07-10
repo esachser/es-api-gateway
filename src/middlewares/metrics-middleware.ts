@@ -15,7 +15,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
         this.values = values;
         this.next = nextMiddleware;

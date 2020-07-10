@@ -11,17 +11,20 @@ export class EsCatchMiddleware implements IEsMiddleware {
 
     next?: IEsMiddleware;
 
+    api: string;
+
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
         this.next = nextMiddleware;
+        this.api = api;
     }
 
     async loadAsync(values: any) {
         if (_.isArray(values['mids'])) {
-            this.catchMiddleware = await createMiddleware(values['mids'], 0);
+            this.catchMiddleware = await createMiddleware(values['mids'], 0, this.api);
         }
         else {
             throw new EsMiddlewareError(EsCatchMiddleware.middlewareName, 'mids MUST be array');

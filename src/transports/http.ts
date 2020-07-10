@@ -32,12 +32,15 @@ export class EsHttpTransport implements IEsTransport {
 
     apiLogger: Logger;
 
+    api: string;
+
     /**
      *
      */
     constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined) {
         // Verifica padrões
-        this.apiLogger = apiLogger
+        this.apiLogger = apiLogger;
+        this.api = api;
 
         if (!params.routeContext.endsWith('/')) {
             params.routeContext += '/';
@@ -176,7 +179,7 @@ export class EsHttpTransport implements IEsTransport {
                 totalPath = totalPath.replace(/\/{2,}/g, '/');
 
                 for (const methodInfo of params.routes[path]) {
-                    const pathMethodMid = await createMiddleware(methodInfo.mids, 0);
+                    const pathMethodMid = await createMiddleware(methodInfo.mids, 0, this.api);
                     const middleware = connectMiddlewares(pathMethodMid, this.middleware);
                     httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
                         // Executa middleware central, correspondente a:

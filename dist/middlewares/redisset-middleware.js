@@ -23,8 +23,8 @@ let EsRedisSetMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._srcProp = lodash_1.default.get(values, 'sourceProp');
             this._ttlProp = lodash_1.default.get(values, 'ttlProp');
             this._redisDestProp = lodash_1.default.get(values, 'redisDestProp');

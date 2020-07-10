@@ -17,8 +17,8 @@ let EsParallelMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             // Verifica values contra o esquema.
             this.values = {};
             this.values['mids'] = [];

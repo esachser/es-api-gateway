@@ -26,8 +26,8 @@ let EsGrpcRequestMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._pkgProp = lodash_1.default.get(values, 'packageProp', 'request.package');
             this._serviceProp = lodash_1.default.get(values, 'serviceProp', 'request.service');
             this._methodProp = lodash_1.default.get(values, 'methodProp', 'request.method');

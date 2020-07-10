@@ -60,7 +60,7 @@ async function loadApiFile(fname: string) {
 
     // Carrega Middlewares centrais.
     const executionJs = _.get(apiJson, 'execution') as any[];
-    const centralMid = await createMiddleware(executionJs, 0);
+    const centralMid = await createMiddleware(executionJs, 0, fname);
     let logLevel = _.get(apiJson, 'logging.level', 'info');
     if (!_.isString(logLevel)) {
         logLevel = 'info';
@@ -78,7 +78,7 @@ async function loadApiFile(fname: string) {
             const parameters = _.get(transport, 'parameters');
             const mids = _.get(transport, 'mids') as any[];
 
-            const pre = await createMiddleware(mids, 0);
+            const pre = await createMiddleware(mids, 0, fname);
 
             const mid = connectMiddlewares(pre, centralMid);
 

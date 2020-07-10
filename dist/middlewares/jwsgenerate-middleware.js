@@ -22,8 +22,8 @@ let EsJwsGenerateMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._payloadProp = lodash_1.default.get(values, 'payloadProp', 'jwsPayload');
             this._keyProp = lodash_1.default.get(values, 'keyProp', 'jwsKey');
             this._algProp = lodash_1.default.get(values, 'algProp', 'jwsAlg');

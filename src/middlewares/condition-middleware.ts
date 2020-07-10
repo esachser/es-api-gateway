@@ -23,8 +23,8 @@ export class EsConditionMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
         // Verifica values contra o esquema.
         this.values = {};
         this.values['conditions'] = [];
@@ -45,7 +45,7 @@ export class EsConditionMiddleware extends EsMiddleware {
                 const compiledScript = new vm.Script(script);
                 const conditionStructure: any = {};
                 conditionStructure['conditionExpression'] = compiledScript;
-                conditionStructure['mids'] = await createMiddleware(condition.mids, 0);
+                conditionStructure['mids'] = await createMiddleware(condition.mids, 0, this.api);
                 this.values['conditions'][i] = conditionStructure;
             }
         }

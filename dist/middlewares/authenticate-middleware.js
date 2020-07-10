@@ -22,8 +22,8 @@ let EsAuthenticateMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._propToken = lodash_1.default.get(values, 'propToken', 'auth');
             this._propScope = lodash_1.default.get(values, 'propScope', 'scope');
             this._tokenType = lodash_1.default.get(values, 'tokenType', 'bearer');

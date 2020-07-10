@@ -23,8 +23,8 @@ let EsEncodeMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._sourceProp = lodash_1.default.get(values, 'sourceProp', 'parsedBody');
             this._destProp = lodash_1.default.get(values, 'destProp', 'response.body');
             this._contentType = lodash_1.default.get(values, 'contentType', 'response.headers.content-type');

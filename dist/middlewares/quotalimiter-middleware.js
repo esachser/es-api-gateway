@@ -16,16 +16,16 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsQuotaLimiterMiddle
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const rate_limiter_flexible_1 = require("rate-limiter-flexible");
 const ioredis_1 = __importDefault(require("ioredis"));
 const nanoid_1 = require("nanoid");
+const config_1 = require("../util/config");
 let EsQuotaLimiterMiddleware = /** @class */ (() => {
     class EsQuotaLimiterMiddleware extends core_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._destProp = lodash_1.default.get(values, 'destProp', 'ratelimitres');
             if (!lodash_1.default.isString(this._destProp)) {
                 throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'destProp MUST be string');
@@ -38,32 +38,8 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isArray(quotas)) {
                 throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotas MUST be an array');
             }
-            const redisClient = new ioredis_1.default();
-            const rateLimiters = quotas.map(q => {
-                const points = q.points;
-                const duration = q.duration;
-                if (!lodash_1.default.isInteger(points) || points <= 0) {
-                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'points MUST be integer and greater than 0');
-                }
-                if (!lodash_1.default.isInteger(duration) || duration <= 0) {
-                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'duration MUST be integer and greater than 0');
-                }
-                return new rate_limiter_flexible_1.RateLimiterRedis({
-                    points,
-                    duration,
-                    storeClient: redisClient,
-                    keyPrefix: `esgateway:runtime:apis:quotalimiter:${nanoid_1.nanoid(12)}`
-                });
-            });
-            if (rateLimiters.length === 0) {
-                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'at least one quota MUST be defined');
-            }
-            else if (rateLimiters.length === 1) {
-                this._rateLimiter = rateLimiters[0];
-            }
-            else {
-                this._rateLimiter = new rate_limiter_flexible_1.RateLimiterUnion(...rateLimiters);
-            }
+            this._redis = new ioredis_1.default();
+            this._redisKey = `esgateway:runtime:apis:${config_1.configuration.env}:${nanoid_1.nanoid(12)}`;
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -79,7 +55,7 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                     lodash_1.default.set(context.properties, this._destProp, r);
                 }
                 catch (err) {
-                    if (err instanceof rate_limiter_flexible_1.RateLimiterRes || Object.keys(err).some(k => err[k] instanceof rate_limiter_flexible_1.RateLimiterRes)) {
+                    if (err instanceof RateLimiterRes || Object.keys(err).some(k => err[k] instanceof RateLimiterRes)) {
                         lodash_1.default.set(context.properties, this._destProp, err);
                         throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, err, `Contact administrator for more details`, 429);
                     }

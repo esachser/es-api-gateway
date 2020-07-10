@@ -7,10 +7,11 @@ export declare class EsCatchMiddleware implements IEsMiddleware {
     };
     catchMiddleware?: IEsMiddleware;
     next?: IEsMiddleware;
+    api: string;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware);
     loadAsync(values: any): Promise<void>;
     execute(context: IEsContext): Promise<void>;
 }

@@ -15,8 +15,8 @@ export class EsLoadPrivateKeyMiddleware extends EsMiddleware {
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
 
         this._keyFile = _.get(values, 'keyFile', 'server.key');
         this._keyPassProp = _.get(values, 'keyPassProp', 'keypass');

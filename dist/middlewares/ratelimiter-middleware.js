@@ -22,8 +22,8 @@ let EsRateLimiterMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             const points = lodash_1.default.get(values, 'points');
             const duration = lodash_1.default.get(values, 'duration');
             this._destProp = lodash_1.default.get(values, 'destProp', 'ratelimitres');

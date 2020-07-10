@@ -34,7 +34,7 @@ export interface IEsContext {
 }
 
 export interface IEsMiddlewareConstructor {
-    new(values: any, after: boolean, nextMiddleware?: IEsMiddleware): IEsMiddleware
+    new(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware): IEsMiddleware
 }
 
 export interface IEsMiddleware {
@@ -48,13 +48,16 @@ export abstract class EsMiddleware implements IEsMiddleware {
 
     after: boolean
 
+    api: string
+
     abstract async loadAsync(values:any): Promise<void>
 
     abstract async runInternal(context: IEsContext): Promise<void>
 
-    constructor(after: boolean, nextMiddleware: IEsMiddleware | undefined) {
+    constructor(after: boolean, api: string, nextMiddleware: IEsMiddleware | undefined) {
         this.after = after;
         this.next = nextMiddleware;
+        this.api = api;
     }
 
     async execute(context: IEsContext): Promise<void> {
@@ -79,7 +82,7 @@ export interface IEsTransport {
     clear(): void
 }
 
-export async function createMiddleware(arr: any[], idx: number): Promise<IEsMiddleware | undefined> {
+export async function createMiddleware(arr: any[], idx: number, api: string): Promise<IEsMiddleware | undefined> {
     if (idx >= arr.length) {
         return undefined;
     }
@@ -100,7 +103,7 @@ export async function createMiddleware(arr: any[], idx: number): Promise<IEsMidd
         throw new EsMiddlewareError(type, `${type} parameters are invalid`);
     }
 
-    const mid = new ctor(data, Boolean(after), await createMiddleware(arr, idx + 1));
+    const mid = new ctor(data, Boolean(after), api, await createMiddleware(arr, idx + 1, api));
     await mid.loadAsync(data);
     return mid;
 }

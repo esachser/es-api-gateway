@@ -5,13 +5,14 @@ export declare class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly meta: {
         middleware: string;
     };
-    private _rateLimiter;
+    private _redis;
+    private _redisKey;
     private _destProp;
     private _sourceProp;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware);
     loadAsync(): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }

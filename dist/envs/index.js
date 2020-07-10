@@ -61,7 +61,7 @@ function loadApiFile(fname) {
         }
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
-        const centralMid = yield core_1.createMiddleware(executionJs, 0);
+        const centralMid = yield core_1.createMiddleware(executionJs, 0, fname);
         let logLevel = lodash_1.default.get(apiJson, 'logging.level', 'info');
         if (!lodash_1.default.isString(logLevel)) {
             logLevel = 'info';
@@ -75,7 +75,7 @@ function loadApiFile(fname) {
                 const id = lodash_1.default.get(transport, 'id');
                 const parameters = lodash_1.default.get(transport, 'parameters');
                 const mids = lodash_1.default.get(transport, 'mids');
-                const pre = yield core_1.createMiddleware(mids, 0);
+                const pre = yield core_1.createMiddleware(mids, 0, fname);
                 const mid = core_1.connectMiddlewares(pre, centralMid);
                 if (api.transports[id] !== undefined) {
                     api.transports[id].clear();

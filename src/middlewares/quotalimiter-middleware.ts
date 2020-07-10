@@ -1,24 +1,28 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
-import { RateLimiterRedis, RateLimiterUnion, RateLimiterAbstract, RateLimiterRes } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 import { nanoid } from 'nanoid';
+import { configuration } from '../util/config';
 
 export class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsQuotaLimiterMiddleware';
     static readonly meta = { middleware: EsQuotaLimiterMiddleware.middlewareName };
 
-    private _rateLimiter: RateLimiterUnion | RateLimiterAbstract;
+    private _redis: Redis.Redis;
+    private _redisKey: string;
     private _destProp: string;
     private _sourceProp: string;
+    private _quotaId: string;
+    private _quotaType: string;
+    private _quota: number;
 
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware) {
-        super(after, nextMiddleware);
+    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super(after, api, nextMiddleware);
 
         this._destProp = _.get(values, 'destProp', 'ratelimitres');
         if (!_.isString(this._destProp)) {
@@ -30,42 +34,23 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'sourceProp MUST be string');
         }
 
-        const quotas = _.get(values, 'quotas');
-        if (!_.isArray(quotas)) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotas MUST be an array');
+        this._quotaId = _.get(values, 'quotaId');
+        if (!_.isString(this._quotaId)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaId MUST be string');
         }
 
-        const redisClient = new Redis();
-
-        const rateLimiters = quotas.map(q => {
-            const points = q.points;
-            const duration = q.duration;
-
-            if (!_.isInteger(points) || points <= 0) {
-                throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'points MUST be integer and greater than 0');
-            }
-
-            if (!_.isInteger(duration) || duration <= 0) {
-                throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'duration MUST be integer and greater than 0');
-            }
-
-            return new RateLimiterRedis({
-                points,
-                duration,
-                storeClient: redisClient,
-                keyPrefix: `esgateway:runtime:apis:quotalimiter:${nanoid(12)}`
-            });
-        });
-
-        if (rateLimiters.length === 0) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'at least one quota MUST be defined');
+        this._quotaType = _.get(values, 'quotaType');
+        if (!_.isString(this._quotaType)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType MUST be string');
         }
-        else if(rateLimiters.length === 1) {
-            this._rateLimiter = rateLimiters[0];
+
+        this._quota = _.get(values, 'quota');
+        if (!_.isInteger(this._quotaId) || this._quota > 0) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
         }
-        else {
-            this._rateLimiter = new RateLimiterUnion(...rateLimiters);
-        }
+
+        this._redis = new Redis();
+        this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
     }
 
     async loadAsync() { }
@@ -75,18 +60,22 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
         if (!_.isString(key) && !_.isNumber(key)) {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'key MUST be either string or number');
         }
-        try {
-            const r = await this._rateLimiter.consume(key, 1);
-            _.set(context.properties, this._destProp, r);
-        }
-        catch (err) {
-            if (err instanceof RateLimiterRes || Object.keys(err).some(k => err[k] instanceof RateLimiterRes)) {
-                _.set(context.properties, this._destProp, err);
-                throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, err, `Contact administrator for more details`, 429);
-            }
 
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running rateLimiter', err);
-        }
+        const rKey = `${this._redisKey}`
+
+        const q = await this._redis.incr(rKey);
+        // try {
+        //     const r = await this._rateLimiter.consume(key, 1);
+        //     _.set(context.properties, this._destProp, r);
+        // }
+        // catch (err) {
+        //     if (err instanceof RateLimiterRes || Object.keys(err).some(k => err[k] instanceof RateLimiterRes)) {
+        //         _.set(context.properties, this._destProp, err);
+        //         throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, err, `Contact administrator for more details`, 429);
+        //     }
+
+        //     throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running rateLimiter', err);
+        // }
     }
 };
 
@@ -99,33 +88,26 @@ export const MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "quotas",
+        "quotaId",
+        "quotaType",
+        "quota",
         "sourceProp"
     ],
     "properties": {
-        "quotas": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                    "points",
-                    "duration"
-                ],
-                "properties": {
-                    "points": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                    },
-                    "duration": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                    }
-                }
-            },
-            "minItems": 1
-        },
         "sourceProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "quota": {
+            "type": "number",
+            "min": 1
+        },
+        "quotaType": {
+            "type": "string",
+            "minLength": 1,
+            "enum": ['DAY', 'WEEK', 'MONTH', 'YEAR']
+        },
+        "quotaId": {
             "type": "string",
             "minLength": 1
         },

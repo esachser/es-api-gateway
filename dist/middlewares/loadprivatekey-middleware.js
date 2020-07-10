@@ -22,8 +22,8 @@ let EsLoadPrivateKeyMiddleware = /** @class */ (() => {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._keyFile = lodash_1.default.get(values, 'keyFile', 'server.key');
             this._keyPassProp = lodash_1.default.get(values, 'keyPassProp', 'keypass');
             this._destProp = lodash_1.default.get(values, 'destProp', 'privateKey');
