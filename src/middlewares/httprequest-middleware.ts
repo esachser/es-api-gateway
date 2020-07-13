@@ -67,6 +67,9 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         const retry = _.get(context.properties, _.get(this.values, 'retry'), undefined);
         const followRedirect = _.get(context.properties, _.get(this.values, 'followRedirect'), false);
         const maxRedirects = _.get(context.properties, _.get(this.values, 'maxRedirects'), 5);
+        const ca = _.get(context.properties, _.get(this.values, 'caProp'), undefined);
+        const key = _.get(context.properties, _.get(this.values, 'keyProp'), undefined);
+        const certificate = _.get(context.properties, _.get(this.values, 'certProp'), undefined);
 
         if (path.startsWith('/')) {
             path = path.substr(1);
@@ -85,7 +88,12 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 timeout,
                 retry,
                 followRedirect,
-                maxRedirects, 
+                maxRedirects,
+                https: {
+                    certificateAuthority: ca,
+                    key,
+                    certificate
+                },
                 decompress: false,
                 hooks: {
                     beforeRequest: [
@@ -172,6 +180,18 @@ export const MiddlewareSchema = {
                     "type": "boolean"
                 }
             }
+        },
+        "keyProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "certProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "caProp": {
+            "type": "string",
+            "minLength": 1
         }
     }
 };

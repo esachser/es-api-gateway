@@ -76,5 +76,17 @@ export declare const MiddlewareSchema: {
                 };
             };
         };
+        keyProp: {
+            type: string;
+            minLength: number;
+        };
+        certProp: {
+            type: string;
+            minLength: number;
+        };
+        caProp: {
+            type: string;
+            minLength: number;
+        };
     };
 };

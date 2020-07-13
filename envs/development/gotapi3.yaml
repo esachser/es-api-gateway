@@ -18,6 +18,22 @@ execution:
   - type: EsPropertyMiddleware
     after: false
     data:
+      name: keypass
+      value: "esapi"
+  - type: EsLoadPrivateKeyMiddleware
+    after: false
+    data:
+      keyFile: server.key
+      keyPassProp: "keypass"
+      destProp: jwskey
+  - type: EsLoadPublicCertificateMiddleware
+    after: false
+    data:
+      certFile: server.crt
+      destProp: jwspubliccert
+  - type: EsPropertyMiddleware
+    after: false
+    data:
       name: request.prefixUrl
       value: https://httpbin.org/
   - type: EsPropertyMiddleware
@@ -39,6 +55,8 @@ execution:
         maxSize: 10000
       prefixUrl: request.prefixUrl
       url: urlRequest2
+      keyProp: jwskey
+      certProp: jwspubliccert
   - type: EsPropertyMiddleware
     after: false
     data:
@@ -54,22 +72,6 @@ execution:
   #   data:
   #     name: jwskey
   #     value: "123blabla"
-  - type: EsPropertyMiddleware
-    after: false
-    data:
-      name: keypass
-      value: "esapi"
-  - type: EsLoadPrivateKeyMiddleware
-    after: false
-    data:
-      keyFile: server.key
-      keyPassProp: "keypass"
-      destProp: jwskey
-  - type: EsLoadPublicCertificateMiddleware
-    after: false
-    data:
-      certFile: server.crt
-      destProp: jwspubliccert
   - type: EsPropertyMiddleware
     after: false
     data:

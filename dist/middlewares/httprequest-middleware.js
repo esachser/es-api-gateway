@@ -67,6 +67,9 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 const retry = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'retry'), undefined);
                 const followRedirect = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'followRedirect'), false);
                 const maxRedirects = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'maxRedirects'), 5);
+                const ca = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'caProp'), undefined);
+                const key = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'keyProp'), undefined);
+                const certificate = lodash_1.default.get(context.properties, lodash_1.default.get(this.values, 'certProp'), undefined);
                 if (path.startsWith('/')) {
                     path = path.substr(1);
                 }
@@ -84,6 +87,11 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                         retry,
                         followRedirect,
                         maxRedirects,
+                        https: {
+                            certificateAuthority: ca,
+                            key,
+                            certificate
+                        },
                         decompress: false,
                         hooks: {
                             beforeRequest: [
@@ -174,6 +182,18 @@ exports.MiddlewareSchema = {
                     "type": "boolean"
                 }
             }
+        },
+        "keyProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "certProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "caProp": {
+            "type": "string",
+            "minLength": 1
         }
     }
 };
