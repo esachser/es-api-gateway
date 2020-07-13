@@ -78,6 +78,7 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
         try {
             // Deleta host para evitar problemas na conexão https
             delete headers['host'];
+            delete headers['content-length'];
             const res = await this.got(path, {
                 prefixUrl,
                 method,

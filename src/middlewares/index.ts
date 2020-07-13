@@ -25,6 +25,7 @@ import { MiddlewareCtor as EsRedisSetMiddlewareContructor, MiddlewareSchema as E
 import { MiddlewareCtor as EsRedisGetMiddlewareContructor, MiddlewareSchema as EsRedisGetSchema } from './redisget-middleware';
 import { MiddlewareCtor as EsRateLimiterMiddlewareContructor, MiddlewareSchema as EsRateLimiterSchema } from './ratelimiter-middleware';
 import { MiddlewareCtor as EsQuotaLimiterMiddlewareContructor, MiddlewareSchema as EsQuotaLimiterSchema } from './quotalimiter-middleware';
+import { MiddlewareCtor as EsGetRawBodyMiddlewareContructor, MiddlewareSchema as EsGetRawBodySchema } from './getrawbody-middleware';
 import { addMiddleware } from '../core/middlewares';
 
 function readDirectoryProjects(dir: string) {
@@ -64,6 +65,7 @@ export function loadMiddlewares() {
     addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
     addMiddleware('EsRateLimiterMiddleware', EsRateLimiterMiddlewareContructor, EsRateLimiterSchema);
     addMiddleware('EsQuotaLimiterMiddleware', EsQuotaLimiterMiddlewareContructor, EsQuotaLimiterSchema);
+    addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
 };
 
 export function loadCustomMiddlewares() {

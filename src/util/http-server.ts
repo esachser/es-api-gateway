@@ -40,15 +40,15 @@ export function loadHttpServer() {
     });
 
     // Cria um buffer da entrada, que pode ser transformado em stream para leitura
-    app.use(async (ctx,next) => {
-        if (ctx.req.readableLength > 0) {
-            ctx.request.body = await getRawBody(ctx.req);
-        }
-        else {
-            ctx.request.body = undefined;
-        }
-        return next();
-    });
+    // app.use(async (ctx,next) => {
+    //     // if (ctx.req.readableLength > 0) {
+    //     //     ctx.request.body = await getRawBody(ctx.req);
+    //     // }
+    //     // else {
+    //     //     ctx.request.body = undefined;
+    //     // }
+    //     return next();
+    // });
 
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     

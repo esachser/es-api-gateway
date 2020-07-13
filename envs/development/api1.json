@@ -24,6 +24,13 @@
                             "method": "POST",
                             "mids": [
                                 {
+                                    "type": "EsGetRawBodyMiddleware",
+                                    "data": {
+                                        "streamProp": "httpctx.req"
+                                    },
+                                    "after": false
+                                },
+                                {
                                     "type": "EsPropertyMiddleware",
                                     "data": {
                                         "name": "response.headers.function",

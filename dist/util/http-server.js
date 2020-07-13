@@ -16,7 +16,6 @@ exports.loadHttpServer = exports.httpRouter = void 0;
 const koa_1 = __importDefault(require("koa"));
 const koa_router_1 = __importDefault(require("koa-router"));
 const koa_helmet_1 = __importDefault(require("koa-helmet"));
-const raw_body_1 = __importDefault(require("raw-body"));
 const config_1 = require("./config");
 const logger_1 = require("./logger");
 const unparsed = Symbol.for('unparsedBody');
@@ -40,15 +39,15 @@ function loadHttpServer() {
         }
     }));
     // Cria um buffer da entrada, que pode ser transformado em stream para leitura
-    app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
-        if (ctx.req.readableLength > 0) {
-            ctx.request.body = yield raw_body_1.default(ctx.req);
-        }
-        else {
-            ctx.request.body = undefined;
-        }
-        return next();
-    }));
+    // app.use(async (ctx,next) => {
+    //     // if (ctx.req.readableLength > 0) {
+    //     //     ctx.request.body = await getRawBody(ctx.req);
+    //     // }
+    //     // else {
+    //     //     ctx.request.body = undefined;
+    //     // }
+    //     return next();
+    // });
     app.use(exports.httpRouter.routes()).use(exports.httpRouter.allowedMethods());
     const server = app.listen(config_1.configuration.httpPort || 3000, () => {
         const { port } = server.address();

@@ -57,8 +57,6 @@ let EsHttpTransport = /** @class */ (() => {
                                 query: ctx.query,
                                 path: allPath.substr(routeContextSize),
                                 method: ctx.method,
-                                body: ctx.request.body,
-                                parsedBody: ctx.request.parsedBody,
                                 routePrefix: this.routeContext
                             },
                             httpctx: ctx

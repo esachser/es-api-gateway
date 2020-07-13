@@ -9,7 +9,11 @@ transports:
           - method: GET
             mids: []
           - method: POST
-            mids: []
+            mids:
+              - type: EsGetRawBodyMiddleware
+                after: false
+                data: 
+                  streamProp: httpctx.req
     mids:
       - type: EsMetricsMiddleware
         data:

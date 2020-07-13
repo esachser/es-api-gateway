@@ -30,6 +30,7 @@
     "fast-xml-parser": "^3.17.4",
     "got": "^11.2.0",
     "ioredis": "^4.17.3",
+    "is-stream": "^2.0.0",
     "jose": "^1.27.2",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^1.8.0",

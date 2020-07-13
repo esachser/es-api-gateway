@@ -76,6 +76,7 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 try {
                     // Deleta host para evitar problemas na conexão https
                     delete headers['host'];
+                    delete headers['content-length'];
                     const res = yield this.got(path, {
                         prefixUrl,
                         method,

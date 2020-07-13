@@ -74,8 +74,6 @@ export class EsHttpTransport implements IEsTransport {
                             query: ctx.query,
                             path: allPath.substr(routeContextSize),
                             method: ctx.method,
-                            body: ctx.request.body,
-                            parsedBody: ctx.request.parsedBody,
                             routePrefix: this.routeContext
                         },
                         httpctx: ctx

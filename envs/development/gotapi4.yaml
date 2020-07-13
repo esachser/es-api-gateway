@@ -9,7 +9,17 @@ transports:
           - method: GET
             mids: []
           - method: POST
-            mids: []
+            mids:
+              - type: EsPropertyMiddleware
+                after: false
+                data:
+                  name: maxLen
+                  value: 1024
+              - type: EsGetRawBodyMiddleware
+                after: false
+                data: 
+                  streamProp: httpctx.req
+                  maxLenProp: maxLen
     mids:
       - type: EsMetricsMiddleware
         data:

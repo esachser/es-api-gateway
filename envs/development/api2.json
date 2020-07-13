@@ -13,7 +13,15 @@
                         },
                         {
                             "method": "POST",
-                            "mids": []
+                            "mids": [
+                                {
+                                    "type": "EsGetRawBodyMiddleware",
+                                    "data": {
+                                        "streamProp": "httpctx.req"
+                                    },
+                                    "after": false
+                                }
+                            ]
                         }
                     ],
                     "/healthz": [

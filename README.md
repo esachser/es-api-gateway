@@ -68,8 +68,8 @@ Aspectos que devem ser vistos:
 - [**OK**] Quotas - Por alguma coisa, p.ex. usuário, ip, client_id, etc. (usa Redis)
 - [**OK**] Incluir o nome da API (id) no construtor padrão
 - [**OK**] Chamada HTTP com certificado de cliente - Testar melhor
-- Tornar getRawBody um middleware
-- Limite de tamanho do body no getRawBody
+- [**OK**] Tornar getRawBody um middleware
+- [**OK**] Limite de tamanho do body no getRawBody
 - Compound Middleware --> Middlewares personalizados
 - init_mid --> transport_mid --> execution_mid
 - Adicionar transporte GRPC
