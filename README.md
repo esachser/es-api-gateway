@@ -64,9 +64,9 @@ Aspectos que devem ser vistos:
 - [**OK**] Verificar/Decriptar JWE Middleware
 - [**OK**] Salvar no Redis um registro Middleware
 - [**OK**] Capturar no Redis um registro Middleware
-- Rate Limiting - Por servidor (instalação, em memória)
-- Quotas - Por alguma coisa, p.ex. usuário, ip, client_id, etc. (usa Redis)
-- Incluir o nome da API (id) no construtor padrão
+- [**OK**] Rate Limiting - Por servidor (instalação, em memória)
+- [**OK**] Quotas - Por alguma coisa, p.ex. usuário, ip, client_id, etc. (usa Redis)
+- [**OK**] Incluir o nome da API (id) no construtor padrão
 - Chamada HTTP com certificado de cliente
 - Limite de tamanho do body no getRawBody
 - Compound Middleware --> Middlewares personalizados

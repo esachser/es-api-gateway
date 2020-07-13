@@ -24,15 +24,28 @@ transports:
         data:
           name: quotakey
           value: bla
+      - type: EsPropertyMiddleware
+        after: false
+        data:
+          name: quotakey
+          value: bla
+      - type: EsPropertyMiddleware
+        after: false
+        data:
+          name: qtype
+          value: day
+      - type: EsPropertyMiddleware
+        after: false
+        data:
+          name: qvalue
+          value: 7
       - type: EsQuotaLimiterMiddleware
         after: false
         data: 
           sourceProp: quotakey
-          quotas:
-            - points: 3
-              duration: 10
-            - points: 3
-              duration: 20
+          quotaId: qto
+          quotaTypeProp: qtype
+          quotaProp: qvalue
 execution:
   - type: EsPropertyMiddleware
     after: false

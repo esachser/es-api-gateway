@@ -21,6 +21,7 @@ export declare class EsHttpTransport implements IEsTransport {
     routeContext: string;
     static baseRoutesUsed: Set<string>;
     apiLogger: Logger;
+    api: string;
     /**
      *
      */

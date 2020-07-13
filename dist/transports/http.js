@@ -28,6 +28,7 @@ let EsHttpTransport = /** @class */ (() => {
         constructor(params, api, apiLogger, middleware) {
             // Verifica padrões
             this.apiLogger = apiLogger;
+            this.api = api;
             if (!params.routeContext.endsWith('/')) {
                 params.routeContext += '/';
             }
@@ -150,7 +151,7 @@ let EsHttpTransport = /** @class */ (() => {
                         let totalPath = `${this.routeContext}${path}`;
                         totalPath = totalPath.replace(/\/{2,}/g, '/');
                         for (const methodInfo of params.routes[path]) {
-                            const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0);
+                            const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0, this.api);
                             const middleware = core_1.connectMiddlewares(pathMethodMid, this.middleware);
                             http_server_1.httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:

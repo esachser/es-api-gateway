@@ -50,7 +50,7 @@ let EsConditionMiddleware = /** @class */ (() => {
                         const compiledScript = new vm_1.default.Script(script);
                         const conditionStructure = {};
                         conditionStructure['conditionExpression'] = compiledScript;
-                        conditionStructure['mids'] = yield core_1.createMiddleware(condition.mids, 0);
+                        conditionStructure['mids'] = yield core_1.createMiddleware(condition.mids, 0, this.api);
                         this.values['conditions'][i] = conditionStructure;
                     }
                 }

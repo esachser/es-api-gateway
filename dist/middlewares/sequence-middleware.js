@@ -33,10 +33,10 @@ let EsSequenceMiddleware = /** @class */ (() => {
                     for (let i = 0; i < values['mids'].length; i++) {
                         let ms = values['mids'][i];
                         if (Array.isArray(ms)) {
-                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0);
+                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0, this.api);
                         }
                         else {
-                            this.values['mids'][i] = yield core_1.createMiddleware([ms], 0);
+                            this.values['mids'][i] = yield core_1.createMiddleware([ms], 0, this.api);
                         }
                     }
                 }

@@ -9,14 +9,30 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsQuotaLimiterMiddleware';
     static readonly meta = { middleware: EsQuotaLimiterMiddleware.middlewareName };
+    static readonly QUOTA_TYPES = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
+    static readonly QUOTA_VALIDITIES= [24*60*60, 7*24*60*60, 31*24*60*60, 366*24*60*60];
+    static readonly QUOTA_FUNCTIONS = [
+        (dt: Date) => {
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 1);
+        },
+        (dt: Date) => {
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 7 - dt.getDay());
+        },
+        (dt: Date) => {
+            return new Date(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+        },
+        (dt: Date) => {
+            return new Date(dt.getFullYear() + 1, dt.getMonth(), dt.getDate());
+        }
+    ];
 
     private _redis: Redis.Redis;
     private _redisKey: string;
     private _destProp: string;
     private _sourceProp: string;
     private _quotaId: string;
-    private _quotaType: string;
-    private _quota: number;
+    private _quotaTypeProp: string;
+    private _quotaProp: string;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -39,18 +55,19 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaId MUST be string');
         }
 
-        this._quotaType = _.get(values, 'quotaType');
-        if (!_.isString(this._quotaType)) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType MUST be string');
+        this._quotaTypeProp = _.get(values, 'quotaTypeProp');
+        if (!_.isString(this._quotaTypeProp)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaTypeProp MUST be string');
         }
 
-        this._quota = _.get(values, 'quota');
-        if (!_.isInteger(this._quotaId) || this._quota > 0) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
+        this._quotaProp = _.get(values, 'quotaProp');
+        if (!_.isString(this._quotaProp)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be integer greater than 0');
         }
 
         this._redis = new Redis();
-        this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
+        this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaId}`;
+        // this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
     }
 
     async loadAsync() { }
@@ -61,21 +78,38 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'key MUST be either string or number');
         }
 
-        const rKey = `${this._redisKey}`
+        let quotaType = _.get(context.properties, this._quotaTypeProp);
+        if (!_.isString(quotaType)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType MUST be string');
+        }
+        quotaType = _.toUpper(quotaType);
+        const quotaTypeId = EsQuotaLimiterMiddleware.QUOTA_TYPES.indexOf(quotaType);
+        if (quotaTypeId < 0) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType INVALID');
+        }
 
-        const q = await this._redis.incr(rKey);
-        // try {
-        //     const r = await this._rateLimiter.consume(key, 1);
-        //     _.set(context.properties, this._destProp, r);
-        // }
-        // catch (err) {
-        //     if (err instanceof RateLimiterRes || Object.keys(err).some(k => err[k] instanceof RateLimiterRes)) {
-        //         _.set(context.properties, this._destProp, err);
-        //         throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, err, `Contact administrator for more details`, 429);
-        //     }
+        const quotaValue = _.get(context.properties, this._quotaProp);
+        if (!_.isInteger(quotaValue) || quotaValue <= 0) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
+        }
 
-        //     throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running rateLimiter', err);
-        // }
+        const now = new Date(Date.now());
+        // Calcula chave a partir da data
+        const dtExp = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS[quotaTypeId](now);
+
+        const rKey = `${this._redisKey}:${key}`;
+
+        const res = await this._redis.multi().incr(rKey).expireat(rKey, dtExp.valueOf() / 1000).exec();
+
+        const q = res[0];
+
+        if (q[0] !== null) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
+        }
+        else if (q[1] > quotaValue) {
+            await this._redis.set(rKey, quotaValue);
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
+        }
     }
 };
 
@@ -89,8 +123,8 @@ export const MiddlewareSchema = {
     "additionalProperties": false,
     "required": [
         "quotaId",
-        "quotaType",
-        "quota",
+        "quotaTypeProp",
+        "quotaProp",
         "sourceProp"
     ],
     "properties": {
@@ -98,14 +132,13 @@ export const MiddlewareSchema = {
             "type": "string",
             "minLength": 1
         },
-        "quota": {
-            "type": "number",
-            "min": 1
-        },
-        "quotaType": {
+        "quotaProp": {
             "type": "string",
-            "minLength": 1,
-            "enum": ['DAY', 'WEEK', 'MONTH', 'YEAR']
+            "minLength": 1
+        },
+        "quotaTypeProp": {
+            "type": "string",
+            "minLength": 1
         },
         "quotaId": {
             "type": "string",

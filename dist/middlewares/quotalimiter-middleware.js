@@ -17,7 +17,6 @@ const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const ioredis_1 = __importDefault(require("ioredis"));
-const nanoid_1 = require("nanoid");
 const config_1 = require("../util/config");
 let EsQuotaLimiterMiddleware = /** @class */ (() => {
     class EsQuotaLimiterMiddleware extends core_1.EsMiddleware {
@@ -34,12 +33,21 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isString(this._sourceProp)) {
                 throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'sourceProp MUST be string');
             }
-            const quotas = lodash_1.default.get(values, 'quotas');
-            if (!lodash_1.default.isArray(quotas)) {
-                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotas MUST be an array');
+            this._quotaId = lodash_1.default.get(values, 'quotaId');
+            if (!lodash_1.default.isString(this._quotaId)) {
+                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaId MUST be string');
+            }
+            this._quotaTypeProp = lodash_1.default.get(values, 'quotaTypeProp');
+            if (!lodash_1.default.isString(this._quotaTypeProp)) {
+                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaTypeProp MUST be string');
+            }
+            this._quotaProp = lodash_1.default.get(values, 'quotaProp');
+            if (!lodash_1.default.isString(this._quotaProp)) {
+                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be integer greater than 0');
             }
             this._redis = new ioredis_1.default();
-            this._redisKey = `esgateway:runtime:apis:${config_1.configuration.env}:${nanoid_1.nanoid(12)}`;
+            this._redisKey = `esgateway:runtime:apis:${config_1.configuration.env}:${api}:quotas:${this._quotaId}`;
+            // this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -50,16 +58,31 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                 if (!lodash_1.default.isString(key) && !lodash_1.default.isNumber(key)) {
                     throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'key MUST be either string or number');
                 }
-                try {
-                    const r = yield this._rateLimiter.consume(key, 1);
-                    lodash_1.default.set(context.properties, this._destProp, r);
+                let quotaType = lodash_1.default.get(context.properties, this._quotaTypeProp);
+                if (!lodash_1.default.isString(quotaType)) {
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType MUST be string');
                 }
-                catch (err) {
-                    if (err instanceof RateLimiterRes || Object.keys(err).some(k => err[k] instanceof RateLimiterRes)) {
-                        lodash_1.default.set(context.properties, this._destProp, err);
-                        throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, err, `Contact administrator for more details`, 429);
-                    }
-                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running rateLimiter', err);
+                quotaType = lodash_1.default.toUpper(quotaType);
+                const quotaTypeId = EsQuotaLimiterMiddleware.QUOTA_TYPES.indexOf(quotaType);
+                if (quotaTypeId < 0) {
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaType INVALID');
+                }
+                const quotaValue = lodash_1.default.get(context.properties, this._quotaProp);
+                if (!lodash_1.default.isInteger(quotaValue) || quotaValue <= 0) {
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
+                }
+                const now = new Date(Date.now());
+                // Calcula chave a partir da data
+                const dtExp = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS[quotaTypeId](now);
+                const rKey = `${this._redisKey}:${key}`;
+                const res = yield this._redis.multi().incr(rKey).expireat(rKey, dtExp.valueOf() / 1000).exec();
+                const q = res[0];
+                if (q[0] !== null) {
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
+                }
+                else if (q[1] > quotaValue) {
+                    yield this._redis.set(rKey, quotaValue);
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
                 }
             });
         }
@@ -67,6 +90,22 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
     EsQuotaLimiterMiddleware.isInOut = true;
     EsQuotaLimiterMiddleware.middlewareName = 'EsQuotaLimiterMiddleware';
     EsQuotaLimiterMiddleware.meta = { middleware: EsQuotaLimiterMiddleware.middlewareName };
+    EsQuotaLimiterMiddleware.QUOTA_TYPES = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
+    EsQuotaLimiterMiddleware.QUOTA_VALIDITIES = [24 * 60 * 60, 7 * 24 * 60 * 60, 31 * 24 * 60 * 60, 366 * 24 * 60 * 60];
+    EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS = [
+        (dt) => {
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 1);
+        },
+        (dt) => {
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 7 - dt.getDay());
+        },
+        (dt) => {
+            return new Date(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+        },
+        (dt) => {
+            return new Date(dt.getFullYear() + 1, dt.getMonth(), dt.getDate());
+        }
+    ];
     return EsQuotaLimiterMiddleware;
 })();
 exports.EsQuotaLimiterMiddleware = EsQuotaLimiterMiddleware;
@@ -79,33 +118,25 @@ exports.MiddlewareSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "quotas",
+        "quotaId",
+        "quotaTypeProp",
+        "quotaProp",
         "sourceProp"
     ],
     "properties": {
-        "quotas": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                    "points",
-                    "duration"
-                ],
-                "properties": {
-                    "points": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                    },
-                    "duration": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                    }
-                }
-            },
-            "minItems": 1
-        },
         "sourceProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "quotaProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "quotaTypeProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "quotaId": {
             "type": "string",
             "minLength": 1
         },

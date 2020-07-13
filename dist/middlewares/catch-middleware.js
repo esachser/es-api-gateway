@@ -29,7 +29,7 @@ let EsCatchMiddleware = /** @class */ (() => {
         loadAsync(values) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (lodash_1.default.isArray(values['mids'])) {
-                    this.catchMiddleware = yield core_1.createMiddleware(values['mids'], 0);
+                    this.catchMiddleware = yield core_1.createMiddleware(values['mids'], 0, this.api);
                 }
                 else {
                     throw new errors_1.EsMiddlewareError(EsCatchMiddleware.middlewareName, 'mids MUST be array');

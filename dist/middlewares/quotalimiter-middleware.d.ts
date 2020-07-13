@@ -5,10 +5,16 @@ export declare class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly meta: {
         middleware: string;
     };
+    static readonly QUOTA_TYPES: string[];
+    static readonly QUOTA_VALIDITIES: number[];
+    static readonly QUOTA_FUNCTIONS: ((dt: Date) => Date)[];
     private _redis;
     private _redisKey;
     private _destProp;
     private _sourceProp;
+    private _quotaId;
+    private _quotaTypeProp;
+    private _quotaProp;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
@@ -25,26 +31,19 @@ export declare const MiddlewareSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        quotas: {
-            type: string;
-            items: {
-                type: string;
-                additionalProperties: boolean;
-                required: string[];
-                properties: {
-                    points: {
-                        type: string;
-                        exclusiveMinimum: number;
-                    };
-                    duration: {
-                        type: string;
-                        exclusiveMinimum: number;
-                    };
-                };
-            };
-            minItems: number;
-        };
         sourceProp: {
+            type: string;
+            minLength: number;
+        };
+        quotaProp: {
+            type: string;
+            minLength: number;
+        };
+        quotaTypeProp: {
+            type: string;
+            minLength: number;
+        };
+        quotaId: {
             type: string;
             minLength: number;
         };
