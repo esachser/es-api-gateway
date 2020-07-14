@@ -13,7 +13,7 @@ async function start() {
     await loadConfig();
     loadParsers();
     loadMiddlewares();
-    loadCustomMiddlewares();
+    await loadCustomMiddlewares();
     loadTransports();
     loadCustomTransports();
     loadAuthenticators();

@@ -2,13 +2,12 @@ import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
-import { baseDirectory } from '../util';
+import { baseDirectory, readFileToObject } from '../util';
 import { logger, createLogger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
 import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
-import YAML from 'yaml';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -17,18 +16,6 @@ interface IEsApi {
 }
 
 let apis: { [id: string]: IEsApi } = {};
-
-async function readFileToObject(fname: string) {
-    const fileContents = (await fsasync.readFile(fname)).toString();
-    const ext = path.extname(fname);
-
-    if (ext === '.json') {
-        return JSON.parse(fileContents);
-    }
-    else if (ext === '.yaml') {
-        return YAML.parse(fileContents);
-    }
-}
 
 async function loadApiFile(fname: string) {
     const apiJson = await readFileToObject(fname);

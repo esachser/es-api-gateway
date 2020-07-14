@@ -7,7 +7,12 @@ transports:
       routes:
         "/":
           - method: POST
-            mids: []
+            mids: 
+              - type: EsGetRawBodyMiddleware
+                after: false
+                data: 
+                  streamProp: httpctx.req
+                  maxLenProp: maxLen
     mids: []
 execution:
   - type: EsDecodeMiddleware
@@ -28,5 +33,8 @@ execution:
     data:
       name: response.status
       value: 200
+  - type: Custom-CPMID1
+    after: false
+    data: {}
 logging:
   level: info

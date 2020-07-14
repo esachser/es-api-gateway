@@ -81,7 +81,7 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                     throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
                 }
                 else if (q[1] > quotaValue) {
-                    yield this._redis.set(rKey, quotaValue);
+                    yield this._redis.multi().set(rKey, quotaValue).expireat(rKey, dtExp.valueOf() / 1000).exec();
                     throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
                 }
             });

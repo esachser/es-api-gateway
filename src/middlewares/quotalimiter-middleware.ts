@@ -107,7 +107,7 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
         }
         else if (q[1] > quotaValue) {
-            await this._redis.set(rKey, quotaValue);
+            await this._redis.multi().set(rKey, quotaValue).expireat(rKey, dtExp.valueOf() / 1000).exec();
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
         }
     }

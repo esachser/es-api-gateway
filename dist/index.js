@@ -23,7 +23,7 @@ function start() {
         yield config_1.loadConfig();
         parsers_1.loadParsers();
         middlewares_1.loadMiddlewares();
-        middlewares_1.loadCustomMiddlewares();
+        yield middlewares_1.loadCustomMiddlewares();
         transports_1.loadTransports();
         transports_1.loadCustomTransports();
         authenticators_1.loadAuthenticators();

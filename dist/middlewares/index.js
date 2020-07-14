@@ -1,11 +1,20 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadCustomMiddlewares = exports.loadMiddlewares = void 0;
-const decache_1 = __importDefault(require("decache"));
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const logger_1 = require("../util/logger");
 const property_middleware_1 = require("./property-middleware");
 const metrics_middleware_1 = require("./metrics-middleware");
@@ -33,6 +42,9 @@ const ratelimiter_middleware_1 = require("./ratelimiter-middleware");
 const quotalimiter_middleware_1 = require("./quotalimiter-middleware");
 const getrawbody_middleware_1 = require("./getrawbody-middleware");
 const middlewares_1 = require("../core/middlewares");
+const util_1 = require("../util");
+const lodash_1 = __importDefault(require("lodash"));
+const errors_1 = require("../core/errors");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
     finfos.forEach(finfo => {
@@ -71,12 +83,41 @@ function loadMiddlewares() {
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;
+function loadCompoundMiddleware(fname) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
+            logger_1.logger.info(`Loading compound middleware: ${fname}`);
+            const midJson = yield util_1.readFileToObject(path_1.default.resolve(util_1.baseDirectory, 'custom', 'middlewares', 'compound', fname));
+            if (!lodash_1.default.isString(midJson === null || midJson === void 0 ? void 0 : midJson.id)) {
+                throw new errors_1.EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'id MUST be string');
+            }
+            if (!lodash_1.default.isArray(midJson === null || midJson === void 0 ? void 0 : midJson.mids)) {
+                throw new errors_1.EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'mids MUST be array');
+            }
+            middlewares_1.addMiddleware(`Custom-${midJson.id}`, middlewares_1.getCustomConstructor(midJson.mids), middlewares_1.getCustomSchema(midJson.id), true);
+        }
+    });
+}
+function loadCompoundMiddlewareWithCare(fname) {
+    loadCompoundMiddleware(fname)
+        .then(() => logger_1.logger.info(`Compound mid loaded: ${fname}`))
+        .catch(err => logger_1.logger.error(`Error loading compound mid: ${fname}`, err));
+}
+let cpWatcher = undefined;
 function loadCustomMiddlewares() {
-    // Limpa cache dos custom
-    logger_1.logger.info('Removing all custom middlewares');
-    Object.keys(require.cache).filter(s => s.startsWith('./custom/middlewares/')).forEach(k => {
-        logger_1.logger.info(`Removing cache entry ${k}`);
-        decache_1.default(k);
+    return __awaiter(this, void 0, void 0, function* () {
+        // Limpa cache dos custom
+        logger_1.logger.info('Loading compound middlewares');
+        const cpdir = path_1.default.resolve(util_1.baseDirectory, 'custom', 'middlewares', 'compound');
+        if (cpWatcher !== undefined) {
+            middlewares_1.removeAllCustomMiddlewares();
+        }
+        const dstat = yield fs_1.default.promises.stat(cpdir);
+        if (dstat.isDirectory()) {
+            cpWatcher = cpWatcher !== null && cpWatcher !== void 0 ? cpWatcher : fs_1.default.watch(cpdir, (ev, fname) => loadCompoundMiddlewareWithCare(fname));
+            const finfos = yield fs_1.default.promises.readdir(cpdir, { withFileTypes: true });
+            finfos.filter(f => f.isFile()).forEach(f => loadCompoundMiddlewareWithCare(f.name));
+        }
     });
 }
 exports.loadCustomMiddlewares = loadCustomMiddlewares;

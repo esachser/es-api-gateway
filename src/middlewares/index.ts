@@ -1,5 +1,6 @@
 import decache from 'decache';
 import fs from 'fs';
+import path from 'path';
 import { logger } from '../util/logger';
 import { MiddlewareCtor as EsPropertyMiddlewareContructor, MiddlewareSchema as EsPropertySchema } from './property-middleware';
 import { MiddlewareCtor as EsMetricsMiddlewareContructor, MiddlewareSchema as EsMetricsSchema } from './metrics-middleware';
@@ -26,7 +27,10 @@ import { MiddlewareCtor as EsRedisGetMiddlewareContructor, MiddlewareSchema as E
 import { MiddlewareCtor as EsRateLimiterMiddlewareContructor, MiddlewareSchema as EsRateLimiterSchema } from './ratelimiter-middleware';
 import { MiddlewareCtor as EsQuotaLimiterMiddlewareContructor, MiddlewareSchema as EsQuotaLimiterSchema } from './quotalimiter-middleware';
 import { MiddlewareCtor as EsGetRawBodyMiddlewareContructor, MiddlewareSchema as EsGetRawBodySchema } from './getrawbody-middleware';
-import { addMiddleware } from '../core/middlewares';
+import { addMiddleware, removeAllCustomMiddlewares, getCustomConstructor, getCustomSchema } from '../core/middlewares';
+import { baseDirectory, readFileToObject } from '../util';
+import _ from 'lodash';
+import { EsMiddlewareError } from '../core/errors';
 
 function readDirectoryProjects(dir: string) {
     const finfos = fs.readdirSync(dir, { withFileTypes: true });
@@ -34,7 +38,7 @@ function readDirectoryProjects(dir: string) {
     finfos.forEach(finfo => {
         if (finfo.isDirectory()) {
             logger.info(`Loading middleware ${finfo.name}`);
-            
+
         }
     });
 }
@@ -68,11 +72,41 @@ export function loadMiddlewares() {
     addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
 };
 
-export function loadCustomMiddlewares() {
+async function loadCompoundMiddleware(fname: string) {
+    if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
+        logger.info(`Loading compound middleware: ${fname}`);
+        const midJson = await readFileToObject(path.resolve(baseDirectory, 'custom', 'middlewares', 'compound', fname));
+        if (!_.isString(midJson?.id)) {
+            throw new EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'id MUST be string');
+        }
+        if (!_.isArray(midJson?.mids)) {
+            throw new EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'mids MUST be array');
+        }
+        addMiddleware(`Custom-${midJson.id}`, getCustomConstructor(midJson.mids), getCustomSchema(midJson.id), true);
+    }
+}
+
+function loadCompoundMiddlewareWithCare(fname: string) {
+    loadCompoundMiddleware(fname)
+        .then(() => logger.info(`Compound mid loaded: ${fname}`))
+        .catch(err => logger.error(`Error loading compound mid: ${fname}`, err));
+}
+
+let cpWatcher: fs.FSWatcher | undefined = undefined;
+
+export async function loadCustomMiddlewares() {
     // Limpa cache dos custom
-    logger.info('Removing all custom middlewares');
-    Object.keys(require.cache).filter(s => s.startsWith('./custom/middlewares/')).forEach(k => {
-        logger.info(`Removing cache entry ${k}`);
-        decache(k);
-    });
+    logger.info('Loading compound middlewares');
+    const cpdir = path.resolve(baseDirectory, 'custom', 'middlewares', 'compound');
+
+    if (cpWatcher !== undefined) {
+        removeAllCustomMiddlewares();
+    }
+
+    const dstat = await fs.promises.stat(cpdir);
+    if (dstat.isDirectory()) {
+        cpWatcher = cpWatcher ?? fs.watch(cpdir, (ev, fname) => loadCompoundMiddlewareWithCare(fname));
+        const finfos = await fs.promises.readdir(cpdir, { withFileTypes: true });
+        finfos.filter(f => f.isFile()).forEach(f => loadCompoundMiddlewareWithCare(f.name));
+    }
 };

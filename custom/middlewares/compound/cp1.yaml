@@ -1,0 +1,14 @@
+---
+  name: Compound Middleware 1
+  id: CPMID1
+  mids:
+    - type: EsPropertyMiddleware
+      after: false
+      data:
+        name: response.headers.cp1
+        value: balalb
+    - type: EsPropertyMiddleware
+      after: false
+      data:
+        name: response.headers.cp2
+        value: ablc

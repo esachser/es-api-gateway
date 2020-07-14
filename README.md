@@ -70,7 +70,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Chamada HTTP com certificado de cliente - Testar melhor
 - [**OK**] Tornar getRawBody um middleware
 - [**OK**] Limite de tamanho do body no getRawBody
-- Compound Middleware --> Middlewares personalizados
+- [**Iniciado**] Compound Middleware --> Middlewares personalizados
 - init_mid --> transport_mid --> execution_mid
 - Adicionar transporte GRPC
 - Adicionar transporte Kafka
