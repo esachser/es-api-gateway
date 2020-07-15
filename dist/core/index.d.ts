@@ -1,4 +1,6 @@
+/// <reference types="node" />
 import { Logger } from 'winston';
+import events from 'events';
 export declare function applyMixins(derivedCtor: any, baseCtors: any[]): void;
 export interface IEsContext {
     properties: {
@@ -15,12 +17,14 @@ export interface IEsContext {
 export interface IEsMiddlewareConstructor {
     new (values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware): IEsMiddleware;
 }
-export interface IEsMiddleware {
+export interface IEsMiddleware extends events.EventEmitter {
     next?: IEsMiddleware;
     execute(context: IEsContext): Promise<void>;
     loadAsync(values: any): Promise<void>;
 }
-export declare abstract class EsMiddleware implements IEsMiddleware {
+export declare class IEsMiddleware {
+}
+export declare abstract class EsMiddleware extends IEsMiddleware {
     next?: IEsMiddleware;
     after: boolean;
     api: string;

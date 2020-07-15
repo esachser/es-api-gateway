@@ -1,5 +1,5 @@
 import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsCatchMiddleware implements IEsMiddleware {
+export declare class EsCatchMiddleware extends IEsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsCatchMiddleware";
     static readonly meta: {

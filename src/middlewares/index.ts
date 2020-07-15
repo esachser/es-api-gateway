@@ -30,6 +30,7 @@ import { MiddlewareCtor as EsGetRawBodyMiddlewareContructor, MiddlewareSchema as
 import { addMiddleware, removeAllCustomMiddlewares, getCustomConstructor, getCustomSchema } from '../core/middlewares';
 import { baseDirectory, readFileToObject } from '../util';
 import _ from 'lodash';
+import { EventEmitter } from 'events';
 import { EsMiddlewareError } from '../core/errors';
 
 function readDirectoryProjects(dir: string) {
@@ -72,6 +73,8 @@ export function loadMiddlewares() {
     addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
 };
 
+let apiReloader: {[id: string]: EventEmitter} = {};
+
 async function loadCompoundMiddleware(fname: string) {
     if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
         logger.info(`Loading compound middleware: ${fname}`);
@@ -82,7 +85,9 @@ async function loadCompoundMiddleware(fname: string) {
         if (!_.isArray(midJson?.mids)) {
             throw new EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'mids MUST be array');
         }
-        addMiddleware(`Custom-${midJson.id}`, getCustomConstructor(midJson.mids), getCustomSchema(midJson.id), true);
+        apiReloader[fname] = apiReloader[fname] ?? new EventEmitter();
+        apiReloader[fname].emit('change');
+        addMiddleware(`Custom-${midJson.id}`, getCustomConstructor(midJson.mids, apiReloader[fname]), getCustomSchema(midJson.id), true);
     }
 }
 

@@ -5,6 +5,7 @@ import { getTransportConstructor } from './transports';
 import { validateObject } from './schemas';
 import { Logger } from 'winston';
 import { EsTransportError, EsMiddlewareError } from './errors';
+import events from 'events';
 
 export function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
@@ -37,13 +38,15 @@ export interface IEsMiddlewareConstructor {
     new(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware): IEsMiddleware
 }
 
-export interface IEsMiddleware {
+export interface IEsMiddleware extends events.EventEmitter{
     next?: IEsMiddleware
     execute(context: IEsContext): Promise<void>
     loadAsync(values:any): Promise<void>
 }
+export class IEsMiddleware { }
+applyMixins(IEsMiddleware, [events.EventEmitter]);
 
-export abstract class EsMiddleware implements IEsMiddleware {
+export abstract class EsMiddleware extends IEsMiddleware {
     next?: IEsMiddleware
 
     after: boolean
@@ -55,6 +58,7 @@ export abstract class EsMiddleware implements IEsMiddleware {
     abstract async runInternal(context: IEsContext): Promise<void>
 
     constructor(after: boolean, api: string, nextMiddleware: IEsMiddleware | undefined) {
+        super();
         this.after = after;
         this.next = nextMiddleware;
         this.api = api;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadEnv = void 0;
+exports.loadEnv = exports.reloadApi = void 0;
 const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -22,24 +22,26 @@ const logger_1 = require("../util/logger");
 const core_1 = require("../core");
 const http_server_1 = require("../util/http-server");
 const schemas_1 = require("../core/schemas");
+const config_1 = require("../util/config");
 let apis = {};
 function loadApiFile(fname) {
-    var _a;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = yield util_1.readFileToObject(fname);
         logger_1.logger.debug(apiJson);
         const ext = path_1.default.extname(fname);
         fname = path_1.default.basename(fname, ext);
-        let api = apis[fname] || {
+        let api = (_a = apis[fname]) !== null && _a !== void 0 ? _a : {
             transports: [],
             central: {},
             logger: {},
+            apiFile: `${fname}${ext}`
         };
         delete apis[fname];
         for (const tname of Object.keys(api.transports)) {
             if (api.transports[tname] !== undefined) {
                 api.transports[tname].clear();
-                (_a = api.logger) === null || _a === void 0 ? void 0 : _a.close();
+                (_b = api.logger) === null || _b === void 0 ? void 0 : _b.close();
                 delete api.transports[tname];
             }
         }
@@ -89,6 +91,20 @@ function reloadEnv(dir) {
     });
 }
 let watcher = undefined;
+function reloadApi(apiName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        //const api = apis[apiName];
+        const apiJson = path_1.default.resolve(util_1.baseDirectory, 'envs', config_1.configuration.env, `${apiName}.json`);
+        const apiYaml = path_1.default.resolve(util_1.baseDirectory, 'envs', config_1.configuration.env, `${apiName}.yaml`);
+        if (fs_1.default.existsSync(apiJson)) {
+            return loadApiFile(apiJson);
+        }
+        else if (fs_1.default.existsSync(apiYaml)) {
+            return loadApiFile(apiYaml);
+        }
+    });
+}
+exports.reloadApi = reloadApi;
 function loadEnv(envName) {
     return __awaiter(this, void 0, void 0, function* () {
         const envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);

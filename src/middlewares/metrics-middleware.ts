@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
 
-export class EsMetricsMiddleware implements IEsMiddleware {
+export class EsMetricsMiddleware extends IEsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsMetricsMiddleware';
     static readonly meta = { middleware: EsMetricsMiddleware.middlewareName };
@@ -17,6 +17,7 @@ export class EsMetricsMiddleware implements IEsMiddleware {
      */
     constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
         // Verifica values contra o esquema.
+        super();
         this.values = values;
         this.next = nextMiddleware;
 

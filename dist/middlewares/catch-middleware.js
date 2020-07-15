@@ -17,11 +17,12 @@ const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 let EsCatchMiddleware = /** @class */ (() => {
-    class EsCatchMiddleware {
+    class EsCatchMiddleware extends core_1.IEsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
         constructor(values, after, api, nextMiddleware) {
+            super();
             // Verifica values contra o esquema.
             this.next = nextMiddleware;
             this.api = api;

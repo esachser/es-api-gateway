@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransport = exports.connectMiddlewares = exports.connect2Mids = exports.createMiddleware = exports.EsMiddleware = exports.applyMixins = void 0;
+exports.createTransport = exports.connectMiddlewares = exports.connect2Mids = exports.createMiddleware = exports.EsMiddleware = exports.IEsMiddleware = exports.applyMixins = void 0;
 // import workerpool from 'workerpool';
 const lodash_1 = __importDefault(require("lodash"));
 const middlewares_1 = require("./middlewares");
 const transports_1 = require("./transports");
 const schemas_1 = require("./schemas");
 const errors_1 = require("./errors");
+const events_1 = __importDefault(require("events"));
 function applyMixins(derivedCtor, baseCtors) {
     baseCtors.forEach(baseCtor => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
@@ -32,8 +33,13 @@ function applyMixins(derivedCtor, baseCtors) {
 }
 exports.applyMixins = applyMixins;
 ;
-class EsMiddleware {
+class IEsMiddleware {
+}
+exports.IEsMiddleware = IEsMiddleware;
+applyMixins(IEsMiddleware, [events_1.default.EventEmitter]);
+class EsMiddleware extends IEsMiddleware {
     constructor(after, api, nextMiddleware) {
+        super();
         this.after = after;
         this.next = nextMiddleware;
         this.api = api;

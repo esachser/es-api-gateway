@@ -13,15 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsMetricsMiddleware = void 0;
+const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 let EsMetricsMiddleware = /** @class */ (() => {
-    class EsMetricsMiddleware {
+    class EsMetricsMiddleware extends core_1.IEsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
         constructor(values, after, api, nextMiddleware) {
             // Verifica values contra o esquema.
+            super();
             this.values = values;
             this.next = nextMiddleware;
             if (!lodash_1.default.isString(values['prop'])) {

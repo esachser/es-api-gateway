@@ -44,6 +44,7 @@ const getrawbody_middleware_1 = require("./getrawbody-middleware");
 const middlewares_1 = require("../core/middlewares");
 const util_1 = require("../util");
 const lodash_1 = __importDefault(require("lodash"));
+const events_1 = require("events");
 const errors_1 = require("../core/errors");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -83,7 +84,9 @@ function loadMiddlewares() {
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;
+let apiReloader = {};
 function loadCompoundMiddleware(fname) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
             logger_1.logger.info(`Loading compound middleware: ${fname}`);
@@ -94,7 +97,10 @@ function loadCompoundMiddleware(fname) {
             if (!lodash_1.default.isArray(midJson === null || midJson === void 0 ? void 0 : midJson.mids)) {
                 throw new errors_1.EsMiddlewareError(`loadCompoundMiddleware ${fname}`, 'mids MUST be array');
             }
-            middlewares_1.addMiddleware(`Custom-${midJson.id}`, middlewares_1.getCustomConstructor(midJson.mids), middlewares_1.getCustomSchema(midJson.id), true);
+            apiReloader[fname] = (_a = apiReloader[fname]) !== null && _a !== void 0 ? _a : new events_1.EventEmitter();
+            apiReloader[fname].emit('change');
+            //apiReloader[fname].removeAllListeners('change');
+            middlewares_1.addMiddleware(`Custom-${midJson.id}`, middlewares_1.getCustomConstructor(midJson.mids, apiReloader[fname]), middlewares_1.getCustomSchema(midJson.id), true);
         }
     });
 }

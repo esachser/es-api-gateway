@@ -9,7 +9,11 @@ transports:
           - method: GET
             mids: []
           - method: POST
-            mids: []
+            mids: 
+              - type: EsGetRawBodyMiddleware
+                after: false
+                data: 
+                  streamProp: httpctx.req
     mids:
       - type: EsMetricsMiddleware
         data:
@@ -47,6 +51,9 @@ transports:
           quotaTypeProp: qtype
           quotaProp: qvalue
 execution:
+  - type: Custom-CPMID1
+    after: true
+    data: {}
   - type: EsPropertyMiddleware
     after: false
     data:

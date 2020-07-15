@@ -13,6 +13,7 @@ exports.getCustomSchema = exports.getCustomConstructor = exports.removeMiddlewar
 const _1 = require(".");
 const logger_1 = require("../util/logger");
 const schemas_1 = require("./schemas");
+const envs_1 = require("../envs");
 const mids = {};
 function addMiddleware(name, constructor, parameters, custom = false) {
     try {
@@ -47,10 +48,13 @@ function removeMiddleware(name) {
     }
 }
 exports.removeMiddleware = removeMiddleware;
-function getCustomConstructor(mids) {
+function getCustomConstructor(mids, changeEmitter) {
     return class extends _1.EsMiddleware {
         constructor(_values, after, api, nextMiddleware) {
             super(after, api, nextMiddleware);
+            changeEmitter.once('change', () => setImmediate(() => {
+                envs_1.reloadApi(this.api).catch(err => logger_1.logger.error(`Error reloading API ${this.api}`, err));
+            }));
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () {

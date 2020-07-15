@@ -1,18 +1,21 @@
 import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
-import _ from 'lodash';
+import _, { isRegExp } from 'lodash';
 import { baseDirectory, readFileToObject } from '../util';
 import { logger, createLogger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
 import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
+import { load } from '@grpc/grpc-js';
+import { configuration } from '../util/config';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
     central: IEsMiddleware | undefined,
     logger: Logger | undefined,
+    apiFile: string
 }
 
 let apis: { [id: string]: IEsApi } = {};
@@ -25,10 +28,11 @@ async function loadApiFile(fname: string) {
 
     fname = path.basename(fname, ext);
 
-    let api: IEsApi = apis[fname] || {
+    let api: IEsApi = apis[fname] ?? {
         transports: [],
         central: {},
         logger: {},
+        apiFile: `${fname}${ext}`
     };
 
     delete apis[fname];
@@ -98,6 +102,17 @@ async function reloadEnv(dir: string) {
 }
 
 let watcher: fs.FSWatcher | undefined = undefined;
+
+export async function reloadApi(apiName: string) {
+    const apiJson = path.resolve(baseDirectory, 'envs', configuration.env, `${apiName}.json`);
+    const apiYaml = path.resolve(baseDirectory, 'envs', configuration.env, `${apiName}.yaml`);
+    if (fs.existsSync(apiJson)) {
+        return loadApiFile(apiJson);
+    }
+    else if (fs.existsSync(apiYaml)) {
+        return loadApiFile(apiYaml);
+    }
+}
 
 export async function loadEnv(envName: string) {
     const envDir = path.resolve(baseDirectory, 'envs', envName);

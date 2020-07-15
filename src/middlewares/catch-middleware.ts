@@ -2,7 +2,7 @@ import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware }
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 
-export class EsCatchMiddleware implements IEsMiddleware {
+export class EsCatchMiddleware extends IEsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsCatchMiddleware';
     static readonly meta = { middleware: EsCatchMiddleware.middlewareName };
@@ -17,6 +17,7 @@ export class EsCatchMiddleware implements IEsMiddleware {
      * Constrói o middleware a partir dos parâmetros
      */
     constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+        super();
         // Verifica values contra o esquema.
         this.next = nextMiddleware;
         this.api = api;

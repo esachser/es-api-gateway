@@ -1,6 +1,8 @@
 import { IEsMiddlewareConstructor, EsMiddleware, IEsMiddleware, IEsContext, createMiddleware } from ".";
 import { logger } from "../util/logger";
 import { addNewSchema } from "./schemas";
+import { EventEmitter } from 'events';
+import { reloadApi } from "../envs";
 
 const mids: {[id:string]:{mc:IEsMiddlewareConstructor, custom:boolean}} = {};
 
@@ -36,16 +38,19 @@ export function removeMiddleware(name: string) {
     }
 }
 
-export function getCustomConstructor(mids: any[]): IEsMiddlewareConstructor {
+export function getCustomConstructor(mids: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor {
     return class extends EsMiddleware {
 
         private _mid?: IEsMiddleware;
 
         constructor(_values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
             super(after, api, nextMiddleware);
+            changeEmitter.once('change', () => setImmediate(() => {
+                reloadApi(this.api).catch(err => logger.error(`Error reloading API ${this.api}`, err));
+            }));
         }
 
-        async loadAsync() { 
+        async loadAsync() {
             this._mid = await createMiddleware(mids, 0, this.api);
         }
 
