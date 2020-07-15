@@ -49,6 +49,10 @@ async function loadApiFile(fname: string) {
         return;
     }
 
+    // Carrega Middlewares iniciais.
+    const initJs = _.get(apiJson, 'init', []) as any[];
+    const initialMid = await createMiddleware(initJs, 0, fname);
+
     // Carrega Middlewares centrais.
     const executionJs = _.get(apiJson, 'execution') as any[];
     const centralMid = await createMiddleware(executionJs, 0, fname);
@@ -78,7 +82,7 @@ async function loadApiFile(fname: string) {
                 delete api.transports[id];
             }
 
-            const trp = await createTransport(type, fname, api.logger, parameters, mid);
+            const trp = await createTransport(type, fname, api.logger, parameters, mid, initialMid);
 
             if (trp !== undefined) {
                 api.transports[id] = trp;

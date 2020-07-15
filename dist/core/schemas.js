@@ -85,6 +85,12 @@ exports.API_SCHEMA = {
                 "$ref": "es-transport"
             }
         },
+        "init": {
+            "type": "array",
+            "items": {
+                "$ref": "es-middleware"
+            }
+        },
         "execution": {
             "type": "array",
             "items": {

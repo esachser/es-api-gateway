@@ -50,6 +50,7 @@ transports:
           quotaId: qto
           quotaTypeProp: qtype
           quotaProp: qvalue
+init: []
 execution:
   - type: Custom-CPMID1
     after: true

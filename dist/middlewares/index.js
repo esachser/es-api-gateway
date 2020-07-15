@@ -99,7 +99,6 @@ function loadCompoundMiddleware(fname) {
             }
             apiReloader[fname] = (_a = apiReloader[fname]) !== null && _a !== void 0 ? _a : new events_1.EventEmitter();
             apiReloader[fname].emit('change');
-            //apiReloader[fname].removeAllListeners('change');
             middlewares_1.addMiddleware(`Custom-${midJson.id}`, middlewares_1.getCustomConstructor(midJson.mids, apiReloader[fname]), middlewares_1.getCustomSchema(midJson.id), true);
         }
     });

@@ -18,6 +18,7 @@ declare module 'koa' {
 }
 export declare class EsHttpTransport implements IEsTransport {
     middleware: IEsMiddleware | undefined;
+    initMiddleware: IEsMiddleware | undefined;
     routeContext: string;
     static baseRoutesUsed: Set<string>;
     apiLogger: Logger;
@@ -25,7 +26,7 @@ export declare class EsHttpTransport implements IEsTransport {
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined);
+    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware);
     loadAsync(params: IEsHttpTransportParams): Promise<void>;
     clear(): void;
 }

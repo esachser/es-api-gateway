@@ -39,15 +39,18 @@ export function removeMiddleware(name: string) {
 }
 
 export function getCustomConstructor(mids: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor {
-    return class extends EsMiddleware {
-
+    return class C extends EsMiddleware {
+        private static emitters: {[id:string]:boolean} = {};
         private _mid?: IEsMiddleware;
 
         constructor(_values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
             super(after, api, nextMiddleware);
-            changeEmitter.once('change', () => setImmediate(() => {
-                reloadApi(this.api).catch(err => logger.error(`Error reloading API ${this.api}`, err));
-            }));
+            if (!Boolean(C.emitters[api])){
+                changeEmitter.once('change', () => setImmediate(() => {
+                    reloadApi(this.api).catch(err => logger.error(`Error reloading API ${this.api}`, err));
+                }));
+                C.emitters[this.api] = true;
+            }
         }
 
         async loadAsync() {

@@ -49,26 +49,32 @@ function removeMiddleware(name) {
 }
 exports.removeMiddleware = removeMiddleware;
 function getCustomConstructor(mids, changeEmitter) {
-    return class extends _1.EsMiddleware {
-        constructor(_values, after, api, nextMiddleware) {
-            super(after, api, nextMiddleware);
-            changeEmitter.once('change', () => setImmediate(() => {
-                envs_1.reloadApi(this.api).catch(err => logger_1.logger.error(`Error reloading API ${this.api}`, err));
-            }));
-        }
-        loadAsync() {
-            return __awaiter(this, void 0, void 0, function* () {
-                this._mid = yield _1.createMiddleware(mids, 0, this.api);
-            });
-        }
-        runInternal(context) {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (this._mid !== undefined) {
-                    yield this._mid.execute(context);
+    var _a;
+    return _a = class C extends _1.EsMiddleware {
+            constructor(_values, after, api, nextMiddleware) {
+                super(after, api, nextMiddleware);
+                if (!Boolean(C.emitters[api])) {
+                    changeEmitter.once('change', () => setImmediate(() => {
+                        envs_1.reloadApi(this.api).catch(err => logger_1.logger.error(`Error reloading API ${this.api}`, err));
+                    }));
+                    C.emitters[this.api] = true;
                 }
-            });
-        }
-    };
+            }
+            loadAsync() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    this._mid = yield _1.createMiddleware(mids, 0, this.api);
+                });
+            }
+            runInternal(context) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    if (this._mid !== undefined) {
+                        yield this._mid.execute(context);
+                    }
+                });
+            }
+        },
+        _a.emitters = {},
+        _a;
 }
 exports.getCustomConstructor = getCustomConstructor;
 function getCustomSchema(name) {

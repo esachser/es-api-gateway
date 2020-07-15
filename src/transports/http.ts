@@ -25,6 +25,7 @@ declare module 'koa' {
 export class EsHttpTransport implements IEsTransport {
 
     middleware: IEsMiddleware | undefined;
+    initMiddleware: IEsMiddleware | undefined;
 
     routeContext: string;
 
@@ -37,7 +38,7 @@ export class EsHttpTransport implements IEsTransport {
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined) {
+    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware) {
         // Verifica padrões
         this.apiLogger = apiLogger;
         this.api = api;
@@ -56,6 +57,7 @@ export class EsHttpTransport implements IEsTransport {
         EsHttpTransport.baseRoutesUsed.add(params.routeContext);
 
         this.middleware = middleware;
+        this.initMiddleware = initMiddleware;
         this.routeContext = params.routeContext;
         const routeContextSize = this.routeContext.length - 1;
 
@@ -178,7 +180,7 @@ export class EsHttpTransport implements IEsTransport {
 
                 for (const methodInfo of params.routes[path]) {
                     const pathMethodMid = await createMiddleware(methodInfo.mids, 0, this.api);
-                    const middleware = connectMiddlewares(pathMethodMid, this.middleware);
+                    const middleware = connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
                     httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
                         // Executa middleware central, correspondente a:
                         // pathMids ==> transportMids ==> executionMids

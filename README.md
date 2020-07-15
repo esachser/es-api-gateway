@@ -70,8 +70,8 @@ Aspectos que devem ser vistos:
 - [**OK**] Chamada HTTP com certificado de cliente - Testar melhor
 - [**OK**] Tornar getRawBody um middleware
 - [**OK**] Limite de tamanho do body no getRawBody
-- [**Iniciado**] Compound Middleware --> Middlewares personalizados
-- init_mid --> transport_mid --> execution_mid
+- [**OK**] Compound Middleware --> Middlewares personalizados
+- [**OK**] init_mid --> transport_mid --> execution_mid
 - Adicionar transporte GRPC
 - Adicionar transporte Kafka
 - Adicionar transporte Redis Pub/Sub
@@ -88,6 +88,8 @@ Aspectos que devem ser vistos:
 - Estudar a adição dos conceitos SOAP
 - Tipos de Logger na configuração global
 - APIs como JWE, para encriptar informações sensíveis
+- Parâmetros configuráveis para os middlewares criados (e todos os middlewares)
+  - Algo do tipo ${request.headers.test}
 
 ## Outros pontos
 

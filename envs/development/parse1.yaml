@@ -14,6 +14,13 @@ transports:
                   streamProp: httpctx.req
                   maxLenProp: maxLen
     mids: []
+init: 
+  - type: EsMetricsMiddleware
+    data: 
+      prop: response.headers.execution-time
+  - type: Custom-CPMID1
+    after: true
+    data: {}
 execution:
   - type: EsDecodeMiddleware
     after: false
@@ -33,8 +40,5 @@ execution:
     data:
       name: response.status
       value: 200
-  - type: Custom-CPMID1
-    after: false
-    data: {}
 logging:
   level: info

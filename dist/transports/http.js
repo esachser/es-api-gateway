@@ -25,7 +25,7 @@ let EsHttpTransport = /** @class */ (() => {
         /**
          *
          */
-        constructor(params, api, apiLogger, middleware) {
+        constructor(params, api, apiLogger, middleware, initMiddleware) {
             // Verifica padrões
             this.apiLogger = apiLogger;
             this.api = api;
@@ -40,6 +40,7 @@ let EsHttpTransport = /** @class */ (() => {
             }
             EsHttpTransport.baseRoutesUsed.add(params.routeContext);
             this.middleware = middleware;
+            this.initMiddleware = initMiddleware;
             this.routeContext = params.routeContext;
             const routeContextSize = this.routeContext.length - 1;
             try {
@@ -150,7 +151,7 @@ let EsHttpTransport = /** @class */ (() => {
                         totalPath = totalPath.replace(/\/{2,}/g, '/');
                         for (const methodInfo of params.routes[path]) {
                             const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0, this.api);
-                            const middleware = core_1.connectMiddlewares(pathMethodMid, this.middleware);
+                            const middleware = core_1.connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
                             http_server_1.httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids

@@ -48,6 +48,9 @@ function loadApiFile(fname) {
         if (!(yield schemas_1.validateObject('es-api', apiJson))) {
             return;
         }
+        // Carrega Middlewares iniciais.
+        const initJs = lodash_1.default.get(apiJson, 'init', []);
+        const initialMid = yield core_1.createMiddleware(initJs, 0, fname);
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
         const centralMid = yield core_1.createMiddleware(executionJs, 0, fname);
@@ -70,7 +73,7 @@ function loadApiFile(fname) {
                     api.transports[id].clear();
                     delete api.transports[id];
                 }
-                const trp = yield core_1.createTransport(type, fname, api.logger, parameters, mid);
+                const trp = yield core_1.createTransport(type, fname, api.logger, parameters, mid, initialMid);
                 if (trp !== undefined) {
                     api.transports[id] = trp;
                 }
@@ -93,7 +96,6 @@ function reloadEnv(dir) {
 let watcher = undefined;
 function reloadApi(apiName) {
     return __awaiter(this, void 0, void 0, function* () {
-        //const api = apis[apiName];
         const apiJson = path_1.default.resolve(util_1.baseDirectory, 'envs', config_1.configuration.env, `${apiName}.json`);
         const apiYaml = path_1.default.resolve(util_1.baseDirectory, 'envs', config_1.configuration.env, `${apiName}.yaml`);
         if (fs_1.default.existsSync(apiJson)) {

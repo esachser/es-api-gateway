@@ -55,6 +55,12 @@ export declare const API_SCHEMA: {
                 $ref: string;
             };
         };
+        init: {
+            type: string;
+            items: {
+                $ref: string;
+            };
+        };
         execution: {
             type: string;
             items: {
