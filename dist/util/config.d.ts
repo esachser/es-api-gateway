@@ -3,6 +3,7 @@ export interface IEsConfig {
     logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'crit';
     httpPort?: number;
     authenticators?: Array<any>;
+    transports?: Array<any>;
 }
 export declare let configuration: IEsConfig;
 export declare function loadConfig(): Promise<void>;

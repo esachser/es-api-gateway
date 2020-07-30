@@ -1,11 +1,10 @@
 import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
-import { httpRouter } from '../util/http-server';
+import { getHttpRouter } from '../util/http-server';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
-import parsers from '../core/parsers';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -35,13 +34,18 @@ export class EsHttpTransport implements IEsTransport {
 
     api: string;
 
+    tid: string;
+
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware) {
+    constructor(params: IEsHttpTransportParams, api: string, tid: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware) {
         // Verifica padrões
         this.apiLogger = apiLogger;
         this.api = api;
+        this.tid = tid;
+
+        const httpRouter = getHttpRouter(tid);
 
         if (!params.routeContext.endsWith('/')) {
             params.routeContext += '/';
@@ -171,6 +175,7 @@ export class EsHttpTransport implements IEsTransport {
     }
 
     async loadAsync(params: IEsHttpTransportParams) {
+        const httpRouter = getHttpRouter(this.tid);
 
         try {
 
@@ -200,6 +205,8 @@ export class EsHttpTransport implements IEsTransport {
     }
 
     clear() {
+        const httpRouter = getHttpRouter(this.tid);
+
         httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
         EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
         logger.info(`Clear ${this.routeContext} executed`);

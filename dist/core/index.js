@@ -107,7 +107,7 @@ function connectMiddlewares(...middlewares) {
     return mid;
 }
 exports.connectMiddlewares = connectMiddlewares;
-function createTransport(type, api, logger, parameters, middleware, initialMid) {
+function createTransport(type, api, tid, logger, parameters, middleware, initialMid) {
     return __awaiter(this, void 0, void 0, function* () {
         const ctor = transports_1.getTransportConstructor(type);
         if (ctor === undefined) {
@@ -117,7 +117,7 @@ function createTransport(type, api, logger, parameters, middleware, initialMid) 
         if (!v) {
             throw new errors_1.EsTransportError(type, `${type} parameters are invalid`);
         }
-        const transport = new ctor(parameters, api, logger, middleware, initialMid);
+        const transport = new ctor(parameters, api, tid, logger, middleware, initialMid);
         yield transport.loadAsync(parameters);
         return transport;
     });

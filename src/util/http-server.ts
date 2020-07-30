@@ -6,18 +6,30 @@ import contentType from 'content-type';
 import koaBody from 'koa-body';
 import { configuration } from './config';
 import { logger } from './logger';
+import _ from 'lodash';
+import http from 'http';
+import https from 'https';
+import fs from 'fs';
 
-declare module 'koa' {
-    interface BaseRequest {
-        parsedBody?: any
+const routers: {[id: string]: Router} = {};
+
+export function getHttpRouter(id: string) {
+    return routers[id];
+}
+
+export function clearRouters() {
+    for (const k in routers) {
+        routers[k].stack = [];
     }
 }
 
-const unparsed = Symbol.for('unparsedBody');
+//export const httpRouter = new Router();
 
-export const httpRouter = new Router();
-
-export function loadHttpServer() {
+export function loadHttpServer(conf: any) {
+    const port = _.get(conf, 'port');
+    const secure = _.get(conf, 'secure', false);
+    const id = _.get(conf, 'id');
+    
     const app = new koa();
     
     app.use(async (ctx,next) => {
@@ -39,25 +51,45 @@ export function loadHttpServer() {
         }
     });
 
-    // Cria um buffer da entrada, que pode ser transformado em stream para leitura
-    // app.use(async (ctx,next) => {
-    //     // if (ctx.req.readableLength > 0) {
-    //     //     ctx.request.body = await getRawBody(ctx.req);
-    //     // }
-    //     // else {
-    //     //     ctx.request.body = undefined;
-    //     // }
-    //     return next();
-    // });
-
+    const httpRouter = new Router();
+    routers[id] = httpRouter;
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
-    
-    const server = app.listen(configuration.httpPort || 3000, () => {
-        const { port } = server.address() as import('net').AddressInfo;
-        logger.info(`Http Server running on port ${port}`);
-    });
 
     app.on('error', (err, ctx) => {
         logger.error('Erro no servidor HTTP', err);
     });
+
+    if (secure) {
+        const keyFile = _.get(conf, 'keyFile');
+        const passphrase = _.get(conf, 'passphrase');
+        const certFile = _.get(conf, 'certFile');
+        
+        const server = https.createServer({
+            key: fs.readFileSync(keyFile, 'binary'),
+            passphrase,
+            cert: fs.readFileSync(certFile, 'binary')
+        }, app.callback()).listen(port, () => {
+            const { port } = server.address() as import('net').AddressInfo;
+            logger.info(`Http Server running on port ${port}`);
+        });
+    }
+    else {
+        const server = http.createServer(app.callback()).listen(port, () => {
+            const { port } = server.address() as import('net').AddressInfo;
+            logger.info(`Http Server running on port ${port}`);
+        });
+    }
+}
+
+export function loadHttpServers() {
+    const httpConfs = configuration.transports?.filter(c => c.type === 'http');
+    if (httpConfs === undefined) return;
+    for (const cnf of httpConfs) {
+        try{
+            loadHttpServer(cnf);
+        }
+        catch(err) {
+            logger.error('Error loading Http Server', err);
+        }
+    }
 }

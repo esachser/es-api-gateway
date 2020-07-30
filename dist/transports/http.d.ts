@@ -23,10 +23,11 @@ export declare class EsHttpTransport implements IEsTransport {
     static baseRoutesUsed: Set<string>;
     apiLogger: Logger;
     api: string;
+    tid: string;
     /**
      *
      */
-    constructor(params: IEsHttpTransportParams, api: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware);
+    constructor(params: IEsHttpTransportParams, api: string, tid: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware);
     loadAsync(params: IEsHttpTransportParams): Promise<void>;
     clear(): void;
 }

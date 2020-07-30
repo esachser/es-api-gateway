@@ -3,7 +3,7 @@ import { loadMiddlewares, loadCustomMiddlewares } from './middlewares';
 import { logger } from './util/logger';
 import { loadTransports, loadCustomTransports } from './transports';
 import { loadEnv } from './envs';
-import { loadHttpServer } from './util/http-server';
+import { loadHttpServers } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
 import { loadParsers } from './parsers';
@@ -17,7 +17,7 @@ async function start() {
     loadTransports();
     loadCustomTransports();
     loadAuthenticators();
-    loadHttpServer();
+    loadHttpServers();
     loadJsonSchemaValidator();
     await startAuthenticators();
     await loadEnv(configuration.env);

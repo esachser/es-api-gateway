@@ -12,15 +12,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadHttpServer = exports.httpRouter = void 0;
+exports.loadHttpServers = exports.loadHttpServer = exports.clearRouters = exports.getHttpRouter = void 0;
 const koa_1 = __importDefault(require("koa"));
 const koa_router_1 = __importDefault(require("koa-router"));
 const koa_helmet_1 = __importDefault(require("koa-helmet"));
 const config_1 = require("./config");
 const logger_1 = require("./logger");
-const unparsed = Symbol.for('unparsedBody');
-exports.httpRouter = new koa_router_1.default();
-function loadHttpServer() {
+const lodash_1 = __importDefault(require("lodash"));
+const http_1 = __importDefault(require("http"));
+const https_1 = __importDefault(require("https"));
+const fs_1 = __importDefault(require("fs"));
+const routers = {};
+function getHttpRouter(id) {
+    return routers[id];
+}
+exports.getHttpRouter = getHttpRouter;
+function clearRouters() {
+    for (const k in routers) {
+        routers[k].stack = [];
+    }
+}
+exports.clearRouters = clearRouters;
+//export const httpRouter = new Router();
+function loadHttpServer(conf) {
+    const port = lodash_1.default.get(conf, 'port');
+    const secure = lodash_1.default.get(conf, 'secure', false);
+    const id = lodash_1.default.get(conf, 'id');
     const app = new koa_1.default();
     app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
         // Avaliando tempo de execução total da aplicação koa
@@ -38,24 +55,46 @@ function loadHttpServer() {
             };
         }
     }));
-    // Cria um buffer da entrada, que pode ser transformado em stream para leitura
-    // app.use(async (ctx,next) => {
-    //     // if (ctx.req.readableLength > 0) {
-    //     //     ctx.request.body = await getRawBody(ctx.req);
-    //     // }
-    //     // else {
-    //     //     ctx.request.body = undefined;
-    //     // }
-    //     return next();
-    // });
-    app.use(exports.httpRouter.routes()).use(exports.httpRouter.allowedMethods());
-    const server = app.listen(config_1.configuration.httpPort || 3000, () => {
-        const { port } = server.address();
-        logger_1.logger.info(`Http Server running on port ${port}`);
-    });
+    const httpRouter = new koa_router_1.default();
+    routers[id] = httpRouter;
+    app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     app.on('error', (err, ctx) => {
         logger_1.logger.error('Erro no servidor HTTP', err);
     });
+    if (secure) {
+        const keyFile = lodash_1.default.get(conf, 'keyFile');
+        const passphrase = lodash_1.default.get(conf, 'passphrase');
+        const certFile = lodash_1.default.get(conf, 'certFile');
+        const server = https_1.default.createServer({
+            key: fs_1.default.readFileSync(keyFile, 'binary'),
+            passphrase,
+            cert: fs_1.default.readFileSync(certFile, 'binary')
+        }, app.callback()).listen(port, () => {
+            const { port } = server.address();
+            logger_1.logger.info(`Http Server running on port ${port}`);
+        });
+    }
+    else {
+        const server = http_1.default.createServer(app.callback()).listen(port, () => {
+            const { port } = server.address();
+            logger_1.logger.info(`Http Server running on port ${port}`);
+        });
+    }
 }
 exports.loadHttpServer = loadHttpServer;
+function loadHttpServers() {
+    var _a;
+    const httpConfs = (_a = config_1.configuration.transports) === null || _a === void 0 ? void 0 : _a.filter(c => c.type === 'http');
+    if (httpConfs === undefined)
+        return;
+    for (const cnf of httpConfs) {
+        try {
+            loadHttpServer(cnf);
+        }
+        catch (err) {
+            logger_1.logger.error('Error loading Http Server', err);
+        }
+    }
+}
+exports.loadHttpServers = loadHttpServers;
 //# sourceMappingURL=http-server.js.map

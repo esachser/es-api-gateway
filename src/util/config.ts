@@ -10,7 +10,8 @@ export interface IEsConfig {
     env: string,
     logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'crit',
     httpPort?: number,
-    authenticators?: Array<any> 
+    authenticators?: Array<any>,
+    transports?: Array<any>
 };
 
 export let configuration: IEsConfig = { env: 'local' };

@@ -25,10 +25,12 @@ let EsHttpTransport = /** @class */ (() => {
         /**
          *
          */
-        constructor(params, api, apiLogger, middleware, initMiddleware) {
+        constructor(params, api, tid, apiLogger, middleware, initMiddleware) {
             // Verifica padrões
             this.apiLogger = apiLogger;
             this.api = api;
+            this.tid = tid;
+            const httpRouter = http_server_1.getHttpRouter(tid);
             if (!params.routeContext.endsWith('/')) {
                 params.routeContext += '/';
             }
@@ -44,7 +46,7 @@ let EsHttpTransport = /** @class */ (() => {
             this.routeContext = params.routeContext;
             const routeContextSize = this.routeContext.length - 1;
             try {
-                http_server_1.httpRouter.use(this.routeContext, (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                httpRouter.use(this.routeContext, (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                     // Prepara a chamada
                     let allPath = ctx.path;
                     if (!allPath.endsWith('/')) {
@@ -145,6 +147,7 @@ let EsHttpTransport = /** @class */ (() => {
         }
         loadAsync(params) {
             return __awaiter(this, void 0, void 0, function* () {
+                const httpRouter = http_server_1.getHttpRouter(this.tid);
                 try {
                     for (const path in params.routes) {
                         let totalPath = `${this.routeContext}${path}`;
@@ -152,7 +155,7 @@ let EsHttpTransport = /** @class */ (() => {
                         for (const methodInfo of params.routes[path]) {
                             const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0, this.api);
                             const middleware = core_1.connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
-                            http_server_1.httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                            httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids
                                 //      <========    ||    <==========||
@@ -170,10 +173,11 @@ let EsHttpTransport = /** @class */ (() => {
             });
         }
         clear() {
-            http_server_1.httpRouter.stack = http_server_1.httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
+            const httpRouter = http_server_1.getHttpRouter(this.tid);
+            httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
             EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
             logger_1.logger.info(`Clear ${this.routeContext} executed`);
-            logger_1.logger.debug(http_server_1.httpRouter.stack);
+            logger_1.logger.debug(httpRouter.stack);
         }
     }
     EsHttpTransport.baseRoutesUsed = new Set();

@@ -1,8 +1,5 @@
 import Router from 'koa-router';
-declare module 'koa' {
-    interface BaseRequest {
-        parsedBody?: any;
-    }
-}
-export declare const httpRouter: Router<any, {}>;
-export declare function loadHttpServer(): void;
+export declare function getHttpRouter(id: string): Router<any, {}>;
+export declare function clearRouters(): void;
+export declare function loadHttpServer(conf: any): void;
+export declare function loadHttpServers(): void;

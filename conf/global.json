@@ -1,6 +1,5 @@
 {
     "env": "development",
-    "httpPort": 4000,
     "logLevel": "info",
     "authenticators": [
         {
@@ -36,6 +35,22 @@
                 "issuer": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6",
                 "audience": "http://authtestapi"
             }
+        }
+    ],
+    "transports": [
+        {
+            "type": "http",
+            "port": 4000,
+            "id": "http"
+        },
+        {
+            "type": "http",
+            "port": 8443,
+            "id": "https",
+            "secure": true,
+            "keyFile": "./certs/server.key",
+            "passphrase": "esapi",
+            "certFile": "./certs/server.crt"
         }
     ]
 }

@@ -77,7 +77,7 @@ export abstract class EsMiddleware extends IEsMiddleware {
 }
 
 export interface IEsTranportConstructor {
-    new (params: any, api: string, logger: Logger, middleware?: IEsMiddleware, initMiddleware?: IEsMiddleware): IEsTransport
+    new (params: any, api: string, tid: string, logger: Logger, middleware?: IEsMiddleware, initMiddleware?: IEsMiddleware): IEsTransport
 }
 
 export interface IEsTransport {
@@ -145,7 +145,7 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
     return mid;
 }
 
-export async function createTransport(type: string, api: string, logger: Logger, parameters: any, middleware: IEsMiddleware | undefined, initialMid?: IEsMiddleware) {
+export async function createTransport(type: string, api: string, tid: string, logger: Logger, parameters: any, middleware: IEsMiddleware | undefined, initialMid?: IEsMiddleware) {
     const ctor = getTransportConstructor(type);
     if (ctor === undefined) {
         throw new EsTransportError(type, `Constructor of ${type} doesnt exists`);
@@ -157,7 +157,7 @@ export async function createTransport(type: string, api: string, logger: Logger,
         throw new EsTransportError(type, `${type} parameters are invalid`);
     }
 
-    const transport = new ctor(parameters, api, logger, middleware, initialMid);
+    const transport = new ctor(parameters, api, tid, logger, middleware, initialMid);
     await transport.loadAsync(parameters);
     return transport;
 }

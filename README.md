@@ -72,7 +72,8 @@ Aspectos que devem ser vistos:
 - [**OK**] Limite de tamanho do body no getRawBody
 - [**OK**] Compound Middleware --> Middlewares personalizados
 - [**OK**] init_mid --> transport_mid --> execution_mid
-- Adicionar transporte GRPC
+- [**OK**] Várias portas HTTP com configurações diferentes
+  - Fazer a recarga de todas elas corretamente
 - Adicionar transporte Kafka
 - Adicionar transporte Redis Pub/Sub
 - Adicionar transporte Redis Streams
@@ -95,6 +96,7 @@ Aspectos que devem ser vistos:
 
 Outros pontos a serem verificados:
 
+- Adicionar transporte GRPC
 - Verificar concorrência nos *creators*
 - Criar testes para todo o sistema
 - Criar "Vault" para salvar infos das APIs

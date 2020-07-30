@@ -20,9 +20,9 @@ const lodash_1 = __importDefault(require("lodash"));
 const util_1 = require("../util");
 const logger_1 = require("../util/logger");
 const core_1 = require("../core");
-const http_server_1 = require("../util/http-server");
 const schemas_1 = require("../core/schemas");
 const config_1 = require("../util/config");
+const http_server_1 = require("../util/http-server");
 let apis = {};
 function loadApiFile(fname) {
     var _a, _b;
@@ -73,7 +73,7 @@ function loadApiFile(fname) {
                     api.transports[id].clear();
                     delete api.transports[id];
                 }
-                const trp = yield core_1.createTransport(type, fname, api.logger, parameters, mid, initialMid);
+                const trp = yield core_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
                 if (trp !== undefined) {
                     api.transports[id] = trp;
                 }
@@ -113,7 +113,7 @@ function loadEnv(envName) {
         const envDirExists = fs_1.default.existsSync(envDir);
         if (watcher !== undefined) {
             watcher.close();
-            http_server_1.httpRouter.stack = [];
+            http_server_1.clearRouters();
         }
         if (envDirExists) {
             const envFinfo = yield promises_1.default.stat(envDir);

@@ -5,11 +5,11 @@ import _, { isRegExp } from 'lodash';
 import { baseDirectory, readFileToObject } from '../util';
 import { logger, createLogger } from '../util/logger';
 import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
-import { httpRouter } from '../util/http-server';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
 import { load } from '@grpc/grpc-js';
 import { configuration } from '../util/config';
+import { clearRouters } from '../util/http-server';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -82,7 +82,7 @@ async function loadApiFile(fname: string) {
                 delete api.transports[id];
             }
 
-            const trp = await createTransport(type, fname, api.logger, parameters, mid, initialMid);
+            const trp = await createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
 
             if (trp !== undefined) {
                 api.transports[id] = trp;
@@ -125,7 +125,7 @@ export async function loadEnv(envName: string) {
 
     if (watcher !== undefined) {
         watcher.close();
-        httpRouter.stack = [];
+        clearRouters();
     }
 
     if (envDirExists) {
