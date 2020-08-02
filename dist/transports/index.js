@@ -8,6 +8,7 @@ const decache_1 = __importDefault(require("decache"));
 const fs_1 = __importDefault(require("fs"));
 const logger_1 = require("../util/logger");
 const http_1 = require("./http");
+const schedule_1 = require("./schedule");
 const transports_1 = require("../core/transports");
 function readDirectoryProjects(dir) {
     const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
@@ -19,6 +20,7 @@ function readDirectoryProjects(dir) {
 }
 function loadTransports() {
     transports_1.addTransport('EsHttpTransport', http_1.TransportContructor, http_1.TransportSchema);
+    transports_1.addTransport('EsScheduleTransport', schedule_1.TransportContructor, schedule_1.TransportSchema);
 }
 exports.loadTransports = loadTransports;
 ;

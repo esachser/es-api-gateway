@@ -1,0 +1,44 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: https
+    parameters:
+      routeContext: "/api/parser/v1"
+      routes:
+        "/":
+          - method: POST
+            mids: 
+              - type: EsGetRawBodyMiddleware
+                after: false
+                data: 
+                  streamProp: httpctx.req
+                  maxLenProp: maxLen
+    mids: []
+init: 
+  - type: EsMetricsMiddleware
+    data: 
+      prop: response.headers.execution-time
+  - type: Custom-CPMID1
+    after: true
+    data: {}
+execution:
+  - type: EsDecodeMiddleware
+    after: false
+    data:
+      parserOpts:
+        ignoreAttributes: true
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.headers.content-type
+      value: application/json
+  - type: EsEncodeMiddleware
+    after: false
+    data: {}
+  - type: EsPropertyMiddleware
+    after: false
+    data:
+      name: response.status
+      value: 200
+logging:
+  level: info

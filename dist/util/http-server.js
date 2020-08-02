@@ -93,7 +93,6 @@ function loadHttpServer(conf) {
             server.once('error', err => {
                 reject(err);
             });
-            // _.set(routers[id], 'server', server);
             lodash_1.default.set(routers, `[${id}].server`, server);
         }
         if (server !== undefined) {

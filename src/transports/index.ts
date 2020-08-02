@@ -5,6 +5,7 @@ import { IEsTranportConstructor } from '../core';
 import { baseDirectory } from '../util';
 import { logger } from '../util/logger';
 import { TransportContructor as EsHttpTransportContructor, TransportSchema as EsHttpTransportSchema } from './http';
+import { TransportContructor as EsScheduleTransportContructor, TransportSchema as EsScheduleTransportSchema } from './schedule';
 import { addNewSchema } from '../core/schemas';
 import { addTransport } from '../core/transports';
 
@@ -15,13 +16,13 @@ function readDirectoryProjects(dir: string) {
     finfos.forEach(finfo => {
         if (finfo.isDirectory()) {
             logger.info(`Loading transport ${finfo.name}`);
-            
         }
     });
 }
 
 export function loadTransports() {
     addTransport('EsHttpTransport', EsHttpTransportContructor, EsHttpTransportSchema);
+    addTransport('EsScheduleTransport', EsScheduleTransportContructor, EsScheduleTransportSchema);
 };
 
 export function loadCustomTransports() {

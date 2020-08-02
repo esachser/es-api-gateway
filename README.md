@@ -74,9 +74,10 @@ Aspectos que devem ser vistos:
 - [**OK**] init_mid --> transport_mid --> execution_mid
 - [**OK**] Várias portas HTTP com configurações diferentes
   - [**OK**] Fazer a recarga de todas elas corretamente
-- Adicionar transporte Kafka
+- [**OK**] Adicionar "transporte" Scheduler
 - Adicionar transporte Redis Pub/Sub
 - Adicionar transporte Redis Streams
+- Adicionar transporte Kafka
 - Adicionar transportes de filas
   - AMQP
   - MQTT

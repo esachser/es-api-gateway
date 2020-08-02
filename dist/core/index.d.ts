@@ -6,7 +6,7 @@ export interface IEsContext {
     properties: {
         [id: string]: any;
     };
-    body: string;
+    body?: string;
     logger: Logger;
     meta: {
         api: string;

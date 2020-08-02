@@ -38,12 +38,18 @@ let EsHttpTransport = /** @class */ (() => {
                 params.routeContext += '/';
             }
             // Procura estaticamente e testa se já existe
-            for (const basePath of EsHttpTransport.baseRoutesUsed) {
-                if (basePath.startsWith(params.routeContext) || params.routeContext.startsWith(basePath)) {
-                    throw new Error(`Base route already exists. Exists ${basePath} x ${params.routeContext} New`);
+            const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
+            if (basePaths !== undefined) {
+                for (const basePath of basePaths) {
+                    if (basePath.startsWith(params.routeContext) || params.routeContext.startsWith(basePath)) {
+                        throw new Error(`Base route already exists. Exists ${basePath} x ${params.routeContext} New`);
+                    }
                 }
+                basePaths.add(params.routeContext);
             }
-            EsHttpTransport.baseRoutesUsed.add(params.routeContext);
+            else {
+                EsHttpTransport.baseRoutesUsed.set(this.tid, new Set([params.routeContext]));
+            }
             this.middleware = middleware;
             this.initMiddleware = initMiddleware;
             this.routeContext = params.routeContext;
@@ -184,12 +190,15 @@ let EsHttpTransport = /** @class */ (() => {
                 return;
             }
             httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
-            EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
+            const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
+            if (basePaths !== undefined) {
+                basePaths.delete(this.routeContext);
+            }
             logger_1.logger.info(`Clear ${this.routeContext} executed`);
             logger_1.logger.debug(httpRouter.stack);
         }
     }
-    EsHttpTransport.baseRoutesUsed = new Set();
+    EsHttpTransport.baseRoutesUsed = new Map();
     return EsHttpTransport;
 })();
 exports.EsHttpTransport = EsHttpTransport;

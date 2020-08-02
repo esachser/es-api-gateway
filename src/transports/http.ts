@@ -28,7 +28,7 @@ export class EsHttpTransport implements IEsTransport {
 
     routeContext: string;
 
-    static baseRoutesUsed: Set<string> = new Set<string>();
+    static baseRoutesUsed: Map<string,Set<string>> = new Map<string, Set<string>>();
 
     apiLogger: Logger;
 
@@ -56,13 +56,18 @@ export class EsHttpTransport implements IEsTransport {
         }
 
         // Procura estaticamente e testa se já existe
-        for (const basePath of EsHttpTransport.baseRoutesUsed) {
-            if (basePath.startsWith(params.routeContext) || params.routeContext.startsWith(basePath)) {
-                throw new Error(`Base route already exists. Exists ${basePath} x ${params.routeContext} New`);
+        const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
+        if (basePaths !== undefined) {
+            for (const basePath of basePaths) {
+                if (basePath.startsWith(params.routeContext) || params.routeContext.startsWith(basePath)) {
+                    throw new Error(`Base route already exists. Exists ${basePath} x ${params.routeContext} New`);
+                }
             }
+            basePaths.add(params.routeContext);
         }
-
-        EsHttpTransport.baseRoutesUsed.add(params.routeContext);
+        else {
+            EsHttpTransport.baseRoutesUsed.set(this.tid, new Set<string>([params.routeContext]));
+        }
 
         this.middleware = middleware;
         this.initMiddleware = initMiddleware;
@@ -220,7 +225,10 @@ export class EsHttpTransport implements IEsTransport {
         }
 
         httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
-        EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
+        const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
+        if (basePaths !== undefined) {
+            basePaths.delete(this.routeContext);
+        }
         logger.info(`Clear ${this.routeContext} executed`);
         logger.debug(httpRouter.stack);
     }

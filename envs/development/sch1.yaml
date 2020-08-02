@@ -1,0 +1,62 @@
+---
+transports:
+  - type: EsScheduleTransport
+    id: sch1
+    parameters:
+      schedule: "*/5 * * * * *"
+    mids: []
+init: 
+  - type: EsMetricsMiddleware
+    data: 
+      prop: execution-time
+execution: 
+- type: EsPropertyMiddleware
+  data:
+    name: body
+    value: 
+      teste: 123
+      ok: true
+# - type: EsPropertyMiddleware
+#   data:
+#     name: parsedBody
+#     expression: JSON.stringify(ctx.properties.body)
+- type: EsPropertyMiddleware
+  data:
+    name: ctype
+    value: application/json
+- type: EsEncodeMiddleware
+  after: false
+  data: 
+    sourceProp: body
+    contentType: ctype
+    destProp: parsedBody
+- type: EsPropertyMiddleware
+  after: false
+  data:
+    name: keypass
+    value: "esapi"
+- type: EsLoadPrivateKeyMiddleware
+  after: false
+  data:
+    keyFile: server.key
+    keyPassProp: "keypass"
+    destProp: jwskey
+# - type: EsPropertyMiddleware
+#   after: false
+#   data:
+#     name: jwskey
+#     value: "abcdefghijabcdefghijabcdefghijab"
+- type: EsPropertyMiddleware
+  after: false
+  data:
+    name: jwsalg
+    value: "RS256"
+- type: EsJwsGenerateMiddleware
+  after: false
+  data:
+    payloadProp: parsedBody
+    keyProp: jwskey
+    algProp: jwsalg
+    destProp: jws
+logging:
+  level: info

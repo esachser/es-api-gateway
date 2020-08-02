@@ -20,7 +20,7 @@ export declare class EsHttpTransport implements IEsTransport {
     middleware: IEsMiddleware | undefined;
     initMiddleware: IEsMiddleware | undefined;
     routeContext: string;
-    static baseRoutesUsed: Set<string>;
+    static baseRoutesUsed: Map<string, Set<string>>;
     apiLogger: Logger;
     api: string;
     tid: string;
