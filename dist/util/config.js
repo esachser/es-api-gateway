@@ -20,6 +20,7 @@ const _1 = require(".");
 const logger_1 = require("./logger");
 const envs_1 = require("../envs");
 const authenticators_1 = require("../authenticators");
+const http_server_1 = require("./http-server");
 ;
 exports.configuration = { env: 'local' };
 const configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.json');
@@ -38,6 +39,9 @@ fs_1.default.watch(configFileName, (event, fname) => __awaiter(void 0, void 0, v
     });
     yield authenticators_1.startAuthenticators().catch(e => {
         logger_1.logger.error('Error starting authenticators', e);
+    });
+    yield http_server_1.loadHttpServers().catch(e => {
+        logger_1.logger.error('Error loading HTTP Transports', e);
     });
     yield envs_1.loadEnv(exports.configuration.env).catch(e => {
         logger_1.logger.error('Error loading APIs', e);

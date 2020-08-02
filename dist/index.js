@@ -27,7 +27,7 @@ function start() {
         transports_1.loadTransports();
         transports_1.loadCustomTransports();
         authenticators_1.loadAuthenticators();
-        http_server_1.loadHttpServers();
+        yield http_server_1.loadHttpServers();
         schemas_1.loadJsonSchemaValidator();
         yield authenticators_1.startAuthenticators();
         yield envs_1.loadEnv(config_1.configuration.env);

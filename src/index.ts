@@ -17,7 +17,7 @@ async function start() {
     loadTransports();
     loadCustomTransports();
     loadAuthenticators();
-    loadHttpServers();
+    await loadHttpServers();
     loadJsonSchemaValidator();
     await startAuthenticators();
     await loadEnv(configuration.env);

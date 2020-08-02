@@ -73,7 +73,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Compound Middleware --> Middlewares personalizados
 - [**OK**] init_mid --> transport_mid --> execution_mid
 - [**OK**] Várias portas HTTP com configurações diferentes
-  - Fazer a recarga de todas elas corretamente
+  - [**OK**] Fazer a recarga de todas elas corretamente
 - Adicionar transporte Kafka
 - Adicionar transporte Redis Pub/Sub
 - Adicionar transporte Redis Streams

@@ -24,17 +24,21 @@ const https_1 = __importDefault(require("https"));
 const fs_1 = __importDefault(require("fs"));
 const routers = {};
 function getHttpRouter(id) {
-    return routers[id];
+    return routers[id].router;
 }
 exports.getHttpRouter = getHttpRouter;
 function clearRouters() {
     for (const k in routers) {
-        routers[k].stack = [];
+        const r = routers[k].router;
+        if (r !== undefined) {
+            r.stack = [];
+        }
     }
 }
 exports.clearRouters = clearRouters;
 //export const httpRouter = new Router();
 function loadHttpServer(conf) {
+    var _a, _b;
     const port = lodash_1.default.get(conf, 'port');
     const secure = lodash_1.default.get(conf, 'secure', false);
     const id = lodash_1.default.get(conf, 'id');
@@ -55,46 +59,71 @@ function loadHttpServer(conf) {
             };
         }
     }));
-    const httpRouter = new koa_router_1.default();
-    routers[id] = httpRouter;
+    const httpRouter = (_b = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.router) !== null && _b !== void 0 ? _b : new koa_router_1.default();
+    lodash_1.default.set(routers, `[${id}].router`, httpRouter);
     app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
     app.on('error', (err, ctx) => {
         logger_1.logger.error('Erro no servidor HTTP', err);
     });
-    if (secure) {
-        const keyFile = lodash_1.default.get(conf, 'keyFile');
-        const passphrase = lodash_1.default.get(conf, 'passphrase');
-        const certFile = lodash_1.default.get(conf, 'certFile');
-        const server = https_1.default.createServer({
-            key: fs_1.default.readFileSync(keyFile, 'binary'),
-            passphrase,
-            cert: fs_1.default.readFileSync(certFile, 'binary')
-        }, app.callback()).listen(port, () => {
-            const { port } = server.address();
-            logger_1.logger.info(`Http Server running on port ${port}`);
-        });
-    }
-    else {
-        const server = http_1.default.createServer(app.callback()).listen(port, () => {
-            const { port } = server.address();
-            logger_1.logger.info(`Http Server running on port ${port}`);
-        });
-    }
+    return new Promise((resolve, reject) => {
+        var _a;
+        let server = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.server;
+        function createServer() {
+            if (secure) {
+                const keyFile = lodash_1.default.get(conf, 'keyFile');
+                const passphrase = lodash_1.default.get(conf, 'passphrase');
+                const certFile = lodash_1.default.get(conf, 'certFile');
+                server = https_1.default.createServer({
+                    key: fs_1.default.readFileSync(keyFile, 'binary'),
+                    passphrase,
+                    cert: fs_1.default.readFileSync(certFile, 'binary')
+                }, app.callback()).listen(port, () => {
+                    const { port } = server === null || server === void 0 ? void 0 : server.address();
+                    logger_1.logger.info(`Https Server running on port ${port}`);
+                    return resolve();
+                });
+            }
+            else {
+                server = http_1.default.createServer(app.callback()).listen(port, () => {
+                    const { port } = server === null || server === void 0 ? void 0 : server.address();
+                    logger_1.logger.info(`Http Server running on port ${port}`);
+                    return resolve();
+                });
+            }
+            server.once('error', err => {
+                reject(err);
+            });
+            // _.set(routers[id], 'server', server);
+            lodash_1.default.set(routers, `[${id}].server`, server);
+        }
+        if (server !== undefined) {
+            server.close(err => {
+                if (err)
+                    return reject(err);
+                createServer();
+            });
+        }
+        else {
+            createServer();
+        }
+    });
 }
 exports.loadHttpServer = loadHttpServer;
 function loadHttpServers() {
     var _a;
-    const httpConfs = (_a = config_1.configuration.transports) === null || _a === void 0 ? void 0 : _a.filter(c => c.type === 'http');
-    if (httpConfs === undefined)
-        return;
-    for (const cnf of httpConfs) {
-        try {
-            loadHttpServer(cnf);
+    return __awaiter(this, void 0, void 0, function* () {
+        const httpConfs = (_a = config_1.configuration.transports) === null || _a === void 0 ? void 0 : _a.filter(c => c.type === 'http');
+        if (httpConfs === undefined)
+            return;
+        for (const cnf of httpConfs) {
+            try {
+                yield loadHttpServer(cnf);
+            }
+            catch (err) {
+                logger_1.logger.error('Error loading Http Server', err);
+            }
         }
-        catch (err) {
-            logger_1.logger.error('Error loading Http Server', err);
-        }
-    }
+    });
 }
 exports.loadHttpServers = loadHttpServers;
 //# sourceMappingURL=http-server.js.map

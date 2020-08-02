@@ -5,6 +5,7 @@ import { baseDirectory } from '.';
 import { logger } from './logger';
 import { loadEnv } from '../envs';
 import { startAuthenticators } from '../authenticators';
+import { loadHttpServers } from './http-server';
 
 export interface IEsConfig {
     env: string,
@@ -31,6 +32,9 @@ fs.watch(configFileName, async (event, fname) => {
     });
     await startAuthenticators().catch(e => { 
         logger.error('Error starting authenticators', e);
+    });
+    await loadHttpServers().catch(e => { 
+        logger.error('Error loading HTTP Transports', e);
     });
     await loadEnv(configuration.env).catch(e => { 
         logger.error('Error loading APIs', e);

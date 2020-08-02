@@ -31,6 +31,9 @@ let EsHttpTransport = /** @class */ (() => {
             this.api = api;
             this.tid = tid;
             const httpRouter = http_server_1.getHttpRouter(tid);
+            if (httpRouter === undefined) {
+                throw new errors_1.EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
+            }
             if (!params.routeContext.endsWith('/')) {
                 params.routeContext += '/';
             }
@@ -148,6 +151,9 @@ let EsHttpTransport = /** @class */ (() => {
         loadAsync(params) {
             return __awaiter(this, void 0, void 0, function* () {
                 const httpRouter = http_server_1.getHttpRouter(this.tid);
+                if (httpRouter === undefined) {
+                    throw new errors_1.EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
+                }
                 try {
                     for (const path in params.routes) {
                         let totalPath = `${this.routeContext}${path}`;
@@ -174,6 +180,9 @@ let EsHttpTransport = /** @class */ (() => {
         }
         clear() {
             const httpRouter = http_server_1.getHttpRouter(this.tid);
+            if (httpRouter === undefined) {
+                return;
+            }
             httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
             EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
             logger_1.logger.info(`Clear ${this.routeContext} executed`);

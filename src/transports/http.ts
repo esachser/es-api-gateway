@@ -2,7 +2,7 @@ import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, create
 import { getHttpRouter } from '../util/http-server';
 import _ from 'lodash';
 import { logger } from '../util/logger';
-import { Logger } from 'winston';
+import { Logger, http } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 
@@ -46,6 +46,10 @@ export class EsHttpTransport implements IEsTransport {
         this.tid = tid;
 
         const httpRouter = getHttpRouter(tid);
+
+        if (httpRouter === undefined) {
+            throw new EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
+        }
 
         if (!params.routeContext.endsWith('/')) {
             params.routeContext += '/';
@@ -177,6 +181,10 @@ export class EsHttpTransport implements IEsTransport {
     async loadAsync(params: IEsHttpTransportParams) {
         const httpRouter = getHttpRouter(this.tid);
 
+        if (httpRouter === undefined) {
+            throw new EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
+        }
+
         try {
 
             for (const path in params.routes) {
@@ -206,6 +214,10 @@ export class EsHttpTransport implements IEsTransport {
 
     clear() {
         const httpRouter = getHttpRouter(this.tid);
+
+        if (httpRouter === undefined) {
+            return;
+        }
 
         httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
         EsHttpTransport.baseRoutesUsed.delete(this.routeContext);
