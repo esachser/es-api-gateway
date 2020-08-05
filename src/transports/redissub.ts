@@ -1,0 +1,96 @@
+import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
+import _ from 'lodash';
+import { logger } from '../util/logger';
+import { Logger, http } from 'winston';
+import { nanoid } from 'nanoid';
+import { EsTransportError, EsError } from '../core/errors';
+import Redis from 'ioredis';
+
+export class EsRedisSubTransport implements IEsTransport {
+
+    middleware: IEsMiddleware | undefined;
+
+    apiLogger: Logger;
+
+    api: string;
+
+    tid: string;
+
+    private _redis: Redis.Redis;
+    private _subStr: string[];
+
+    /**
+     *
+     */
+    constructor(params: any, api: string, tid: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware) {
+        // Verifica padrões
+        this.apiLogger = apiLogger;
+        this.api = api;
+        this.tid = tid;
+        this.middleware = connectMiddlewares(initMiddleware, middleware);
+        this._redis = new Redis();
+        this._subStr = _.get(params, 'subscribe');
+    }
+
+    async loadAsync(params: any) {
+        try {
+            await this._redis.psubscribe(this._subStr);
+
+            this._redis.on('pmessage', async (pattern, channel, message) => {
+                try {
+                    logger.info(`Starting subscribed (${channel}) for ${this.api}`);
+                    let init = process.hrtime();
+                    const context: IEsContext = {
+                        properties: {
+                            message
+                        },
+                        logger: this.apiLogger,
+                        meta: {
+                            api: this.api,
+                            transport: EsRedisSubTransport.name,
+                            uid: nanoid(12)
+                        }
+                    };
+                    await this.middleware?.execute(context);
+                    const diffs = process.hrtime(init);
+                    const diff = diffs[0] * 1000 + diffs[1] / 1000000;
+                    logger.info(`Ending subscribed (${channel}) for ${this.api} in ${diff}ms`);
+                }
+                catch(err) {
+                    this.apiLogger.error('Error running middlewares', err);
+                }
+            });
+
+            logger.info(`Loaded Subscribe Transport ${this.api} - ${this.tid}`);
+        }
+        catch(err) {
+            throw new EsTransportError(EsRedisSubTransport.name, 'Error subscribing', err);
+        }
+    }
+
+    clear() {
+        this._redis.punsubscribe(this._subStr);
+    }
+}
+
+export const TransportContructor: IEsTranportConstructor = EsRedisSubTransport;
+
+export const TransportSchema = {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsRedisSubTransport",
+    "title": "RedisSub Transport parameters",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "subscribe"
+    ],
+    "properties": {
+        "subscribe": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+};
+

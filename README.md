@@ -75,8 +75,14 @@ Aspectos que devem ser vistos:
 - [**OK**] Várias portas HTTP com configurações diferentes
   - [**OK**] Fazer a recarga de todas elas corretamente
 - [**OK**] Adicionar "transporte" Scheduler
-- Adicionar transporte Redis Pub/Sub
-- Adicionar transporte Redis Streams
+- [**OK**] Adicionar transporte/middleware Redis Pub/Sub
+  - [**OK**] Middleware Pub
+  - [**OK**] Transport Sub
+- Adicionar transporte/middleware Redis Streams
+  - Middleware Stream Write
+  - Transport Group Stream Read
+- Adicionar middleware de envio de email
+  - Exige configuração centralizada?
 - Adicionar transporte Kafka
 - Adicionar transportes de filas
   - AMQP
@@ -92,6 +98,7 @@ Aspectos que devem ser vistos:
 - APIs como JWE, para encriptar informações sensíveis
 - Parâmetros configuráveis para os middlewares criados (e todos os middlewares)
   - Algo do tipo ${request.headers.test}
+- Validar configuração global
 
 ## Outros pontos
 
