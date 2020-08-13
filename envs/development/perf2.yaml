@@ -1,0 +1,27 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: http
+    parameters:
+      routeContext: /api/perf/v2
+      routes:
+        "/":
+        - method: GET
+          mids: []
+    mids: []
+init: 
+  - type: EsMetricsMiddleware
+    data: 
+      prop: execution-time
+execution: 
+- type: EsPropertyMiddleware
+  data:
+    name: response.status
+    value: 200
+- type: EsPropertyMiddleware
+  data:
+    name: response.body
+    value: 
+      ok: true
+logging:
+  level: info

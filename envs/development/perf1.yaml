@@ -1,9 +1,13 @@
 ---
 transports:
-  - type: EsScheduleTransport
-    id: sch1
+  - type: EsHttpTransport
+    id: http
     parameters:
-      schedule: "0 * * * * *"
+      routeContext: /api/perf/v1
+      routes:
+        "/":
+        - method: GET
+          mids: []
     mids: []
 init: 
   - type: EsMetricsMiddleware
@@ -60,13 +64,11 @@ execution:
     destProp: jws
 - type: EsPropertyMiddleware
   data:
-    name: destRedis
-    value: news.bla
-- type: EsRedisPublishMiddleware
-  after: false
-  data: 
-    sourceProp: jws
-    redisDestProp: destRedis
-    waitFor: false
+    name: response.status
+    value: 200
+- type: EsPropertyMiddleware
+  data:
+    name: response.body
+    expression: ctx.properties.jws
 logging:
   level: info

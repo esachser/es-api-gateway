@@ -78,9 +78,12 @@ Aspectos que devem ser vistos:
 - [**OK**] Adicionar transporte/middleware Redis Pub/Sub
   - [**OK**] Middleware Pub
   - [**OK**] Transport Sub
-- Adicionar transporte/middleware Redis Streams
-  - Middleware Stream Write
-  - Transport Group Stream Read
+- [**OK**] Adicionar transporte/middleware Redis Streams
+  - [**OK**] Middleware Stream Write
+  - [**OK**] Transport Group Stream Read
+- Criar tag de API desabilitada
+- Centralizar configuração de Redis
+- Avaliar uso de ETCD para clusterização
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka

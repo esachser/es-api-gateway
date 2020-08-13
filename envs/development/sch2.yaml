@@ -1,9 +1,9 @@
 ---
 transports:
   - type: EsScheduleTransport
-    id: sch1
+    id: sch2
     parameters:
-      schedule: "0 * * * * *"
+      schedule: "*/10 * * * * *"
     mids: []
 init: 
   - type: EsMetricsMiddleware
@@ -61,12 +61,12 @@ execution:
 - type: EsPropertyMiddleware
   data:
     name: destRedis
-    value: news.bla
-- type: EsRedisPublishMiddleware
+    value: newsbla
+- type: EsRedisXaddMiddleware
   after: false
   data: 
     sourceProp: jws
-    redisDestProp: destRedis
+    redisStreamProp: destRedis
     waitFor: false
 logging:
   level: info

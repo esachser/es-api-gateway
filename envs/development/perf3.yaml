@@ -1,9 +1,13 @@
 ---
 transports:
-  - type: EsScheduleTransport
-    id: sch1
+  - type: EsHttpTransport
+    id: http
     parameters:
-      schedule: "0 * * * * *"
+      routeContext: /api/perf/v3
+      routes:
+        "/":
+        - method: GET
+          mids: []
     mids: []
 init: 
   - type: EsMetricsMiddleware
@@ -30,27 +34,27 @@ execution:
     sourceProp: body
     contentType: ctype
     destProp: parsedBody
-- type: EsPropertyMiddleware
-  after: false
-  data:
-    name: keypass
-    value: "esapi"
-- type: EsLoadPrivateKeyMiddleware
-  after: false
-  data:
-    keyFile: server.key
-    keyPassProp: "keypass"
-    destProp: jwskey
 # - type: EsPropertyMiddleware
 #   after: false
 #   data:
-#     name: jwskey
-#     value: "abcdefghijabcdefghijabcdefghijab"
+#     name: keypass
+#     value: "esapi"
+# - type: EsLoadPrivateKeyMiddleware
+#   after: false
+#   data:
+#     keyFile: server.key
+#     keyPassProp: "keypass"
+#     destProp: jwskey
+- type: EsPropertyMiddleware
+  after: false
+  data:
+    name: jwskey
+    value: "abcdefghijabcdefghijabcdefghijab"
 - type: EsPropertyMiddleware
   after: false
   data:
     name: jwsalg
-    value: "RS256"
+    value: "HS256"
 - type: EsJwsGenerateMiddleware
   after: false
   data:
@@ -60,13 +64,11 @@ execution:
     destProp: jws
 - type: EsPropertyMiddleware
   data:
-    name: destRedis
-    value: news.bla
-- type: EsRedisPublishMiddleware
-  after: false
-  data: 
-    sourceProp: jws
-    redisDestProp: destRedis
-    waitFor: false
+    name: response.status
+    value: 200
+- type: EsPropertyMiddleware
+  data:
+    name: response.body
+    expression: ctx.properties.jws
 logging:
   level: info
