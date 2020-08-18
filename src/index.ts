@@ -7,7 +7,6 @@ import { loadHttpServers } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
 import { loadParsers } from './parsers';
-import { getPublicCert, getPrivateKey } from './util/certs';
 
 async function start() {
     await loadConfig();
@@ -23,7 +22,51 @@ async function start() {
     await loadEnv(configuration.env);
 }
 
-start().catch(e => {
-    logger.error('General error', e);
-});
+// Cluster start
+import cluster from 'cluster';
+import os from 'os';
+import { RateLimiterClusterMaster } from 'rate-limiter-flexible';
+import { setIdScheduler } from './transports/schedule';
+import { setIdSub } from './transports/redissub';
+
+const numCpus = os.cpus().length;
+
+if (cluster.isMaster) {
+    new RateLimiterClusterMaster();
+    for (let i = 0; i < numCpus; i++) {
+        cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+        logger.info(`worker ${worker.process.pid} died`);
+        setIdToSchedule();
+    });
+
+    function setIdToSchedule() {
+        let fid = undefined;
+        for (const id in cluster.workers) {
+            if (cluster.workers[id]?.isConnected()) {
+                fid = fid ?? cluster.workers[id]?.id;
+                cluster.workers[id]?.send({type: 'SET_ID_SCHEDULER', data:fid});
+            }
+        }
+    }
+
+    setIdToSchedule();
+}
+else {
+    start().catch(e => {
+        logger.error('General error', e);
+    });
+    logger.info(`Worker ${cluster.worker.id} on pid ${cluster.worker.process.pid} running.`);
+
+    process.on('message', (msg: {type: string, data:any}) => {
+        switch(msg.type) {
+            case 'SET_ID_SCHEDULER': 
+                setIdScheduler(msg.data);
+                setIdSub(msg.data);
+            break;
+        }
+    });
+}
 

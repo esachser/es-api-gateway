@@ -1,7 +1,8 @@
 import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
-import { RateLimiterMemory, RateLimiterAbstract, RateLimiterRes } from 'rate-limiter-flexible';
+import { RateLimiterCluster, RateLimiterAbstract, RateLimiterRes } from 'rate-limiter-flexible';
+import { nanoid } from 'nanoid';
 
 export class EsRateLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -33,7 +34,8 @@ export class EsRateLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRateLimiterMiddleware.name, 'destProp MUST be string');
         }
 
-        this._rateLimiter = new RateLimiterMemory({
+        this._rateLimiter = new RateLimiterCluster({
+            keyPrefix: this.api,
             points,
             duration
         });

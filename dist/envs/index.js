@@ -42,6 +42,7 @@ function loadApiFile(fname) {
             if (api.transports[tname] !== undefined) {
                 api.transports[tname].clear();
                 (_b = api.logger) === null || _b === void 0 ? void 0 : _b.close();
+                delete api.logger;
                 delete api.transports[tname];
             }
         }

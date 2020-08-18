@@ -1,5 +1,6 @@
 import { IEsTransport, IEsMiddleware, IEsTranportConstructor } from '../core';
 import { Logger } from 'winston';
+export declare function setIdSub(id: number): void;
 export declare class EsRedisSubTransport implements IEsTransport {
     middleware: IEsMiddleware | undefined;
     apiLogger: Logger;

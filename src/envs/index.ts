@@ -41,6 +41,7 @@ async function loadApiFile(fname: string) {
         if (api.transports[tname] !== undefined) {
             api.transports[tname].clear();
             api.logger?.close();
+            delete api.logger;
             delete api.transports[tname];
         }
     }

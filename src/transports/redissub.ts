@@ -5,6 +5,12 @@ import { Logger, http } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import Redis from 'ioredis';
+import cluster from 'cluster';
+
+let idSub: number | undefined = undefined
+export function setIdSub(id: number) {
+    idSub = id;
+}
 
 export class EsRedisSubTransport implements IEsTransport {
 
@@ -38,6 +44,9 @@ export class EsRedisSubTransport implements IEsTransport {
 
             this._redis.on('pmessage', async (pattern, channel, message) => {
                 try {
+                    // Roda somente em 1 worker
+                    if (idSub !== undefined && cluster.worker.id !== idSub) return;
+                    
                     logger.info(`Starting subscribed (${channel}) for ${this.api}`);
                     let init = process.hrtime();
                     const context: IEsContext = {

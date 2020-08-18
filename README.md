@@ -81,6 +81,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Adicionar transporte/middleware Redis Streams
   - [**OK**] Middleware Stream Write
   - [**OK**] Transport Group Stream Read
+- [**OK**] Rodar gateway em cluster
 - Criar tag de API desabilitada
 - Centralizar configuração de Redis
 - Avaliar uso de ETCD para clusterização

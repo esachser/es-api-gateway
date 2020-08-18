@@ -12,12 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransportSchema = exports.TransportContructor = exports.EsScheduleTransport = void 0;
+exports.TransportSchema = exports.TransportContructor = exports.EsScheduleTransport = exports.setIdScheduler = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
+const errors_1 = require("../core/errors");
 const node_schedule_1 = __importDefault(require("node-schedule"));
+const cluster_1 = __importDefault(require("cluster"));
+let idSch = undefined;
+function setIdScheduler(id) {
+    idSch = id;
+}
+exports.setIdScheduler = setIdScheduler;
 class EsScheduleTransport {
     /**
      *
@@ -29,30 +36,38 @@ class EsScheduleTransport {
         this.tid = tid;
         this.middleware = core_1.connectMiddlewares(initMiddleware, middleware);
         const scheduleStr = lodash_1.default.get(params, 'schedule');
-        this._job = node_schedule_1.default.scheduleJob(scheduleStr, () => __awaiter(this, void 0, void 0, function* () {
-            var _a;
-            try {
-                logger_1.logger.info(`Starting scheduled job (${scheduleStr}) for ${this.api}`);
-                let init = process.hrtime();
-                const context = {
-                    properties: {},
-                    logger: this.apiLogger,
-                    meta: {
-                        api,
-                        transport: 'EsScheduleTransport',
-                        uid: nanoid_1.nanoid(12)
-                    }
-                };
-                yield ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(context));
-                const diffs = process.hrtime(init);
-                const diff = diffs[0] * 1000 + diffs[1] / 1000000;
-                logger_1.logger.info(`Ending scheduled job (${scheduleStr}) for ${this.api} in ${diff}ms`);
-            }
-            catch (err) {
-                this.apiLogger.error('Error running middlewares', err);
-            }
-        }));
-        logger_1.logger.info(`Loaded Schedule ${this.api} - ${this.tid}`);
+        try {
+            this._job = node_schedule_1.default.scheduleJob(scheduleStr, () => __awaiter(this, void 0, void 0, function* () {
+                var _a;
+                // Roda somente em 1 worker
+                if (idSch !== undefined && cluster_1.default.worker.id !== idSch)
+                    return;
+                try {
+                    logger_1.logger.info(`Starting scheduled job (${scheduleStr}) for ${this.api}`);
+                    let init = process.hrtime();
+                    const context = {
+                        properties: {},
+                        logger: this.apiLogger,
+                        meta: {
+                            api,
+                            transport: 'EsScheduleTransport',
+                            uid: nanoid_1.nanoid(12)
+                        }
+                    };
+                    yield ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.execute(context));
+                    const diffs = process.hrtime(init);
+                    const diff = diffs[0] * 1000 + diffs[1] / 1000000;
+                    logger_1.logger.info(`Ending scheduled job (${scheduleStr}) for ${this.api} in ${diff}ms`);
+                }
+                catch (err) {
+                    this.apiLogger.error('Error running middlewares', err);
+                }
+            }));
+            logger_1.logger.info(`Loaded Schedule ${this.api} - ${this.tid}`);
+        }
+        catch (err) {
+            throw new errors_1.EsTransportError(EsScheduleTransport.name, 'Error scheduling', err);
+        }
     }
     loadAsync(params) {
         return __awaiter(this, void 0, void 0, function* () {

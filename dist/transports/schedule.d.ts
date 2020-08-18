@@ -1,5 +1,6 @@
 import { IEsTransport, IEsMiddleware, IEsTranportConstructor } from '../core';
 import { Logger } from 'winston';
+export declare function setIdScheduler(id: number): void;
 export declare class EsScheduleTransport implements IEsTransport {
     middleware: IEsMiddleware | undefined;
     apiLogger: Logger;

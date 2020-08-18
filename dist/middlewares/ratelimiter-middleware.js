@@ -36,7 +36,8 @@ let EsRateLimiterMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isString(this._destProp)) {
                 throw new errors_1.EsMiddlewareError(EsRateLimiterMiddleware.name, 'destProp MUST be string');
             }
-            this._rateLimiter = new rate_limiter_flexible_1.RateLimiterMemory({
+            this._rateLimiter = new rate_limiter_flexible_1.RateLimiterCluster({
+                keyPrefix: this.api,
                 points,
                 duration
             });

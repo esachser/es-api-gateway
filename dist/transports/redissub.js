@@ -12,13 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransportSchema = exports.TransportContructor = exports.EsRedisSubTransport = void 0;
+exports.TransportSchema = exports.TransportContructor = exports.EsRedisSubTransport = exports.setIdSub = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
 const ioredis_1 = __importDefault(require("ioredis"));
+const cluster_1 = __importDefault(require("cluster"));
+let idSub = undefined;
+function setIdSub(id) {
+    idSub = id;
+}
+exports.setIdSub = setIdSub;
 class EsRedisSubTransport {
     /**
      *
@@ -39,6 +45,9 @@ class EsRedisSubTransport {
                 this._redis.on('pmessage', (pattern, channel, message) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
                     try {
+                        // Roda somente em 1 worker
+                        if (idSub !== undefined && cluster_1.default.worker.id !== idSub)
+                            return;
                         logger_1.logger.info(`Starting subscribed (${channel}) for ${this.api}`);
                         let init = process.hrtime();
                         const context = {
