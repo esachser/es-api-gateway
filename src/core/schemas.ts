@@ -52,6 +52,9 @@ export const TRANSPORT_SCHEMA = {
             "items": {
                 "$ref": "es-middleware"
             }
+        },
+        "enabled": {
+            "type": "boolean"
         }
     }
 };
@@ -95,6 +98,9 @@ export const API_SCHEMA = {
                     "type": "string"
                 }
             }
+        },
+        "enable": {
+            "type": "boolean"
         }
     }
 }

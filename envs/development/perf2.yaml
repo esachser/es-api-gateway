@@ -9,6 +9,17 @@ transports:
         - method: GET
           mids: []
     mids: []
+    enabled: true
+  - type: EsHttpTransport
+    id: https
+    parameters:
+      routeContext: /api/perf/v2
+      routes:
+        "/":
+        - method: GET
+          mids: []
+    mids: []
+    enabled: true
 init: 
   - type: EsMetricsMiddleware
     data: 
@@ -29,3 +40,4 @@ execution:
       ok: true
 logging:
   level: info
+enabled: true

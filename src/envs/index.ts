@@ -13,7 +13,6 @@ import { clearRouters } from '../util/http-server';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
-    central: IEsMiddleware | undefined,
     logger: Logger | undefined,
     apiFile: string
 }
@@ -30,7 +29,6 @@ async function loadApiFile(fname: string) {
 
     let api: IEsApi = apis[fname] ?? {
         transports: [],
-        central: {},
         logger: {},
         apiFile: `${fname}${ext}`
     };
@@ -52,41 +50,38 @@ async function loadApiFile(fname: string) {
 
     // Carrega Middlewares iniciais.
     const initJs = _.get(apiJson, 'init', []) as any[];
-    const initialMid = await createMiddleware(initJs, 0, fname);
 
     // Carrega Middlewares centrais.
     const executionJs = _.get(apiJson, 'execution') as any[];
-    const centralMid = await createMiddleware(executionJs, 0, fname);
     let logLevel = _.get(apiJson, 'logging.level', 'info');
     if (!_.isString(logLevel)) {
         logLevel = 'info';
     }
-
-    api.central = centralMid;
     api.logger = createLogger(logLevel, fname);
 
     const transports = _.get(apiJson, 'transports');
 
+    const apiEnabled = _.get(apiJson, 'enabled', true);
+
     if (transports !== undefined && _.isArray(transports)) {
         for (const transport of transports) {
-            const type = _.get(transport, 'type');
-            const id = _.get(transport, 'id');
-            const parameters = _.get(transport, 'parameters');
-            const mids = _.get(transport, 'mids') as any[];
+            const trpEnabled = _.get(transport, 'enabled', true);
+            if (apiEnabled && trpEnabled) {
+                const initialMid = await createMiddleware(initJs, 0, fname);
+                const centralMid = await createMiddleware(executionJs, 0, fname);
 
-            const pre = await createMiddleware(mids, 0, fname);
+                const id = _.get(transport, 'id');
+                const type = _.get(transport, 'type');
+                const parameters = _.get(transport, 'parameters');
+                const mids = _.get(transport, 'mids') as any[];
 
-            const mid = connectMiddlewares(pre, centralMid);
+                const pre = await createMiddleware(mids, 0, fname);
+                const mid = connectMiddlewares(pre, centralMid);
 
-            if (api.transports[id] !== undefined) {
-                api.transports[id].clear();
-                delete api.transports[id];
-            }
-
-            const trp = await createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
-
-            if (trp !== undefined) {
-                api.transports[id] = trp;
+                const trp = await createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
+                if (trp !== undefined) {
+                    api.transports[id] = trp;
+                }
             }
         }
     }

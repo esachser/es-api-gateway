@@ -3,7 +3,7 @@ transports:
   - type: EsScheduleTransport
     id: sch2
     parameters:
-      schedule: "*/5 * * * * *"
+      schedule: "0 * * * * *"
     mids: []
 init: 
   - type: EsMetricsMiddleware

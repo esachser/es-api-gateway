@@ -42,7 +42,18 @@ const os_1 = __importDefault(require("os"));
 const rate_limiter_flexible_1 = require("rate-limiter-flexible");
 const schedule_1 = require("./transports/schedule");
 const redissub_1 = require("./transports/redissub");
-const numCpus = os_1.default.cpus().length;
+let numCpus = os_1.default.cpus().length;
+try {
+    if (process.env['NUM_PROCS'] !== undefined) {
+        numCpus = parseInt(process.env['NUM_PROCS']);
+    }
+    if (numCpus <= 0) {
+        numCpus = 1;
+    }
+}
+catch (err) {
+    logger_1.logger.info(`Using ${numCpus} processes`);
+}
 if (cluster_1.default.isMaster) {
     new rate_limiter_flexible_1.RateLimiterClusterMaster();
     for (let i = 0; i < numCpus; i++) {

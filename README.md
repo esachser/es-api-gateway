@@ -82,9 +82,11 @@ Aspectos que devem ser vistos:
   - [**OK**] Middleware Stream Write
   - [**OK**] Transport Group Stream Read
 - [**OK**] Rodar gateway em cluster
-- Criar tag de API desabilitada
+- [**OK**] Criar tag de API desabilitada
+- [**OK**] Criar tag de transporte habilitado
 - Centralizar configuração de Redis
-- Avaliar uso de ETCD para clusterização
+  - Verificar configuração do Redis como um todo
+- Avaliar uso de ETCD para escala horizontal dos clusters
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka

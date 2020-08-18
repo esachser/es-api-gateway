@@ -84,7 +84,7 @@ let EsHttpTransport = /** @class */ (() => {
                     logger_1.logger.info(`Started api with path ${context.properties.request.path}`);
                     ctx.iesContext = context;
                     //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
-                    let init = Date.now();
+                    let init = process.hrtime();
                     try {
                         // Roda o que precisa
                         yield next();
@@ -145,7 +145,8 @@ let EsHttpTransport = /** @class */ (() => {
                         }
                         context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
                     }
-                    let diff = Date.now() - init;
+                    const diffs = process.hrtime(init);
+                    const diff = diffs[0] * 1000 + diffs[1] / 1000000;
                     logger_1.logger.info(`Call ${ctx.path} ended in ${diff}ms`);
                 }));
             }

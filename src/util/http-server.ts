@@ -56,6 +56,7 @@ export function loadHttpServer(conf: any) {
             ctx.body = {
                 error: 'Not Found'
             };
+            ctx.status = 404;
         }
     });
 

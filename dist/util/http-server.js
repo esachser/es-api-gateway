@@ -57,6 +57,7 @@ function loadHttpServer(conf) {
             ctx.body = {
                 error: 'Not Found'
             };
+            ctx.status = 404;
         }
     }));
     const httpRouter = (_b = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.router) !== null && _b !== void 0 ? _b : new koa_router_1.default();

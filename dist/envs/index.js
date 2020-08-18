@@ -33,7 +33,6 @@ function loadApiFile(fname) {
         fname = path_1.default.basename(fname, ext);
         let api = (_a = apis[fname]) !== null && _a !== void 0 ? _a : {
             transports: [],
-            central: {},
             logger: {},
             apiFile: `${fname}${ext}`
         };
@@ -51,32 +50,31 @@ function loadApiFile(fname) {
         }
         // Carrega Middlewares iniciais.
         const initJs = lodash_1.default.get(apiJson, 'init', []);
-        const initialMid = yield core_1.createMiddleware(initJs, 0, fname);
         // Carrega Middlewares centrais.
         const executionJs = lodash_1.default.get(apiJson, 'execution');
-        const centralMid = yield core_1.createMiddleware(executionJs, 0, fname);
         let logLevel = lodash_1.default.get(apiJson, 'logging.level', 'info');
         if (!lodash_1.default.isString(logLevel)) {
             logLevel = 'info';
         }
-        api.central = centralMid;
         api.logger = logger_1.createLogger(logLevel, fname);
         const transports = lodash_1.default.get(apiJson, 'transports');
+        const apiEnabled = lodash_1.default.get(apiJson, 'enabled', true);
         if (transports !== undefined && lodash_1.default.isArray(transports)) {
             for (const transport of transports) {
-                const type = lodash_1.default.get(transport, 'type');
-                const id = lodash_1.default.get(transport, 'id');
-                const parameters = lodash_1.default.get(transport, 'parameters');
-                const mids = lodash_1.default.get(transport, 'mids');
-                const pre = yield core_1.createMiddleware(mids, 0, fname);
-                const mid = core_1.connectMiddlewares(pre, centralMid);
-                if (api.transports[id] !== undefined) {
-                    api.transports[id].clear();
-                    delete api.transports[id];
-                }
-                const trp = yield core_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
-                if (trp !== undefined) {
-                    api.transports[id] = trp;
+                const trpEnabled = lodash_1.default.get(transport, 'enabled', true);
+                if (apiEnabled && trpEnabled) {
+                    const initialMid = yield core_1.createMiddleware(initJs, 0, fname);
+                    const centralMid = yield core_1.createMiddleware(executionJs, 0, fname);
+                    const id = lodash_1.default.get(transport, 'id');
+                    const type = lodash_1.default.get(transport, 'type');
+                    const parameters = lodash_1.default.get(transport, 'parameters');
+                    const mids = lodash_1.default.get(transport, 'mids');
+                    const pre = yield core_1.createMiddleware(mids, 0, fname);
+                    const mid = core_1.connectMiddlewares(pre, centralMid);
+                    const trp = yield core_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
+                    if (trp !== undefined) {
+                        api.transports[id] = trp;
+                    }
                 }
             }
         }

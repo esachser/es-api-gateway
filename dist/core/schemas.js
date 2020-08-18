@@ -65,6 +65,9 @@ exports.TRANSPORT_SCHEMA = {
             "items": {
                 "$ref": "es-middleware"
             }
+        },
+        "enabled": {
+            "type": "boolean"
         }
     }
 };
@@ -107,6 +110,9 @@ exports.API_SCHEMA = {
                     "type": "string"
                 }
             }
+        },
+        "enable": {
+            "type": "boolean"
         }
     }
 };

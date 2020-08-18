@@ -107,7 +107,7 @@ export class EsHttpTransport implements IEsTransport {
                 ctx.iesContext = context;
 
                 //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
-                let init = Date.now();
+                let init = process.hrtime();
 
                 try {
                     // Roda o que precisa
@@ -173,7 +173,8 @@ export class EsHttpTransport implements IEsTransport {
                     context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
                 }
 
-                let diff = Date.now() - init;
+                const diffs = process.hrtime(init);
+                const diff = diffs[0] * 1000 + diffs[1] / 1000000;
                 logger.info(`Call ${ctx.path} ended in ${diff}ms`);
             });
         }

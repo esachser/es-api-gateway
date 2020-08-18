@@ -12,6 +12,9 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/dist/index.js",
+            "env": {
+                "NUM_PROCS": "1"
+            },
             "preLaunchTask": "Compile",
             "outputCapture": "std",
             "outFiles": [

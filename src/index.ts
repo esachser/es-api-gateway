@@ -28,8 +28,21 @@ import os from 'os';
 import { RateLimiterClusterMaster } from 'rate-limiter-flexible';
 import { setIdScheduler } from './transports/schedule';
 import { setIdSub } from './transports/redissub';
+import _ from 'lodash';
 
-const numCpus = os.cpus().length;
+let numCpus = os.cpus().length;
+
+try {
+    if (process.env['NUM_PROCS'] !== undefined) {
+        numCpus = parseInt(process.env['NUM_PROCS']);
+    }
+    if (numCpus <= 0) {
+        numCpus = 1;
+    }
+}
+catch(err) {
+    logger.info(`Using ${numCpus} processes`);
+}
 
 if (cluster.isMaster) {
     new RateLimiterClusterMaster();

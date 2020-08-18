@@ -40,6 +40,9 @@ export declare const TRANSPORT_SCHEMA: {
                 $ref: string;
             };
         };
+        enabled: {
+            type: string;
+        };
     };
 };
 export declare const API_SCHEMA: {
@@ -75,6 +78,9 @@ export declare const API_SCHEMA: {
                     type: string;
                 };
             };
+        };
+        enable: {
+            type: string;
         };
     };
 };
