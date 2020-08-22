@@ -99,7 +99,7 @@ export const API_SCHEMA = {
                 }
             }
         },
-        "enable": {
+        "enabled": {
             "type": "boolean"
         }
     }

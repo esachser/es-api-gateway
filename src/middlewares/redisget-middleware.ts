@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
 import { configuration } from '../util/config';
+import { logger } from '../util/logger';
+import { getRedisClient } from '../util/redisClient';
 
 export class EsRedisGetMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -11,7 +13,7 @@ export class EsRedisGetMiddleware extends EsMiddleware {
 
     private _destProp: string;
     private _redisSourceProp: string;
-    private _redis: Redis.Redis;
+    private _redis: Redis.Redis | Redis.Cluster;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -30,7 +32,15 @@ export class EsRedisGetMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRedisGetMiddleware.name, 'redisSourceProp MUST be string');
         }
 
-        this._redis = new Redis();
+        const redisConfig = _.get(values, 'redisProperties.config');
+        const isCluster = _.get(values, 'redisProperties.isCluster');
+        const clusterNodes = _.get(values, 'redisProperties.clusterNodes');
+        try {
+            this._redis = getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch(err) {
+            throw new EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
 
     async loadAsync() { }
@@ -41,7 +51,8 @@ export class EsRedisGetMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRedisGetMiddleware.name, `redisDest (prop ${this._redisSourceProp}) redisProp be string`);
         }
 
-        const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisProp}`;
+        // const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisProp}`;
+        const realDest = redisProp;
 
         const res = await this._redis.get(realDest);
 
@@ -65,6 +76,9 @@ export const MiddlewareSchema = {
         "destProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "redisSourceProp": {
             "type": "string",

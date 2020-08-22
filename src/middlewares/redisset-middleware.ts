@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
 import { configuration } from '../util/config';
+import { logger } from '../util/logger';
+import { getRedisClient } from '../util/redisClient';
 
 export class EsRedisSetMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -12,7 +14,7 @@ export class EsRedisSetMiddleware extends EsMiddleware {
     private _srcProp: string;
     private _ttlProp?: string;
     private _redisDestProp: string;
-    private _redis: Redis.Redis;
+    private _redis: Redis.Redis | Redis.Cluster;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -36,7 +38,15 @@ export class EsRedisSetMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRedisSetMiddleware.name, 'redisDestProp MUST be string');
         }
 
-        this._redis = new Redis();
+        const redisConfig = _.get(values, 'redisProperties.config');
+        const isCluster = _.get(values, 'redisProperties.isCluster');
+        const clusterNodes = _.get(values, 'redisProperties.clusterNodes');
+        try {
+            this._redis = getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch(err) {
+            throw new EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
 
     async loadAsync() { }
@@ -58,7 +68,8 @@ export class EsRedisSetMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRedisSetMiddleware.name, `redisDest (prop ${this._redisDestProp}) MUST be string`);
         }
 
-        const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisDest}`;
+        // const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisDest}`;
+        const realDest = redisDest;
 
         // Não vou deixar o TTL ser infinito, pode gerar problemas -- 30 dias no máximo
         ttl = ttl ?? 1000 * 60 * 60 * 24 * 30;
@@ -87,6 +98,9 @@ export const MiddlewareSchema = {
         "ttlProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "redisDestProp": {
             "type": "string",

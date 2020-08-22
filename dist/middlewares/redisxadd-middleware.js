@@ -16,7 +16,7 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsRedisXaddMiddlewar
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
+const redisClient_1 = require("../util/redisClient");
 let EsRedisXaddMiddleware = /** @class */ (() => {
     class EsRedisXaddMiddleware extends core_1.EsMiddleware {
         /**
@@ -36,7 +36,15 @@ let EsRedisXaddMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isBoolean(this._waitFor)) {
                 throw new errors_1.EsMiddlewareError(EsRedisXaddMiddleware.name, 'waitFor MUST be boolean');
             }
-            this._redis = new ioredis_1.default();
+            const redisConfig = lodash_1.default.get(values, 'redisProperties.config');
+            const isCluster = lodash_1.default.get(values, 'redisProperties.isCluster');
+            const clusterNodes = lodash_1.default.get(values, 'redisProperties.clusterNodes');
+            try {
+                this._redis = redisClient_1.getRedisClient(redisConfig, isCluster, clusterNodes);
+            }
+            catch (err) {
+                throw new errors_1.EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+            }
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -87,6 +95,9 @@ exports.MiddlewareSchema = {
         "redisStreamProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "waitFor": {
             "type": "boolean",

@@ -30,6 +30,9 @@ export declare const TransportSchema: {
         group: {
             type: string;
         };
+        redisProperties: {
+            type: string;
+        };
         stream: {
             type: string;
         };

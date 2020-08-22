@@ -18,6 +18,7 @@ const errors_1 = require("../core/errors");
 const oauth2_authenticator_1 = require("./oauth2-authenticator");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
+const logger_1 = require("../util/logger");
 class EsOAuth2InspectAuthenticator extends oauth2_authenticator_1.EsOAuth2Authenticator {
     constructor(name, id, params) {
         super(name, id, 'scopes=tokenObj?.scope?.split(" ");');
@@ -26,10 +27,13 @@ class EsOAuth2InspectAuthenticator extends oauth2_authenticator_1.EsOAuth2Authen
         this._credentialValue = String(lodash_1.default.get(params, 'credValue'));
         this._issuer = String(lodash_1.default.get(params, 'issuer'));
         this._audience = lodash_1.default.get(params, 'audience');
-        this._cache = new keyv_1.default('redis://localhost:6379', {
+        this._cache = new keyv_1.default({
             maxSize: 100,
             ttl: 10 * 60 * 1000,
             namespace: `gotcache:auth2inspect:${id}`
+        });
+        this._cache.on('error', err => {
+            logger_1.logger.error('Error loading Redis Cache', err);
         });
     }
     loadAsync() {

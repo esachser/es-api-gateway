@@ -85,8 +85,13 @@ Aspectos que devem ser vistos:
 - [**OK**] Criar tag de API desabilitada
 - [**OK**] Criar tag de transporte habilitado
 - Centralizar configuração de Redis
-  - Verificar configuração do Redis como um todo
-- Avaliar uso de ETCD para escala horizontal dos clusters
+  - [**OK**] Verificar configuração do Redis como um todo
+  - [**OK**] Configuração de redis publisher para os logs das APIs
+  - [**OK**] Configuração de redis como objeto para cada middleware ou transporte
+- [**OK**] Avaliar uso de ETCD para escala horizontal dos clusters
+  - [**OK**] Será usado
+  - [**OK**] Usar para quotaLimiter
+  - Utilizar como replicação de cluster
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka

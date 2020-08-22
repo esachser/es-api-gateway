@@ -4,13 +4,17 @@ import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
 import { nanoid } from 'nanoid';
 import { configuration } from '../util/config';
+import { logger } from '../util/logger';
+import { getRedisClient } from '../util/redisClient';
+import ETCD_CLIENT from '../util/etdc';
+import { Lease } from 'etcd3';
 
 export class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsQuotaLimiterMiddleware';
     static readonly meta = { middleware: EsQuotaLimiterMiddleware.middlewareName };
     static readonly QUOTA_TYPES = ['DAY', 'WEEK', 'MONTH', 'YEAR'];
-    static readonly QUOTA_VALIDITIES= [24*60*60, 7*24*60*60, 31*24*60*60, 366*24*60*60];
+    static readonly QUOTA_VALIDITIES = [24 * 60 * 60, 7 * 24 * 60 * 60, 31 * 24 * 60 * 60, 366 * 24 * 60 * 60];
     static readonly QUOTA_FUNCTIONS = [
         (dt: Date) => {
             return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + 1);
@@ -26,18 +30,22 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
         }
     ];
 
-    private _redis: Redis.Redis;
-    private _redisKey: string;
+    static PREFETCH = _.flatten(EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => [`/${t}`, `/${t}/exp`]));
+
+    //static LEASES: Lease[];
+
+    private _etcdKey: string;
     private _destProp: string;
     private _sourceProp: string;
     private _quotaId: string;
     private _quotaTypeProp: string;
     private _quotaProp: string;
+    private _strictProp: string;
 
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, api:string, nextMiddleware?: IEsMiddleware) {
+    constructor(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware) {
         super(after, api, nextMiddleware);
 
         this._destProp = _.get(values, 'destProp', 'ratelimitres');
@@ -62,12 +70,19 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
 
         this._quotaProp = _.get(values, 'quotaProp');
         if (!_.isString(this._quotaProp)) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be integer greater than 0');
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be string');
         }
 
-        this._redis = new Redis();
-        this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaId}`;
-        // this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
+        this._strictProp = _.get(values, 'strictProp');
+        if (!_.isString(this._strictProp)) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'strictProp MUST be string');
+        }
+
+        this._etcdKey = `esgateway/runtime/apis/${configuration.env}/${api}/quotas/${this._quotaId}`;
+        // this._etcdKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
+
+        const dt = new Date(Date.now());
+        //EsQuotaLimiterMiddleware.LEASES = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS.map(f => ETCD_CLIENT.lease(Math.floor((f(dt).valueOf() - Date.now())/1000)));
     }
 
     async loadAsync() { }
@@ -93,21 +108,56 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
         }
 
+        const strict = Boolean(_.get(context.properties, this._strictProp, false));
+
         const now = new Date(Date.now());
         // Calcula chave a partir da data
-        const dtExp = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS[quotaTypeId](now);
+        const dtExps = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS.map(f => f(now).valueOf());
 
-        const rKey = `${this._redisKey}:${key}`;
+        const rKey = `${this._etcdKey}/${key}`;
 
-        const res = await this._redis.multi().incr(rKey).expireat(rKey, dtExp.valueOf() / 1000).exec();
+        let error = false;
+        let excp = undefined;
 
-        const q = res[0];
+        const func = async () => {
+            try {
+                let quotas: number[] = [];
+                let exps: number[] = [];
+                const allKeys = await ns.getAll().numbers();
 
-        if (q[0] !== null) {
-            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
+                quotas = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => allKeys[`/${t}`] ?? 0);
+                exps = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => allKeys[`/${t}/exp`] ?? 0);
+
+                error = now.valueOf() <= exps[quotaTypeId] && quotas[quotaTypeId] >= quotaValue;
+
+                await ns.stm({ retries: 0 }).transact(tx => Promise.all([
+                    Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map(async (t, i) => {
+                        if (!error){
+                            let val = (await tx.get(`/${t}`).number()) ?? 0;
+                            if (now.valueOf() > exps[i]) val = 0;
+                            await tx.put(`/${t}`).value(val+1);
+                        }
+                        else if (now.valueOf() > exps[i]) {
+                            await tx.put(`/${t}`).value(1);
+                        }
+                    })),
+                    Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => tx.put(`/${t}/exp`).value(dtExps[i])))
+                ]));
+            }
+            catch (err) {
+                excp = err;
+            }
         }
-        else if (q[1] > quotaValue) {
-            await this._redis.multi().set(rKey, quotaValue).expireat(rKey, dtExp.valueOf() / 1000).exec();
+
+        const ns = ETCD_CLIENT.namespace(rKey);
+        if (strict) await ns.lock(`/mutex`).ttl(5).do(func);
+        else await func();
+
+        if (excp !== undefined) {
+            throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Error updating quotas`, excp);
+        }
+
+        if (error) {
             throw new EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
         }
     }
@@ -125,7 +175,8 @@ export const MiddlewareSchema = {
         "quotaId",
         "quotaTypeProp",
         "quotaProp",
-        "sourceProp"
+        "sourceProp",
+        "strictProp"
     ],
     "properties": {
         "sourceProp": {
@@ -145,6 +196,10 @@ export const MiddlewareSchema = {
             "minLength": 1
         },
         "destProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "strictProp": {
             "type": "string",
             "minLength": 1
         }

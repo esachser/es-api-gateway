@@ -18,8 +18,8 @@ const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
 const cluster_1 = __importDefault(require("cluster"));
+const redisClient_1 = require("../util/redisClient");
 let idSub = undefined;
 function setIdSub(id) {
     idSub = id;
@@ -35,8 +35,16 @@ class EsRedisSubTransport {
         this.api = api;
         this.tid = tid;
         this.middleware = core_1.connectMiddlewares(initMiddleware, middleware);
-        this._redis = new ioredis_1.default();
         this._subStr = lodash_1.default.get(params, 'subscribe');
+        const redisConfig = lodash_1.default.get(params, 'redisProperties.config');
+        const isCluster = lodash_1.default.get(params, 'redisProperties.isCluster');
+        const clusterNodes = lodash_1.default.get(params, 'redisProperties.clusterNodes');
+        try {
+            this._redis = redisClient_1.getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch (err) {
+            throw new errors_1.EsTransportError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
     loadAsync(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -93,6 +101,9 @@ exports.TransportSchema = {
         "subscribe"
     ],
     "properties": {
+        "redisProperties": {
+            "type": "object"
+        },
         "subscribe": {
             "type": "array",
             "items": {

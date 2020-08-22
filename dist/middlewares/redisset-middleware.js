@@ -16,8 +16,7 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsRedisSetMiddleware
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
-const config_1 = require("../util/config");
+const redisClient_1 = require("../util/redisClient");
 let EsRedisSetMiddleware = /** @class */ (() => {
     class EsRedisSetMiddleware extends core_1.EsMiddleware {
         /**
@@ -37,7 +36,15 @@ let EsRedisSetMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isUndefined(this._redisDestProp) && !lodash_1.default.isString(this._redisDestProp)) {
                 throw new errors_1.EsMiddlewareError(EsRedisSetMiddleware.name, 'redisDestProp MUST be string');
             }
-            this._redis = new ioredis_1.default();
+            const redisConfig = lodash_1.default.get(values, 'redisProperties.config');
+            const isCluster = lodash_1.default.get(values, 'redisProperties.isCluster');
+            const clusterNodes = lodash_1.default.get(values, 'redisProperties.clusterNodes');
+            try {
+                this._redis = redisClient_1.getRedisClient(redisConfig, isCluster, clusterNodes);
+            }
+            catch (err) {
+                throw new errors_1.EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+            }
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -56,7 +63,8 @@ let EsRedisSetMiddleware = /** @class */ (() => {
                 if (!lodash_1.default.isString(redisDest)) {
                     throw new errors_1.EsMiddlewareError(EsRedisSetMiddleware.name, `redisDest (prop ${this._redisDestProp}) MUST be string`);
                 }
-                const realDest = `esgateway:runtime:apis:${config_1.configuration.env}:${context.meta.api}:store:${redisDest}`;
+                // const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisDest}`;
+                const realDest = redisDest;
                 // Não vou deixar o TTL ser infinito, pode gerar problemas -- 30 dias no máximo
                 ttl = ttl !== null && ttl !== void 0 ? ttl : 1000 * 60 * 60 * 24 * 30;
                 yield this._redis.set(realDest, prop, 'px', ttl);
@@ -89,6 +97,9 @@ exports.MiddlewareSchema = {
         "ttlProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "redisDestProp": {
             "type": "string",

@@ -4,6 +4,13 @@ export interface IEsConfig {
     httpPort?: number;
     authenticators?: Array<any>;
     transports?: Array<any>;
+    redisLogger?: {
+        enabled?: boolean;
+        isCluster?: boolean;
+        clusterNodes?: Array<string>;
+        config?: any;
+    };
+    etcdConf?: any;
 }
 export declare let configuration: IEsConfig;
 export declare function loadConfig(): Promise<void>;

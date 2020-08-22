@@ -61,3 +61,4 @@ execution:
     destProp: jws
 logging:
   level: info
+enabled: false

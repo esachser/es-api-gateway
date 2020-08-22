@@ -5,6 +5,7 @@ import { Logger, http } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import Redis from 'ioredis';
+import { getRedisClient } from '../util/redisClient';
 
 export class EsRedisXgroupreadTransport implements IEsTransport {
 
@@ -16,7 +17,7 @@ export class EsRedisXgroupreadTransport implements IEsTransport {
 
     tid: string;
 
-    private _redis: Redis.Redis;
+    private _redis: Redis.Redis | Redis.Cluster;
     private _groupStr: string;
     private _streamStr: string;
     private _id: string;
@@ -31,10 +32,18 @@ export class EsRedisXgroupreadTransport implements IEsTransport {
         this.api = api;
         this.tid = tid;
         this.middleware = connectMiddlewares(initMiddleware, middleware);
-        this._redis = new Redis();
         this._groupStr = _.get(params, 'group');
         this._streamStr = _.get(params, 'stream');
         this._id = nanoid(12);
+        const redisConfig = _.get(params, 'redisProperties.config');
+        const isCluster = _.get(params, 'redisProperties.isCluster');
+        const clusterNodes = _.get(params, 'redisProperties.clusterNodes');
+        try {
+            this._redis = getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch(err) {
+            throw new EsTransportError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
 
     async loadAsync(params: any) {
@@ -113,6 +122,9 @@ export const TransportSchema = {
     "properties": {
         "group": {
             "type": "string"
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "stream": {
             "type": "string"

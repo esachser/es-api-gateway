@@ -18,7 +18,7 @@ const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
+const redisClient_1 = require("../util/redisClient");
 class EsRedisXgroupreadTransport {
     /**
      *
@@ -30,10 +30,18 @@ class EsRedisXgroupreadTransport {
         this.api = api;
         this.tid = tid;
         this.middleware = core_1.connectMiddlewares(initMiddleware, middleware);
-        this._redis = new ioredis_1.default();
         this._groupStr = lodash_1.default.get(params, 'group');
         this._streamStr = lodash_1.default.get(params, 'stream');
         this._id = nanoid_1.nanoid(12);
+        const redisConfig = lodash_1.default.get(params, 'redisProperties.config');
+        const isCluster = lodash_1.default.get(params, 'redisProperties.isCluster');
+        const clusterNodes = lodash_1.default.get(params, 'redisProperties.clusterNodes');
+        try {
+            this._redis = redisClient_1.getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch (err) {
+            throw new errors_1.EsTransportError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
     loadAsync(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -113,6 +121,9 @@ exports.TransportSchema = {
     "properties": {
         "group": {
             "type": "string"
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "stream": {
             "type": "string"

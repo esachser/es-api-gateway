@@ -21,6 +21,12 @@ const http_server_1 = require("./util/http-server");
 const schemas_1 = require("./core/schemas");
 const authenticators_1 = require("./authenticators");
 const parsers_1 = require("./parsers");
+process.on('uncaughtException', err => {
+    logger_1.logger.error('Excecaooooo', err);
+});
+process.on('unhandledRejection', err => {
+    logger_1.logger.error('REJEICAO', err);
+});
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         yield config_1.loadConfig();
@@ -61,8 +67,23 @@ if (cluster_1.default.isMaster) {
     }
     cluster_1.default.on('exit', (worker, code, signal) => {
         logger_1.logger.info(`worker ${worker.process.pid} died`);
-        setIdToSchedule();
+        if (checkAnyWorking()) {
+            setIdToSchedule();
+        }
+        else {
+            logger_1.logger.info('No client running, exiting');
+            process.exit(0);
+        }
     });
+    function checkAnyWorking() {
+        var _a;
+        for (const id in cluster_1.default.workers) {
+            if ((_a = cluster_1.default.workers[id]) === null || _a === void 0 ? void 0 : _a.isConnected()) {
+                return true;
+            }
+        }
+        return false;
+    }
     function setIdToSchedule() {
         var _a, _b, _c;
         let fid = undefined;

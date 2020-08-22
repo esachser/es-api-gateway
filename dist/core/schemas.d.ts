@@ -79,7 +79,7 @@ export declare const API_SCHEMA: {
                 };
             };
         };
-        enable: {
+        enabled: {
             type: string;
         };
     };

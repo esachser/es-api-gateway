@@ -111,7 +111,7 @@ exports.API_SCHEMA = {
                 }
             }
         },
-        "enable": {
+        "enabled": {
             "type": "boolean"
         }
     }

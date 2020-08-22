@@ -52,5 +52,9 @@
             "passphrase": "esapi",
             "certFile": "./certs/server.crt"
         }
-    ]
+    ],
+    "redisLogger": {
+        "enabled": false,
+        "config": {}
+    }
 }

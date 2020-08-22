@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import Redis from 'ioredis';
 import cluster from 'cluster';
+import { getRedisClient } from '../util/redisClient';
 
 let idSub: number | undefined = undefined
 export function setIdSub(id: number) {
@@ -22,7 +23,7 @@ export class EsRedisSubTransport implements IEsTransport {
 
     tid: string;
 
-    private _redis: Redis.Redis;
+    private _redis: Redis.Redis | Redis.Cluster;
     private _subStr: string[];
 
     /**
@@ -34,8 +35,16 @@ export class EsRedisSubTransport implements IEsTransport {
         this.api = api;
         this.tid = tid;
         this.middleware = connectMiddlewares(initMiddleware, middleware);
-        this._redis = new Redis();
         this._subStr = _.get(params, 'subscribe');
+        const redisConfig = _.get(params, 'redisProperties.config');
+        const isCluster = _.get(params, 'redisProperties.isCluster');
+        const clusterNodes = _.get(params, 'redisProperties.clusterNodes');
+        try {
+            this._redis = getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch(err) {
+            throw new EsTransportError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
 
     async loadAsync(params: any) {
@@ -94,6 +103,9 @@ export const TransportSchema = {
         "subscribe"
     ],
     "properties": {
+        "redisProperties": {
+            "type": "object"
+        },
         "subscribe": {
             "type": "array",
             "items": {

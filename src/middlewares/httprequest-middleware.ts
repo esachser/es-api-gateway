@@ -37,10 +37,13 @@ export class EsHttpRequestMiddleware extends EsMiddleware {
                 throw new EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxSize MUST be integer');
             }
 
-            this.cache = new Keyv('redis://localhost:6379', {
+            this.cache = new Keyv({
                 maxSize: cacheMaxSize,
                 ttl: cacheMaxAge,
                 namespace: `gotcache:${nanoid(12)}`
+            });
+            this.cache.on('error', err => {
+                logger.error('Error loading Redis Cache', err);
             });
         }
 

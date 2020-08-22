@@ -62,11 +62,11 @@ execution:
   data:
     name: destRedis
     value: news.bla
-- type: EsRedisPublishMiddleware
-  after: false
-  data: 
-    sourceProp: jws
-    redisDestProp: destRedis
-    waitFor: false
+# - type: EsRedisPublishMiddleware
+#   after: false
+#   data: 
+#     sourceProp: jws
+#     redisDestProp: destRedis
+#     waitFor: false
 logging:
   level: info

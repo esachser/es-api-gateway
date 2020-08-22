@@ -16,8 +16,7 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsRedisGetMiddleware
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
-const config_1 = require("../util/config");
+const redisClient_1 = require("../util/redisClient");
 let EsRedisGetMiddleware = /** @class */ (() => {
     class EsRedisGetMiddleware extends core_1.EsMiddleware {
         /**
@@ -33,7 +32,15 @@ let EsRedisGetMiddleware = /** @class */ (() => {
             if (!lodash_1.default.isUndefined(this._redisSourceProp) && !lodash_1.default.isString(this._redisSourceProp)) {
                 throw new errors_1.EsMiddlewareError(EsRedisGetMiddleware.name, 'redisSourceProp MUST be string');
             }
-            this._redis = new ioredis_1.default();
+            const redisConfig = lodash_1.default.get(values, 'redisProperties.config');
+            const isCluster = lodash_1.default.get(values, 'redisProperties.isCluster');
+            const clusterNodes = lodash_1.default.get(values, 'redisProperties.clusterNodes');
+            try {
+                this._redis = redisClient_1.getRedisClient(redisConfig, isCluster, clusterNodes);
+            }
+            catch (err) {
+                throw new errors_1.EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+            }
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -44,7 +51,8 @@ let EsRedisGetMiddleware = /** @class */ (() => {
                 if (!lodash_1.default.isString(redisProp)) {
                     throw new errors_1.EsMiddlewareError(EsRedisGetMiddleware.name, `redisDest (prop ${this._redisSourceProp}) redisProp be string`);
                 }
-                const realDest = `esgateway:runtime:apis:${config_1.configuration.env}:${context.meta.api}:store:${redisProp}`;
+                // const realDest = `esgateway:runtime:apis:${configuration.env}:${context.meta.api}:store:${redisProp}`;
+                const realDest = redisProp;
                 const res = yield this._redis.get(realDest);
                 lodash_1.default.set(context.properties, this._destProp, res);
             });
@@ -72,6 +80,9 @@ exports.MiddlewareSchema = {
         "destProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "redisSourceProp": {
             "type": "string",

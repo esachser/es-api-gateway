@@ -6,13 +6,16 @@ import { logger } from './logger';
 import { loadEnv } from '../envs';
 import { startAuthenticators } from '../authenticators';
 import { loadHttpServers } from './http-server';
+import cluster from 'cluster';
 
 export interface IEsConfig {
     env: string,
     logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'crit',
     httpPort?: number,
     authenticators?: Array<any>,
-    transports?: Array<any>
+    transports?: Array<any>,
+    redisLogger?: { enabled?: boolean, isCluster?: boolean, clusterNodes?: Array<string>, config?: any }
+    etcdConf?: any
 };
 
 export let configuration: IEsConfig = { env: 'local' };
@@ -26,17 +29,20 @@ export async function loadConfig() {
     logger.level = configuration.logLevel || 'info';
 }
 
-fs.watch(configFileName, async (event, fname) => {
-    await loadConfig().catch(e => { 
-        logger.error('Error loading config', e);
+if (cluster.isWorker) {
+    fs.watch(configFileName, async (event, fname) => {
+        await loadConfig().catch(e => { 
+            logger.error('Error loading config', e);
+        });
+        await startAuthenticators().catch(e => { 
+            logger.error('Error starting authenticators', e);
+        });
+        await loadHttpServers().catch(e => { 
+            logger.error('Error loading HTTP Transports', e);
+        });
+        await loadEnv(configuration.env).catch(e => { 
+            logger.error('Error loading APIs', e);
+        });
     });
-    await startAuthenticators().catch(e => { 
-        logger.error('Error starting authenticators', e);
-    });
-    await loadHttpServers().catch(e => { 
-        logger.error('Error loading HTTP Transports', e);
-    });
-    await loadEnv(configuration.env).catch(e => { 
-        logger.error('Error loading APIs', e);
-    });
-});
+}
+

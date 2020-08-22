@@ -109,4 +109,4 @@ execution:
     after: false
     data: {}
 logging:
-  level: info
+  level: debug

@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
 import { configuration } from '../util/config';
+import { logger } from '../util/logger';
+import { getRedisClient } from '../util/redisClient';
 
 
 export class EsRedisXaddMiddleware extends EsMiddleware {
@@ -13,7 +15,7 @@ export class EsRedisXaddMiddleware extends EsMiddleware {
     private _srcProp: string;
     private _redisStreamProp: string;
     private _waitFor: boolean;
-    private _redis: Redis.Redis;
+    private _redis: Redis.Redis | Redis.Cluster;
 
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -37,7 +39,15 @@ export class EsRedisXaddMiddleware extends EsMiddleware {
             throw new EsMiddlewareError(EsRedisXaddMiddleware.name, 'waitFor MUST be boolean');
         }
 
-        this._redis = new Redis();
+        const redisConfig = _.get(values, 'redisProperties.config');
+        const isCluster = _.get(values, 'redisProperties.isCluster');
+        const clusterNodes = _.get(values, 'redisProperties.clusterNodes');
+        try {
+            this._redis = getRedisClient(redisConfig, isCluster, clusterNodes);
+        }
+        catch(err) {
+            throw new EsMiddlewareError(this.constructor.name, 'Error configuring Redis', err);
+        }
     }
 
     async loadAsync() { }
@@ -84,6 +94,9 @@ export const MiddlewareSchema = {
         "redisStreamProp": {
             "type": "string",
             "minLength": 1
+        },
+        "redisProperties": {
+            "type": "object"
         },
         "waitFor": {
             "type": "boolean",

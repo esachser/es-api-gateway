@@ -5,6 +5,7 @@ import { EsOAuth2Authenticator } from './oauth2-authenticator';
 import got from 'got';
 import Keyv from 'keyv';
 import { nanoid } from 'nanoid';
+import { logger } from '../util/logger';
 
 export class EsOAuth2InspectAuthenticator extends EsOAuth2Authenticator {
 
@@ -23,10 +24,13 @@ export class EsOAuth2InspectAuthenticator extends EsOAuth2Authenticator {
         this._credentialValue = String(_.get(params, 'credValue'));
         this._issuer = String(_.get(params, 'issuer'));
         this._audience = _.get(params, 'audience');
-        this._cache = new Keyv('redis://localhost:6379', {
+        this._cache = new Keyv({
             maxSize: 100,
             ttl: 10*60*1000,
             namespace: `gotcache:auth2inspect:${id}`
+        });
+        this._cache.on('error', err => {
+            logger.error('Error loading Redis Cache', err);
         });
     }
 

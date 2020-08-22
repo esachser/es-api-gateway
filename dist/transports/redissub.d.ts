@@ -24,6 +24,9 @@ export declare const TransportSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
+        redisProperties: {
+            type: string;
+        };
         subscribe: {
             type: string;
             items: {

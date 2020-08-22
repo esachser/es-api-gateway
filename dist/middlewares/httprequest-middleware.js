@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddleware = void 0;
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
+const logger_1 = require("../util/logger");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
@@ -38,10 +39,13 @@ let EsHttpRequestMiddleware = /** @class */ (() => {
                 if (!lodash_1.default.isInteger(cacheMaxSize)) {
                     throw new errors_1.EsMiddlewareError(EsHttpRequestMiddleware.middlewareName, 'cache.maxSize MUST be integer');
                 }
-                this.cache = new keyv_1.default('redis://localhost:6379', {
+                this.cache = new keyv_1.default({
                     maxSize: cacheMaxSize,
                     ttl: cacheMaxAge,
                     namespace: `gotcache:${nanoid_1.nanoid(12)}`
+                });
+                this.cache.on('error', err => {
+                    logger_1.logger.error('Error loading Redis Cache', err);
                 });
             }
             this.got = got_1.default.extend({

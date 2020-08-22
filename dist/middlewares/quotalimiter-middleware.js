@@ -16,8 +16,8 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsQuotaLimiterMiddle
 const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
 const config_1 = require("../util/config");
+const etdc_1 = __importDefault(require("../util/etdc"));
 let EsQuotaLimiterMiddleware = /** @class */ (() => {
     class EsQuotaLimiterMiddleware extends core_1.EsMiddleware {
         /**
@@ -43,11 +43,16 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
             }
             this._quotaProp = lodash_1.default.get(values, 'quotaProp');
             if (!lodash_1.default.isString(this._quotaProp)) {
-                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be integer greater than 0');
+                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quotaProp MUST be string');
             }
-            this._redis = new ioredis_1.default();
-            this._redisKey = `esgateway:runtime:apis:${config_1.configuration.env}:${api}:quotas:${this._quotaId}`;
-            // this._redisKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
+            this._strictProp = lodash_1.default.get(values, 'strictProp');
+            if (!lodash_1.default.isString(this._strictProp)) {
+                throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'strictProp MUST be string');
+            }
+            this._etcdKey = `esgateway/runtime/apis/${config_1.configuration.env}/${api}/quotas/${this._quotaId}`;
+            // this._etcdKey = `esgateway:runtime:apis:${configuration.env}:${api}:quotas:${this._quotaType}:${this._quotaId}`;
+            const dt = new Date(Date.now());
+            //EsQuotaLimiterMiddleware.LEASES = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS.map(f => ETCD_CLIENT.lease(Math.floor((f(dt).valueOf() - Date.now())/1000)));
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -71,17 +76,50 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                 if (!lodash_1.default.isInteger(quotaValue) || quotaValue <= 0) {
                     throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'quota MUST be integer greater than 0');
                 }
+                const strict = Boolean(lodash_1.default.get(context.properties, this._strictProp, false));
                 const now = new Date(Date.now());
                 // Calcula chave a partir da data
-                const dtExp = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS[quotaTypeId](now);
-                const rKey = `${this._redisKey}:${key}`;
-                const res = yield this._redis.multi().incr(rKey).expireat(rKey, dtExp.valueOf() / 1000).exec();
-                const q = res[0];
-                if (q[0] !== null) {
-                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, 'Error running middleware', q[0]);
+                const dtExps = EsQuotaLimiterMiddleware.QUOTA_FUNCTIONS.map(f => f(now).valueOf());
+                const rKey = `${this._etcdKey}/${key}`;
+                let error = false;
+                let excp = undefined;
+                const func = () => __awaiter(this, void 0, void 0, function* () {
+                    try {
+                        let quotas = [];
+                        let exps = [];
+                        const allKeys = yield ns.getAll().numbers();
+                        quotas = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => { var _a; return (_a = allKeys[`/${t}`]) !== null && _a !== void 0 ? _a : 0; });
+                        exps = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => { var _a; return (_a = allKeys[`/${t}/exp`]) !== null && _a !== void 0 ? _a : 0; });
+                        error = now.valueOf() <= exps[quotaTypeId] && quotas[quotaTypeId] >= quotaValue;
+                        yield ns.stm({ retries: 0 }).transact(tx => Promise.all([
+                            Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => __awaiter(this, void 0, void 0, function* () {
+                                var _a;
+                                if (!error) {
+                                    let val = (_a = (yield tx.get(`/${t}`).number())) !== null && _a !== void 0 ? _a : 0;
+                                    if (now.valueOf() > exps[i])
+                                        val = 0;
+                                    yield tx.put(`/${t}`).value(val + 1);
+                                }
+                                else if (now.valueOf() > exps[i]) {
+                                    yield tx.put(`/${t}`).value(1);
+                                }
+                            }))),
+                            Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => tx.put(`/${t}/exp`).value(dtExps[i])))
+                        ]));
+                    }
+                    catch (err) {
+                        excp = err;
+                    }
+                });
+                const ns = etdc_1.default.namespace(rKey);
+                if (strict)
+                    yield ns.lock(`/mutex`).ttl(5).do(func);
+                else
+                    yield func();
+                if (excp !== undefined) {
+                    throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Error updating quotas`, excp);
                 }
-                else if (q[1] > quotaValue) {
-                    yield this._redis.multi().set(rKey, quotaValue).expireat(rKey, dtExp.valueOf() / 1000).exec();
+                if (error) {
                     throw new errors_1.EsMiddlewareError(EsQuotaLimiterMiddleware.name, `Maximum quota reached`, undefined, `Quota: ${quotaValue} per ${quotaType}`, 429);
                 }
             });
@@ -106,6 +144,7 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
             return new Date(dt.getFullYear() + 1, dt.getMonth(), dt.getDate());
         }
     ];
+    EsQuotaLimiterMiddleware.PREFETCH = lodash_1.default.flatten(EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => [`/${t}`, `/${t}/exp`]));
     return EsQuotaLimiterMiddleware;
 })();
 exports.EsQuotaLimiterMiddleware = EsQuotaLimiterMiddleware;
@@ -121,7 +160,8 @@ exports.MiddlewareSchema = {
         "quotaId",
         "quotaTypeProp",
         "quotaProp",
-        "sourceProp"
+        "sourceProp",
+        "strictProp"
     ],
     "properties": {
         "sourceProp": {
@@ -141,6 +181,10 @@ exports.MiddlewareSchema = {
             "minLength": 1
         },
         "destProp": {
+            "type": "string",
+            "minLength": 1
+        },
+        "strictProp": {
             "type": "string",
             "minLength": 1
         }

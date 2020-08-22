@@ -8,6 +8,14 @@ import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
 import { loadParsers } from './parsers';
 
+process.on('uncaughtException', err => {
+    logger.error('Excecaooooo', err);
+});
+
+process.on('unhandledRejection', err => {
+    logger.error('REJEICAO', err);
+});
+
 async function start() {
     await loadConfig();
     loadParsers();
@@ -28,7 +36,7 @@ import os from 'os';
 import { RateLimiterClusterMaster } from 'rate-limiter-flexible';
 import { setIdScheduler } from './transports/schedule';
 import { setIdSub } from './transports/redissub';
-import _ from 'lodash';
+import _, { stubFalse } from 'lodash';
 
 let numCpus = os.cpus().length;
 
@@ -52,8 +60,23 @@ if (cluster.isMaster) {
 
     cluster.on('exit', (worker, code, signal) => {
         logger.info(`worker ${worker.process.pid} died`);
-        setIdToSchedule();
+        if (checkAnyWorking()) {
+            setIdToSchedule();
+        }
+        else {
+            logger.info('No client running, exiting');
+            process.exit(0);
+        }
     });
+
+    function checkAnyWorking() {
+        for (const id in cluster.workers) {
+            if (cluster.workers[id]?.isConnected()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     function setIdToSchedule() {
         let fid = undefined;

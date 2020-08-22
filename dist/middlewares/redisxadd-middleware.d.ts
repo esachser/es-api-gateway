@@ -33,6 +33,9 @@ export declare const MiddlewareSchema: {
             type: string;
             minLength: number;
         };
+        redisProperties: {
+            type: string;
+        };
         waitFor: {
             type: string;
         };

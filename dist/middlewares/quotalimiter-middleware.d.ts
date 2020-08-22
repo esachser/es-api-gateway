@@ -8,13 +8,14 @@ export declare class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly QUOTA_TYPES: string[];
     static readonly QUOTA_VALIDITIES: number[];
     static readonly QUOTA_FUNCTIONS: ((dt: Date) => Date)[];
-    private _redis;
-    private _redisKey;
+    static PREFETCH: string[];
+    private _etcdKey;
     private _destProp;
     private _sourceProp;
     private _quotaId;
     private _quotaTypeProp;
     private _quotaProp;
+    private _strictProp;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
@@ -48,6 +49,10 @@ export declare const MiddlewareSchema: {
             minLength: number;
         };
         destProp: {
+            type: string;
+            minLength: number;
+        };
+        strictProp: {
             type: string;
             minLength: number;
         };

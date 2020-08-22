@@ -28,6 +28,9 @@ export declare const MiddlewareSchema: {
             type: string;
             minLength: number;
         };
+        redisProperties: {
+            type: string;
+        };
         redisSourceProp: {
             type: string;
             minLength: number;

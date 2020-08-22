@@ -42,14 +42,27 @@ transports:
         after: false
         data:
           name: qvalue
-          value: 7
-      - type: EsQuotaLimiterMiddleware
+          value: 10
+      - type: EsPropertyMiddleware
         after: false
+        data:
+          name: strict
+          value: false
+      - type: EsSequenceMiddleware 
         data: 
-          sourceProp: quotakey
-          quotaId: qto
-          quotaTypeProp: qtype
-          quotaProp: qvalue
+          mids:
+          -
+            - type: EsMetricsMiddleware
+              data:
+                prop: response.headers.timequota
+            - type: EsQuotaLimiterMiddleware
+              after: false
+              data: 
+                sourceProp: quotakey
+                quotaId: qto
+                quotaTypeProp: qtype
+                quotaProp: qvalue
+                strictProp: strict
 init: []
 execution:
   - type: Custom-CPMID1

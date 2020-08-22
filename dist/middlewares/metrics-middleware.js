@@ -38,11 +38,20 @@ let EsMetricsMiddleware = /** @class */ (() => {
             return __awaiter(this, void 0, void 0, function* () {
                 const meta = lodash_1.default.merge({}, EsMetricsMiddleware.meta, context.meta);
                 let init = process.hrtime();
-                yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
+                let e = undefined;
+                try {
+                    yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
+                }
+                catch (err) {
+                    e = err;
+                }
                 const diffs = process.hrtime(init);
                 const diff = diffs[0] * 1000 + diffs[1] / 1000000;
                 context.logger.debug(`Duration: ${diff}ms`, meta);
                 lodash_1.default.set(context.properties, this.values['prop'], diff);
+                if (e !== undefined) {
+                    throw e;
+                }
             });
         }
     }

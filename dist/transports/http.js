@@ -92,37 +92,10 @@ let EsHttpTransport = /** @class */ (() => {
                         const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
                         ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
                         const body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
-                        // const bodyJson = await parsers.transform(body, {
-                        //     bta: {
-                        //         parser: 'EsJson'
-                        //     }
-                        // });
-                        // const bodyXml = await parsers.transform(bodyJson, {
-                        //     atb: {
-                        //         parser: 'EsXml'
-                        //     }
-                        // });
-                        // ctx.set('content-type', 'application/xml');
                         ctx.body = body;
-                        //ctx.body = _.get(ctx.iesContext.properties, 'response.body');
-                        // const encoding = 'deflate';
-                        // ctx.set('content-encoding', encoding);
-                        // ctx.remove('content-length');
-                        // ctx.body = await parsers.transform(_.get(ctx.iesContext.properties, 'response.body'), {
-                        //     btb: [
-                        //         {
-                        //             parser: 'EsCompress',
-                        //             opts: {
-                        //                 encoding
-                        //             }
-                        //         }
-                        //     ]
-                        // });
                     }
                     catch (err) {
-                        for (const key in lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {})) {
-                            ctx.remove(key);
-                        }
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
                         ctx.set('host', 'es-api-gateway 0.1.0');
                         ctx.remove('content-encoding');
                         if (err instanceof errors_1.EsError && err.statusCode < 500) {
