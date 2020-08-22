@@ -92,6 +92,7 @@ Aspectos que devem ser vistos:
   - [**OK**] Será usado
   - [**OK**] Usar para quotaLimiter
   - Utilizar como replicação de cluster
+- Iniciar documentação, exemplos, testes, e casos de uso
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka
