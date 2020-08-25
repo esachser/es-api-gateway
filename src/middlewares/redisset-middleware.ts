@@ -1,10 +1,11 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
 import { configuration } from '../util/config';
 import { logger } from '../util/logger';
 import { getRedisClient } from '../util/redisClient';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsRedisSetMiddleware extends EsMiddleware {
     static readonly isInOut = true;

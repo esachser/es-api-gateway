@@ -19,10 +19,11 @@ const path_1 = __importDefault(require("path"));
 const lodash_1 = __importDefault(require("lodash"));
 const util_1 = require("../util");
 const logger_1 = require("../util/logger");
-const core_1 = require("../core");
 const schemas_1 = require("../core/schemas");
 const config_1 = require("../util/config");
 const http_server_1 = require("../util/http-server");
+const transports_1 = require("../core/transports");
+const middlewares_1 = require("../core/middlewares");
 let apis = {};
 function loadApiFile(fname) {
     var _a, _b;
@@ -63,15 +64,15 @@ function loadApiFile(fname) {
             for (const transport of transports) {
                 const trpEnabled = lodash_1.default.get(transport, 'enabled', true);
                 if (apiEnabled && trpEnabled) {
-                    const initialMid = yield core_1.createMiddleware(initJs, 0, fname);
-                    const centralMid = yield core_1.createMiddleware(executionJs, 0, fname);
+                    const initialMid = yield middlewares_1.createMiddleware(initJs, 0, fname);
+                    const centralMid = yield middlewares_1.createMiddleware(executionJs, 0, fname);
                     const id = lodash_1.default.get(transport, 'id');
                     const type = lodash_1.default.get(transport, 'type');
                     const parameters = lodash_1.default.get(transport, 'parameters');
                     const mids = lodash_1.default.get(transport, 'mids');
-                    const pre = yield core_1.createMiddleware(mids, 0, fname);
-                    const mid = core_1.connectMiddlewares(pre, centralMid);
-                    const trp = yield core_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
+                    const pre = yield middlewares_1.createMiddleware(mids, 0, fname);
+                    const mid = middlewares_1.connectMiddlewares(pre, centralMid);
+                    const trp = yield transports_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
                     if (trp !== undefined) {
                         api.transports[id] = trp;
                     }

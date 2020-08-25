@@ -4,12 +4,13 @@ import path from 'path';
 import _, { isRegExp } from 'lodash';
 import { baseDirectory, readFileToObject } from '../util';
 import { logger, createLogger } from '../util/logger';
-import { IEsMiddleware, IEsTransport, createMiddleware, connectMiddlewares, createTransport } from '../core';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
 import { load } from '@grpc/grpc-js';
 import { configuration } from '../util/config';
 import { clearRouters } from '../util/http-server';
+import { IEsTransport, createTransport } from '../core/transports';
+import { createMiddleware, connectMiddlewares } from '../core/middlewares';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },

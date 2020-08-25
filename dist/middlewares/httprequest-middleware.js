@@ -13,15 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsHttpRequestMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const got_1 = __importDefault(require("got"));
 const keyv_1 = __importDefault(require("keyv"));
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsHttpRequestMiddleware = /** @class */ (() => {
-    class EsHttpRequestMiddleware extends core_1.EsMiddleware {
+    class EsHttpRequestMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

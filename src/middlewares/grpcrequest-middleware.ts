@@ -1,4 +1,3 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import tmp from 'tmp';
@@ -8,6 +7,8 @@ import { GrpcObject } from '@grpc/grpc-js';
 import { ServiceClientConstructor } from '@grpc/grpc-js/build/src/make-client';
 import { getPrivateKey, getPublicCert } from '../util/certs';
 import { logger } from '../util/logger';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 const grpc = require('@grpc/grpc-js');
 

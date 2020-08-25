@@ -1,7 +1,8 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import { getPrivateKey } from '../util/certs';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsLoadPrivateKeyMiddleware extends EsMiddleware {
     static readonly isInOut = true;

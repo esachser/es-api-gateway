@@ -1,6 +1,7 @@
 /// <reference types="node" />
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import vm from 'vm';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 export declare class EsExecJsMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsExecJsMiddleware";

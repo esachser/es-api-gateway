@@ -1,9 +1,8 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
-import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
-
 import vm from 'vm';
+import { EsMiddleware, IEsMiddleware, createMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 const vmContext = vm.createContext({
     '_': _,

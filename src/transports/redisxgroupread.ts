@@ -1,4 +1,3 @@
-import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { Logger, http } from 'winston';
@@ -6,6 +5,9 @@ import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import Redis from 'ioredis';
 import { getRedisClient } from '../util/redisClient';
+import { IEsTransport, IEsTranportConstructor } from '../core/transports';
+import { IEsMiddleware, connectMiddlewares } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsRedisXgroupreadTransport implements IEsTransport {
 

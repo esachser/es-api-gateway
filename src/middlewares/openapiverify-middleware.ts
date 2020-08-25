@@ -1,10 +1,11 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import ChowChow from "oas3-chow-chow";
 import { EsMiddlewareError } from '../core/errors';
 import parsers from '../core/parsers';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsOpenApiVerifyMiddleware extends EsMiddleware {
     static readonly isInOut = true;

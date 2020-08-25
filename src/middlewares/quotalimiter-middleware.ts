@@ -1,13 +1,10 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import Redis from 'ioredis';
-import { nanoid } from 'nanoid';
 import { configuration } from '../util/config';
-import { logger } from '../util/logger';
-import { getRedisClient } from '../util/redisClient';
 import ETCD_CLIENT from '../util/etdc';
-import { Lease } from 'etcd3';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -140,8 +137,8 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
                         else if (now.valueOf() > exps[i]) {
                             await tx.put(`/${t}`).value(1);
                         }
-                    })),
-                    Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => tx.put(`/${t}/exp`).value(dtExps[i])))
+                        await tx.put(`/${t}/exp`).value(dtExps[i]);
+                    }))
                 ]));
             }
             catch (err) {

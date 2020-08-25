@@ -13,16 +13,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsGrpcRequestMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const tmp_1 = __importDefault(require("tmp"));
 const promises_1 = __importDefault(require("fs/promises"));
 const proto_loader_1 = require("@grpc/proto-loader");
 const certs_1 = require("../util/certs");
+const middlewares_1 = require("../core/middlewares");
 const grpc = require('@grpc/grpc-js');
 let EsGrpcRequestMiddleware = /** @class */ (() => {
-    class EsGrpcRequestMiddleware extends core_1.EsMiddleware {
+    class EsGrpcRequestMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

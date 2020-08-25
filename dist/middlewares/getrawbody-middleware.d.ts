@@ -1,4 +1,5 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 export declare class EsGetRawBodyMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsGetRawBodyMiddleware";

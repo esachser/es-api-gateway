@@ -1,7 +1,8 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { EsMiddlewareError } from '../core/errors';
+import { IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsMetricsMiddleware extends IEsMiddleware {
     static readonly isInOut = true;
@@ -29,6 +30,9 @@ export class EsMetricsMiddleware extends IEsMiddleware {
     async loadAsync() { }
 
     async execute(context: IEsContext) {
+        if (context.logger.level === 'debug') {
+            context.logger.debug({ properties: context.properties, middleware: this.constructor.name });
+        }
         const meta = _.merge({}, EsMetricsMiddleware.meta, context.meta);
         let init = process.hrtime();
         let e = undefined;

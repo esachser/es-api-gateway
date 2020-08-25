@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsDecodeMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const content_type_1 = __importDefault(require("content-type"));
 const parsers_1 = __importDefault(require("../core/parsers"));
+const middlewares_1 = require("../core/middlewares");
 let EsDecodeMiddleware = /** @class */ (() => {
-    class EsDecodeMiddleware extends core_1.EsMiddleware {
+    class EsDecodeMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

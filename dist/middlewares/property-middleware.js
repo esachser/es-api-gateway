@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsPropertyMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const vm_1 = __importDefault(require("vm"));
 const stringify_object_1 = __importDefault(require("stringify-object"));
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 const vmContext = vm_1.default.createContext({
     '_': lodash_1.default,
     ctx: {},
@@ -26,7 +26,7 @@ const vmContext = vm_1.default.createContext({
     name: 'Property Middleware'
 });
 let EsPropertyMiddleware = /** @class */ (() => {
-    class EsPropertyMiddleware extends core_1.EsMiddleware {
+    class EsPropertyMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

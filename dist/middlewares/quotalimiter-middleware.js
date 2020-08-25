@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsQuotaLimiterMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const config_1 = require("../util/config");
 const etdc_1 = __importDefault(require("../util/etdc"));
+const middlewares_1 = require("../core/middlewares");
 let EsQuotaLimiterMiddleware = /** @class */ (() => {
-    class EsQuotaLimiterMiddleware extends core_1.EsMiddleware {
+    class EsQuotaLimiterMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -103,8 +103,8 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                                 else if (now.valueOf() > exps[i]) {
                                     yield tx.put(`/${t}`).value(1);
                                 }
-                            }))),
-                            Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => tx.put(`/${t}/exp`).value(dtExps[i])))
+                                yield tx.put(`/${t}/exp`).value(dtExps[i]);
+                            })))
                         ]));
                     }
                     catch (err) {

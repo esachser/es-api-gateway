@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsMetricsMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsMetricsMiddleware = /** @class */ (() => {
-    class EsMetricsMiddleware extends core_1.IEsMiddleware {
+    class EsMetricsMiddleware extends middlewares_1.IEsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -36,6 +36,9 @@ let EsMetricsMiddleware = /** @class */ (() => {
         execute(context) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
+                if (context.logger.level === 'debug') {
+                    context.logger.debug({ properties: context.properties, middleware: this.constructor.name });
+                }
                 const meta = lodash_1.default.merge({}, EsMetricsMiddleware.meta, context.meta);
                 let init = process.hrtime();
                 let e = undefined;

@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsGetRawBodyMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const raw_body_1 = __importDefault(require("raw-body"));
 const is_stream_1 = __importDefault(require("is-stream"));
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsGetRawBodyMiddleware = /** @class */ (() => {
-    class EsGetRawBodyMiddleware extends core_1.EsMiddleware {
+    class EsGetRawBodyMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

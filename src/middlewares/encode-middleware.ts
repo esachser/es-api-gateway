@@ -1,8 +1,9 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import contentType from 'content-type';
 import parsers from '../core/parsers';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsEncodeMiddleware extends EsMiddleware {
     static readonly isInOut = true;

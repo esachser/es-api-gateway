@@ -1,10 +1,12 @@
-import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
 import { getHttpRouter } from '../util/http-server';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { Logger, http } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
+import { IEsContext } from '../core';
+import { IEsTransport, IEsTranportConstructor } from '../core/transports';
+import { IEsMiddleware, createMiddleware, connectMiddlewares } from '../core/middlewares';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

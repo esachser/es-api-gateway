@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsSequenceMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsSequenceMiddleware = /** @class */ (() => {
-    class EsSequenceMiddleware extends core_1.EsMiddleware {
+    class EsSequenceMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -33,10 +33,10 @@ let EsSequenceMiddleware = /** @class */ (() => {
                     for (let i = 0; i < values['mids'].length; i++) {
                         let ms = values['mids'][i];
                         if (Array.isArray(ms)) {
-                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0, this.api);
+                            this.values['mids'][i] = yield middlewares_1.createMiddleware(ms, 0, this.api);
                         }
                         else {
-                            this.values['mids'][i] = yield core_1.createMiddleware([ms], 0, this.api);
+                            this.values['mids'][i] = yield middlewares_1.createMiddleware([ms], 0, this.api);
                         }
                     }
                 }

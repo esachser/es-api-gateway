@@ -1,6 +1,7 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import { Got } from 'got';
 import Keyv from 'keyv';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 export declare class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = "EsHttpRequestMiddleware";

@@ -84,7 +84,7 @@ Aspectos que devem ser vistos:
 - [**OK**] Rodar gateway em cluster
 - [**OK**] Criar tag de API desabilitada
 - [**OK**] Criar tag de transporte habilitado
-- Centralizar configuração de Redis
+- [**OK**] Centralizar configuração de Redis
   - [**OK**] Verificar configuração do Redis como um todo
   - [**OK**] Configuração de redis publisher para os logs das APIs
   - [**OK**] Configuração de redis como objeto para cada middleware ou transporte
@@ -92,6 +92,11 @@ Aspectos que devem ser vistos:
   - [**OK**] Será usado
   - [**OK**] Usar para quotaLimiter
   - Utilizar como replicação de cluster
+- Ajustar middlewares
+  - [**OK**] Debug unificado
+  - Verificar código
+- [**OK**] Ajustar transportes
+  - [**OK**] Ajustar index.ts para não carregar de lugar nenhum
 - Iniciar documentação, exemplos, testes, e casos de uso
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?

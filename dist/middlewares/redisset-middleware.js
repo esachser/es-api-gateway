@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsRedisSetMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const redisClient_1 = require("../util/redisClient");
+const middlewares_1 = require("../core/middlewares");
 let EsRedisSetMiddleware = /** @class */ (() => {
-    class EsRedisSetMiddleware extends core_1.EsMiddleware {
+    class EsRedisSetMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */

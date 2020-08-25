@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransportSchema = exports.TransportContructor = exports.EsHttpTransport = void 0;
-const core_1 = require("../core");
 const http_server_1 = require("../util/http-server");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 ;
 let EsHttpTransport = /** @class */ (() => {
     class EsHttpTransport {
@@ -139,8 +139,8 @@ let EsHttpTransport = /** @class */ (() => {
                         let totalPath = `${this.routeContext}${path}`;
                         totalPath = totalPath.replace(/\/{2,}/g, '/');
                         for (const methodInfo of params.routes[path]) {
-                            const pathMethodMid = yield core_1.createMiddleware(methodInfo.mids, 0, this.api);
-                            const middleware = core_1.connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
+                            const pathMethodMid = yield middlewares_1.createMiddleware(methodInfo.mids, 0, this.api);
+                            const middleware = middlewares_1.connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
                             httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids

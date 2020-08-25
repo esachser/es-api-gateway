@@ -13,10 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsConditionMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const vm_1 = __importDefault(require("vm"));
+const middlewares_1 = require("../core/middlewares");
 const vmContext = vm_1.default.createContext({
     '_': lodash_1.default,
     ctx: {},
@@ -25,7 +25,7 @@ const vmContext = vm_1.default.createContext({
     name: 'Context Middleware'
 });
 let EsConditionMiddleware = /** @class */ (() => {
-    class EsConditionMiddleware extends core_1.EsMiddleware {
+    class EsConditionMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -50,7 +50,7 @@ let EsConditionMiddleware = /** @class */ (() => {
                         const compiledScript = new vm_1.default.Script(script);
                         const conditionStructure = {};
                         conditionStructure['conditionExpression'] = compiledScript;
-                        conditionStructure['mids'] = yield core_1.createMiddleware(condition.mids, 0, this.api);
+                        conditionStructure['mids'] = yield middlewares_1.createMiddleware(condition.mids, 0, this.api);
                         this.values['conditions'][i] = conditionStructure;
                     }
                 }

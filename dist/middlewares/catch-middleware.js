@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsCatchMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsCatchMiddleware = /** @class */ (() => {
-    class EsCatchMiddleware extends core_1.IEsMiddleware {
+    class EsCatchMiddleware extends middlewares_1.IEsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -30,7 +30,7 @@ let EsCatchMiddleware = /** @class */ (() => {
         loadAsync(values) {
             return __awaiter(this, void 0, void 0, function* () {
                 if (lodash_1.default.isArray(values['mids'])) {
-                    this.catchMiddleware = yield core_1.createMiddleware(values['mids'], 0, this.api);
+                    this.catchMiddleware = yield middlewares_1.createMiddleware(values['mids'], 0, this.api);
                 }
                 else {
                     throw new errors_1.EsMiddlewareError(EsCatchMiddleware.middlewareName, 'mids MUST be array');
@@ -40,6 +40,9 @@ let EsCatchMiddleware = /** @class */ (() => {
         execute(context) {
             var _a, _b;
             return __awaiter(this, void 0, void 0, function* () {
+                if (context.logger.level === 'debug') {
+                    context.logger.debug({ properties: context.properties, middleware: this.constructor.name });
+                }
                 try {
                     yield ((_a = this.next) === null || _a === void 0 ? void 0 : _a.execute(context));
                 }

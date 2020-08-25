@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsParallelMiddleware = void 0;
-const core_1 = require("../core");
 const errors_1 = require("../core/errors");
+const middlewares_1 = require("../core/middlewares");
 let EsParallelMiddleware = /** @class */ (() => {
-    class EsParallelMiddleware extends core_1.EsMiddleware {
+    class EsParallelMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -29,7 +29,7 @@ let EsParallelMiddleware = /** @class */ (() => {
                     for (let i = 0; i < values['mids'].length; i++) {
                         let ms = values['mids'][i];
                         if (Array.isArray(ms)) {
-                            this.values['mids'][i] = yield core_1.createMiddleware(ms, 0, this.api);
+                            this.values['mids'][i] = yield middlewares_1.createMiddleware(ms, 0, this.api);
                         }
                         else {
                             throw new errors_1.EsMiddlewareError(EsParallelMiddleware.middlewareName, `values.mids[${i}] MUST be array`);

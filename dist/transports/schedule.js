@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransportSchema = exports.TransportContructor = exports.EsScheduleTransport = exports.setIdScheduler = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
 const node_schedule_1 = __importDefault(require("node-schedule"));
 const cluster_1 = __importDefault(require("cluster"));
+const middlewares_1 = require("../core/middlewares");
 let idSch = undefined;
 function setIdScheduler(id) {
     idSch = id;
@@ -34,7 +34,7 @@ class EsScheduleTransport {
         this.apiLogger = apiLogger;
         this.api = api;
         this.tid = tid;
-        this.middleware = core_1.connectMiddlewares(initMiddleware, middleware);
+        this.middleware = middlewares_1.connectMiddlewares(initMiddleware, middleware);
         const scheduleStr = lodash_1.default.get(params, 'schedule');
         try {
             this._job = node_schedule_1.default.scheduleJob(scheduleStr, () => __awaiter(this, void 0, void 0, function* () {

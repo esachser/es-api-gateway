@@ -32,11 +32,16 @@ function startAuthenticators() {
         const auths = lodash_1.default.get(config_1.configuration, 'authenticators', []);
         if (lodash_1.default.isArray(auths)) {
             for (const auth of auths) {
-                const type = lodash_1.default.get(auth, 'type');
-                const name = lodash_1.default.get(auth, 'name');
-                const id = lodash_1.default.get(auth, 'id');
-                const params = lodash_1.default.get(auth, 'parameters');
-                yield authenticators_1.createAuthenticator(type, name, id, params);
+                try {
+                    const type = lodash_1.default.get(auth, 'type');
+                    const name = lodash_1.default.get(auth, 'name');
+                    const id = lodash_1.default.get(auth, 'id');
+                    const params = lodash_1.default.get(auth, 'parameters');
+                    yield authenticators_1.createAuthenticator(type, name, id, params);
+                }
+                catch (err) {
+                    logger_1.logger.error('Error creating authenticator', err);
+                }
             }
         }
         else {

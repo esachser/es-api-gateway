@@ -1,4 +1,3 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import got, { Got } from 'got';
@@ -6,6 +5,8 @@ import Keyv  from 'keyv';
 import { nanoid } from 'nanoid';
 import { EsMiddlewareError } from '../core/errors';
 import stream from 'stream';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsHttpRequestMiddleware extends EsMiddleware {
     static readonly isInOut = true;

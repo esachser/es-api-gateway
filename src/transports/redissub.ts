@@ -1,4 +1,3 @@
-import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor, createMiddleware, connectMiddlewares } from '../core';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { Logger, http } from 'winston';
@@ -7,6 +6,9 @@ import { EsTransportError, EsError } from '../core/errors';
 import Redis from 'ioredis';
 import cluster from 'cluster';
 import { getRedisClient } from '../util/redisClient';
+import { IEsTransport, IEsTranportConstructor } from '../core/transports';
+import { IEsMiddleware, connectMiddlewares } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 let idSub: number | undefined = undefined
 export function setIdSub(id: number) {

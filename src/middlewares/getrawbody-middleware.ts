@@ -1,8 +1,9 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import getRawBody from 'raw-body';
 import isStream from 'is-stream';
 import { EsMiddlewareError } from '../core/errors';
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsGetRawBodyMiddleware extends EsMiddleware {
     static readonly isInOut = true;

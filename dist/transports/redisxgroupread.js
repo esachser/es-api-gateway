@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransportSchema = exports.TransportContructor = exports.EsRedisXgroupreadTransport = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
 const errors_1 = require("../core/errors");
 const redisClient_1 = require("../util/redisClient");
+const middlewares_1 = require("../core/middlewares");
 class EsRedisXgroupreadTransport {
     /**
      *
@@ -29,7 +29,7 @@ class EsRedisXgroupreadTransport {
         this.apiLogger = apiLogger;
         this.api = api;
         this.tid = tid;
-        this.middleware = core_1.connectMiddlewares(initMiddleware, middleware);
+        this.middleware = middlewares_1.connectMiddlewares(initMiddleware, middleware);
         this._groupStr = lodash_1.default.get(params, 'group');
         this._streamStr = lodash_1.default.get(params, 'stream');
         this._id = nanoid_1.nanoid(12);

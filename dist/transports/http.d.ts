@@ -1,5 +1,7 @@
-import { IEsTransport, IEsMiddleware, IEsContext, IEsTranportConstructor } from '../core';
 import { Logger } from 'winston';
+import { IEsContext } from '../core';
+import { IEsTransport, IEsTranportConstructor } from '../core/transports';
+import { IEsMiddleware } from '../core/middlewares';
 declare type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface IEsHttpTransportParams {
     routeContext: string;

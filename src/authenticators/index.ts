@@ -20,11 +20,16 @@ export async function startAuthenticators() {
     const auths = _.get(configuration, 'authenticators', []);
     if (_.isArray(auths)) {
         for (const auth of auths) {
-            const type = _.get(auth, 'type');
-            const name = _.get(auth, 'name');
-            const id = _.get(auth, 'id');
-            const params = _.get(auth, 'parameters');
-            await createAuthenticator(type, name, id, params);
+            try {
+                const type = _.get(auth, 'type');
+                const name = _.get(auth, 'name');
+                const id = _.get(auth, 'id');
+                const params = _.get(auth, 'parameters');
+                await createAuthenticator(type, name, id, params);
+            }
+            catch (err) {
+                logger.error('Error creating authenticator', err);
+            }
         }
     }
     else {

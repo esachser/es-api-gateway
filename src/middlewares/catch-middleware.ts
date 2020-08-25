@@ -1,6 +1,7 @@
-import { IEsMiddleware, IEsContext, IEsMiddlewareConstructor, createMiddleware } from '../core';
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
+import { IEsMiddleware, createMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
 
 export class EsCatchMiddleware extends IEsMiddleware {
     static readonly isInOut = true;
@@ -33,6 +34,9 @@ export class EsCatchMiddleware extends IEsMiddleware {
     }
 
     async execute(context: IEsContext) {
+        if (context.logger.level === 'debug') {
+            context.logger.debug({ properties: context.properties, middleware: this.constructor.name });
+        }
         try{
             await this.next?.execute(context);
         }

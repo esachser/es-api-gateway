@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsJwsVerifyMiddleware = void 0;
-const core_1 = require("../core");
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const jose_1 = require("jose");
+const middlewares_1 = require("../core/middlewares");
 let EsJwsVerifyMiddleware = /** @class */ (() => {
-    class EsJwsVerifyMiddleware extends core_1.EsMiddleware {
+    class EsJwsVerifyMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
