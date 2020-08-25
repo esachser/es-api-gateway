@@ -98,6 +98,13 @@ Aspectos que devem ser vistos:
 - [**OK**] Ajustar transportes
   - [**OK**] Ajustar index.ts para não carregar de lugar nenhum
 - Iniciar documentação, exemplos, testes, e casos de uso
+  - Documentação explicando o geral do projeto
+  - Principais componentes do projeto
+  - Diagrama day of life de uma chamada
+  - Descrição de cada transporte
+  - Descrição de cada middleware
+  - Descrição de cada autenticador
+  - Exemplos e casos de uso
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka
