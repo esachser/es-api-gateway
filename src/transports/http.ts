@@ -104,7 +104,7 @@ export class EsHttpTransport implements IEsTransport {
                     }
                 };
 
-                logger.info(`Started api with path ${context.properties.request.path}`);
+                //logger.info(`Started api with path ${context.properties.request.path}`);
 
                 ctx.iesContext = context;
 
@@ -150,7 +150,7 @@ export class EsHttpTransport implements IEsTransport {
 
                 const diffs = process.hrtime(init);
                 const diff = diffs[0] * 1000 + diffs[1] / 1000000;
-                logger.info(`Call ${ctx.path} ended in ${diff}ms`);
+                //logger.info(`Call ${ctx.path} ended in ${diff}ms`);
             });
         }
         catch (err) {

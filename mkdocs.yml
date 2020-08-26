@@ -1,0 +1,5 @@
+site_name: Maestro API Gateway
+theme:
+  name: material
+  features:
+  - tabs

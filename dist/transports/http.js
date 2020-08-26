@@ -81,7 +81,7 @@ let EsHttpTransport = /** @class */ (() => {
                             uid: nanoid_1.nanoid(12)
                         }
                     };
-                    logger_1.logger.info(`Started api with path ${context.properties.request.path}`);
+                    //logger.info(`Started api with path ${context.properties.request.path}`);
                     ctx.iesContext = context;
                     //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
                     let init = process.hrtime();
@@ -120,7 +120,7 @@ let EsHttpTransport = /** @class */ (() => {
                     }
                     const diffs = process.hrtime(init);
                     const diff = diffs[0] * 1000 + diffs[1] / 1000000;
-                    logger_1.logger.info(`Call ${ctx.path} ended in ${diff}ms`);
+                    //logger.info(`Call ${ctx.path} ended in ${diff}ms`);
                 }));
             }
             catch (err) {
