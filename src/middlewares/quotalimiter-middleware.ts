@@ -5,6 +5,8 @@ import { configuration } from '../util/config';
 import ETCD_CLIENT from '../util/etdc';
 import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
 import { IEsContext } from '../core';
+import getEtcdClient from '../util/etdc';
+import { Isolation } from 'etcd3';
 
 export class EsQuotaLimiterMiddleware extends EsMiddleware {
     static readonly isInOut = true;
@@ -127,8 +129,8 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
 
                 error = now.valueOf() <= exps[quotaTypeId] && quotas[quotaTypeId] >= quotaValue;
 
-                await ns.stm({ retries: 0 }).transact(tx => Promise.all([
-                    Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map(async (t, i) => {
+                await ns.stm({ retries: 0, isolation: Isolation.ReadCommitted })
+                    .transact(tx => Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map(async (t, i) => {
                         if (!error){
                             let val = (await tx.get(`/${t}`).number()) ?? 0;
                             if (now.valueOf() > exps[i]) val = 0;
@@ -138,15 +140,14 @@ export class EsQuotaLimiterMiddleware extends EsMiddleware {
                             await tx.put(`/${t}`).value(1);
                         }
                         await tx.put(`/${t}/exp`).value(dtExps[i]);
-                    }))
-                ]));
+                    })));
             }
             catch (err) {
                 excp = err;
             }
         }
 
-        const ns = ETCD_CLIENT.namespace(rKey);
+        const ns = getEtcdClient().namespace(rKey);
         if (strict) await ns.lock(`/mutex`).ttl(5).do(func);
         else await func();
 

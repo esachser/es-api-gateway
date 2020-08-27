@@ -16,8 +16,8 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsQuotaLimiterMiddle
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const config_1 = require("../util/config");
-const etdc_1 = __importDefault(require("../util/etdc"));
 const middlewares_1 = require("../core/middlewares");
+const etdc_1 = __importDefault(require("../util/etdc"));
 let EsQuotaLimiterMiddleware = /** @class */ (() => {
     class EsQuotaLimiterMiddleware extends middlewares_1.EsMiddleware {
         /**
@@ -91,27 +91,26 @@ let EsQuotaLimiterMiddleware = /** @class */ (() => {
                         quotas = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => { var _a; return (_a = allKeys[`/${t}`]) !== null && _a !== void 0 ? _a : 0; });
                         exps = EsQuotaLimiterMiddleware.QUOTA_TYPES.map(t => { var _a; return (_a = allKeys[`/${t}/exp`]) !== null && _a !== void 0 ? _a : 0; });
                         error = now.valueOf() <= exps[quotaTypeId] && quotas[quotaTypeId] >= quotaValue;
-                        yield ns.stm({ retries: 0 }).transact(tx => Promise.all([
-                            Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => __awaiter(this, void 0, void 0, function* () {
-                                var _a;
-                                if (!error) {
-                                    let val = (_a = (yield tx.get(`/${t}`).number())) !== null && _a !== void 0 ? _a : 0;
-                                    if (now.valueOf() > exps[i])
-                                        val = 0;
-                                    yield tx.put(`/${t}`).value(val + 1);
-                                }
-                                else if (now.valueOf() > exps[i]) {
-                                    yield tx.put(`/${t}`).value(1);
-                                }
-                                yield tx.put(`/${t}/exp`).value(dtExps[i]);
-                            })))
-                        ]));
+                        yield ns.stm({ retries: 0, isolation: 3 /* ReadCommitted */ })
+                            .transact(tx => Promise.all(EsQuotaLimiterMiddleware.QUOTA_TYPES.map((t, i) => __awaiter(this, void 0, void 0, function* () {
+                            var _a;
+                            if (!error) {
+                                let val = (_a = (yield tx.get(`/${t}`).number())) !== null && _a !== void 0 ? _a : 0;
+                                if (now.valueOf() > exps[i])
+                                    val = 0;
+                                yield tx.put(`/${t}`).value(val + 1);
+                            }
+                            else if (now.valueOf() > exps[i]) {
+                                yield tx.put(`/${t}`).value(1);
+                            }
+                            yield tx.put(`/${t}/exp`).value(dtExps[i]);
+                        }))));
                     }
                     catch (err) {
                         excp = err;
                     }
                 });
-                const ns = etdc_1.default.namespace(rKey);
+                const ns = etdc_1.default().namespace(rKey);
                 if (strict)
                     yield ns.lock(`/mutex`).ttl(5).do(func);
                 else

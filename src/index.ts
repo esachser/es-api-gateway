@@ -9,14 +9,15 @@ import { loadAuthenticators, startAuthenticators } from './authenticators';
 import { loadParsers } from './parsers';
 
 process.on('uncaughtException', err => {
-    logger.error('Excecaooooo', err);
+    logger.error('Uncaught exception happened', err);
 });
 
 process.on('unhandledRejection', err => {
-    logger.error('REJEICAO', err);
+    logger.error('Unhandled Rejection on promise', err);
 });
 
 async function start() {
+    await createEtcd();
     await loadConfig();
     loadParsers();
     loadMiddlewares();
@@ -36,7 +37,8 @@ import os from 'os';
 import { RateLimiterClusterMaster } from 'rate-limiter-flexible';
 import { setIdScheduler } from './transports/schedule';
 import { setIdSub } from './transports/redissub';
-import _, { stubFalse } from 'lodash';
+import _ from 'lodash';
+import { createEtcd } from './util/etdc';
 
 let numCpus = os.cpus().length;
 
@@ -47,16 +49,16 @@ try {
     if (numCpus <= 0) {
         numCpus = 1;
     }
+    if (isNaN(numCpus)) {
+        numCpus = 1;
+    }
 }
-catch(err) {
+finally {
     logger.info(`Using ${numCpus} processes`);
 }
 
 if (cluster.isMaster) {
     new RateLimiterClusterMaster();
-    for (let i = 0; i < numCpus; i++) {
-        cluster.fork();
-    }
 
     cluster.on('exit', (worker, code, signal) => {
         logger.info(`worker ${worker.process.pid} died`);
@@ -88,7 +90,17 @@ if (cluster.isMaster) {
         }
     }
 
-    setIdToSchedule();
+    loadConfig()
+        .then(async () => {
+            await createEtcd();
+            for (let i = 0; i < numCpus; i++) {
+                cluster.fork();
+            }
+            setIdToSchedule();
+        })
+        .catch(err => {
+            logger.error('Error staring leader', err);
+        });
 }
 else {
     start().catch(e => {

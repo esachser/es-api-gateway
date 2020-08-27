@@ -22,13 +22,14 @@ const schemas_1 = require("./core/schemas");
 const authenticators_1 = require("./authenticators");
 const parsers_1 = require("./parsers");
 process.on('uncaughtException', err => {
-    logger_1.logger.error('Excecaooooo', err);
+    logger_1.logger.error('Uncaught exception happened', err);
 });
 process.on('unhandledRejection', err => {
-    logger_1.logger.error('REJEICAO', err);
+    logger_1.logger.error('Unhandled Rejection on promise', err);
 });
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
+        yield etdc_1.createEtcd();
         yield config_1.loadConfig();
         parsers_1.loadParsers();
         middlewares_1.loadMiddlewares();
@@ -48,6 +49,7 @@ const os_1 = __importDefault(require("os"));
 const rate_limiter_flexible_1 = require("rate-limiter-flexible");
 const schedule_1 = require("./transports/schedule");
 const redissub_1 = require("./transports/redissub");
+const etdc_1 = require("./util/etdc");
 let numCpus = os_1.default.cpus().length;
 try {
     if (process.env['NUM_PROCS'] !== undefined) {
@@ -56,15 +58,15 @@ try {
     if (numCpus <= 0) {
         numCpus = 1;
     }
+    if (isNaN(numCpus)) {
+        numCpus = 1;
+    }
 }
-catch (err) {
+finally {
     logger_1.logger.info(`Using ${numCpus} processes`);
 }
 if (cluster_1.default.isMaster) {
     new rate_limiter_flexible_1.RateLimiterClusterMaster();
-    for (let i = 0; i < numCpus; i++) {
-        cluster_1.default.fork();
-    }
     cluster_1.default.on('exit', (worker, code, signal) => {
         logger_1.logger.info(`worker ${worker.process.pid} died`);
         if (checkAnyWorking()) {
@@ -94,7 +96,17 @@ if (cluster_1.default.isMaster) {
             }
         }
     }
-    setIdToSchedule();
+    config_1.loadConfig()
+        .then(() => __awaiter(void 0, void 0, void 0, function* () {
+        yield etdc_1.createEtcd();
+        for (let i = 0; i < 0; i++) {
+            cluster_1.default.fork();
+        }
+        setIdToSchedule();
+    }))
+        .catch(err => {
+        logger_1.logger.error('Error staring leader', err);
+    });
 }
 else {
     start().catch(e => {

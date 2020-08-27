@@ -13,7 +13,7 @@
             ],
             "program": "${workspaceFolder}/dist/index.js",
             "env": {
-                "NUM_PROCS": "1"
+                "NUM_PROCS": ""
             },
             "preLaunchTask": "Compile",
             "outputCapture": "std",
