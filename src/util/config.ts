@@ -1,6 +1,7 @@
 import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
+import chokidar from 'chokidar';
 import { baseDirectory } from '.';
 import { logger } from './logger';
 import { loadEnv } from '../envs';
@@ -33,18 +34,10 @@ const DEFAULT_CONFIG: IEsConfig = {
     ]
 }
 
-function waiter(time: number) {
-    return new Promise((res, rej) => {
-        setTimeout(() => res(), time);
-    });
-}
-
 function masterProcessNewConfig() {
     if (!cluster.isMaster) return;
-    watcher.removeAllListeners();
     setImmediate(async () => {
         try {
-            await waiter(1000);
             if (fs.existsSync(configFileName) && actual_version !== 'cancel') {
                 if (actual_version === 'no_version') {
                     logger.info('Updating ETCD Global config');
@@ -67,17 +60,24 @@ function masterProcessNewConfig() {
         catch (err) {
             logger.error('Error writing new configuration', err);
         }
-        watcher.once('change', masterProcessNewConfig);
     });
 }
 
-let watcher: fs.FSWatcher;
+let watcher: chokidar.FSWatcher;
+let loading = false;
 export async function loadConfig() {
     logger.info('Reloading global config file');
 
     if (!fs.existsSync(configFileName)) {
         await fsasync.mkdir(path.dirname(configFileName), { recursive: true });
-        await fsasync.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
+        const cfg = await getEtcdClient().get(ETCD_GLOBAL_CONFIG_KEY).json();
+        actual_version = 'cancel';
+        if (cfg !== null) {
+            await fsasync.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
+        }
+        else {
+            await fsasync.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
+        }
     }
 
     const text = await fsasync.readFile(configFileName);
@@ -90,7 +90,11 @@ export async function loadConfig() {
     logger.level = configuration.logLevel || 'info';
 
     if (cluster.isWorker && watcher === undefined) {
-        watcher = fs.watch(configFileName, async (event, fname) => {
+        const reloadConfig = async () => {
+            if (loading) {
+                return;
+            }
+            loading = true;
             await loadConfig().catch(e => {
                 logger.error('Error loading config', e);
             });
@@ -103,10 +107,14 @@ export async function loadConfig() {
             await loadEnv(configuration.env).catch(e => {
                 logger.error('Error loading APIs', e);
             });
-        });
+            loading = false;
+        };
+        watcher = chokidar.watch(configFileName).on('change', reloadConfig);
+        watcher.on('unlink', reloadConfig);
     }
     else if (cluster.isMaster && watcher === undefined) {
-        watcher = fs.watch(configFileName, masterProcessNewConfig);
+        watcher = chokidar.watch(configFileName).on('change', masterProcessNewConfig);
+        watcher.on('unlink', masterProcessNewConfig);
     }
 }
 

@@ -1,8 +1,8 @@
-import { loadConfig, configuration } from './util/config';
+import { loadConfig, configuration, loadMasterWatcher } from './util/config';
 import { loadMiddlewares, loadCustomMiddlewares } from './middlewares';
 import { logger } from './util/logger';
 import { loadTransports, loadCustomTransports } from './transports';
-import { loadEnv } from './envs';
+import { loadEnv, masterLoadApiWatcher } from './envs';
 import { loadHttpServers } from './util/http-server';
 import { loadJsonSchemaValidator } from './core/schemas';
 import { loadAuthenticators, startAuthenticators } from './authenticators';
@@ -93,6 +93,8 @@ if (cluster.isMaster) {
     loadConfig()
         .then(async () => {
             await createEtcd();
+            await loadMasterWatcher();
+            await masterLoadApiWatcher(configuration.env);
             for (let i = 0; i < numCpus; i++) {
                 cluster.fork();
             }

@@ -16,6 +16,7 @@ exports.loadMasterWatcher = exports.loadConfig = exports.configuration = void 0;
 const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const chokidar_1 = __importDefault(require("chokidar"));
 const _1 = require(".");
 const logger_1 = require("./logger");
 const envs_1 = require("../envs");
@@ -36,18 +37,11 @@ const DEFAULT_CONFIG = {
         }
     ]
 };
-function waiter(time) {
-    return new Promise((res, rej) => {
-        setTimeout(() => res(), time);
-    });
-}
 function masterProcessNewConfig() {
     if (!cluster_1.default.isMaster)
         return;
-    watcher.removeAllListeners();
     setImmediate(() => __awaiter(this, void 0, void 0, function* () {
         try {
-            yield waiter(1000);
             if (fs_1.default.existsSync(configFileName) && actual_version !== 'cancel') {
                 if (actual_version === 'no_version') {
                     logger_1.logger.info('Updating ETCD Global config');
@@ -70,16 +64,23 @@ function masterProcessNewConfig() {
         catch (err) {
             logger_1.logger.error('Error writing new configuration', err);
         }
-        watcher.once('change', masterProcessNewConfig);
     }));
 }
 let watcher;
+let loading = false;
 function loadConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Reloading global config file');
         if (!fs_1.default.existsSync(configFileName)) {
             yield promises_1.default.mkdir(path_1.default.dirname(configFileName), { recursive: true });
-            yield promises_1.default.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
+            const cfg = yield etdc_1.default().get(ETCD_GLOBAL_CONFIG_KEY).json();
+            actual_version = 'cancel';
+            if (cfg !== null) {
+                yield promises_1.default.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
+            }
+            else {
+                yield promises_1.default.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
+            }
         }
         const text = yield promises_1.default.readFile(configFileName);
         try {
@@ -90,7 +91,11 @@ function loadConfig() {
         }
         logger_1.logger.level = exports.configuration.logLevel || 'info';
         if (cluster_1.default.isWorker && watcher === undefined) {
-            watcher = fs_1.default.watch(configFileName, (event, fname) => __awaiter(this, void 0, void 0, function* () {
+            const reloadConfig = () => __awaiter(this, void 0, void 0, function* () {
+                if (loading) {
+                    return;
+                }
+                loading = true;
                 yield loadConfig().catch(e => {
                     logger_1.logger.error('Error loading config', e);
                 });
@@ -103,10 +108,14 @@ function loadConfig() {
                 yield envs_1.loadEnv(exports.configuration.env).catch(e => {
                     logger_1.logger.error('Error loading APIs', e);
                 });
-            }));
+                loading = false;
+            });
+            watcher = chokidar_1.default.watch(configFileName).on('change', reloadConfig);
+            watcher.on('unlink', reloadConfig);
         }
         else if (cluster_1.default.isMaster && watcher === undefined) {
-            watcher = fs_1.default.watch(configFileName, masterProcessNewConfig);
+            watcher = chokidar_1.default.watch(configFileName).on('change', masterProcessNewConfig);
+            watcher.on('unlink', masterProcessNewConfig);
         }
     });
 }

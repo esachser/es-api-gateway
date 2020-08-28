@@ -99,7 +99,9 @@ if (cluster_1.default.isMaster) {
     config_1.loadConfig()
         .then(() => __awaiter(void 0, void 0, void 0, function* () {
         yield etdc_1.createEtcd();
-        for (let i = 0; i < 0; i++) {
+        yield config_1.loadMasterWatcher();
+        yield envs_1.masterLoadApiWatcher(config_1.configuration.env);
+        for (let i = 0; i < numCpus; i++) {
             cluster_1.default.fork();
         }
         setIdToSchedule();

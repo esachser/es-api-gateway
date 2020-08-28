@@ -1,16 +1,19 @@
 import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
-import _, { isRegExp } from 'lodash';
+import chokidar from 'chokidar';
+import cluster from 'cluster';
+import _ from 'lodash';
 import { baseDirectory, readFileToObject } from '../util';
 import { logger, createLogger } from '../util/logger';
 import { validateObject } from '../core/schemas';
 import { Logger } from 'winston';
-import { load } from '@grpc/grpc-js';
 import { configuration } from '../util/config';
 import { clearRouters } from '../util/http-server';
 import { IEsTransport, createTransport } from '../core/transports';
 import { createMiddleware, connectMiddlewares } from '../core/middlewares';
+import getEtcdClient from '../util/etdc';
+import { Watcher } from 'etcd3';
 
 interface IEsApi {
     transports: { [id: string]: IEsTransport },
@@ -90,19 +93,19 @@ async function loadApiFile(fname: string) {
     apis[fname] = api;
 }
 
-async function reloadEnv(dir: string) {
-    const finfos = await fsasync.readdir(dir, { withFileTypes: true });
+// async function reloadEnv(dir: string) {
+//     const finfos = await fsasync.readdir(dir, { withFileTypes: true });
 
-    finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml') )).forEach(finfo => {
-        logger.info(`Loading API ${finfo.name}`);
+//     finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml') )).forEach(finfo => {
+//         logger.info(`Loading API ${finfo.name}`);
 
-        loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
-            logger.error(`Error loading file ${finfo.name}`, e);
-        });
-    });
-}
+//         loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
+//             logger.error(`Error loading file ${finfo.name}`, e);
+//         });
+//     });
+// }
 
-let watcher: fs.FSWatcher | undefined = undefined;
+let watcher: chokidar.FSWatcher;
 
 export async function reloadApi(apiName: string) {
     const apiJson = path.resolve(baseDirectory, 'envs', configuration.env, `${apiName}.json`);
@@ -128,12 +131,12 @@ export async function loadEnv(envName: string) {
     if (envDirExists) {
         const envFinfo = await fsasync.stat(envDir);
         if (envFinfo.isDirectory()) {
-            reloadEnv(envDir);
-            watcher = fs.watch(envDir, (ev, fname) => {
+            //reloadEnv(envDir);
+            watcher = chokidar.watch(envDir).on('all', (ev, fname) => {
+                if (ev === 'addDir') return;
                 if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
-                    // reloadEnv(envDir);
-                    logger.info(`Reloading ${fname}.`);
-                    loadApiFile(path.resolve(envDir, fname)).catch(err => {
+                    logger.info(`Reloading ${path.basename(fname)}.`);
+                    loadApiFile(fname).catch(err => {
                         logger.error(`Error reloading file ${fname}.`, err);
                     });
                 }
@@ -141,4 +144,98 @@ export async function loadEnv(envName: string) {
         }
     }
 };
+
+// ======== MASTER FUNCTIONS ==================
+
+let masterEtcdWatcher: Watcher;
+let masterFileWatcher: chokidar.FSWatcher;
+let apiStatuses: { [index: string]: string } = {};
+export async function masterLoadApiWatcher(envName: string) {
+    if (!cluster.isMaster) return;
+
+    apiStatuses = {};
+    const envDir = path.resolve(baseDirectory, 'envs', envName);
+
+    // Configura o watcher de API
+    if (masterEtcdWatcher !== undefined) {
+        await masterEtcdWatcher.cancel();
+    }
+    masterEtcdWatcher = await getEtcdClient().watch().prefix(`esgateway/envs/${envName}/apis/`).create();
+    masterEtcdWatcher.on('put', async kv => {
+        try {
+            const basename = path.basename(kv.key.toString('utf8'));
+            const status = apiStatuses[basename] ?? '';
+            if (status !== 'local_changed') {
+                const fname = path.resolve(envDir, basename);
+
+                apiStatuses[basename] = 'etcd_changed';
+                await fsasync.writeFile(fname, kv.value);
+            }
+            else {
+                delete apiStatuses[basename];
+            }
+        }
+        catch (err) {
+            logger.error('Error adding/updating API', err);
+        }
+    });
+    masterEtcdWatcher.on('delete', async kv => {
+        try {
+            const basename = path.basename(kv.key.toString('utf8'));
+            const status = apiStatuses[basename] ?? '';
+            if (status !== 'local_deleted') {
+                const fname = path.resolve(envDir, basename);
+
+                if (fs.existsSync(fname)) {
+                    apiStatuses[basename] = 'etcd_deleted';
+                    await fsasync.unlink(fname);
+                }
+            }
+            else {
+                delete apiStatuses[basename];
+            }
+        }
+        catch (err) {
+            logger.error('Error deleting API', err);
+        }
+    });
+
+    // Terá que carregar todas as APIs antes.
+    // TODO: Carregar as APIs do ETCD primeiro, e depois deixar o watcher atualizar
+    
+    // Carrega o file watcher
+    async function masterUpdateApi(fname: string) {
+        const basename = path.basename(fname);
+        const status = apiStatuses[basename] ?? '';
+        if (status !== 'etcd_changed') {
+            apiStatuses[basename] = 'local_changed';
+            const key = `esgateway/envs/${envName}/apis/${basename}`;
+            const value = await fsasync.readFile(fname);
+            await getEtcdClient().put(key).value(value);
+        }
+        else {
+            delete apiStatuses[basename];
+        }
+    }
+    
+    async function masterDeleteApi(fname: string) {
+        const basename = path.basename(fname);
+        const status = apiStatuses[basename] ?? '';
+        if (status !== 'etcd_deleted') {
+            apiStatuses[basename] = 'local_deleted';
+            const key = `esgateway/envs/${envName}/apis/${basename}`;
+            await getEtcdClient().delete().key(key);
+        }
+        else {
+            delete apiStatuses[basename];
+        }
+    }
+    if (masterFileWatcher !== undefined) {
+        await masterFileWatcher.close();
+    }
+    masterFileWatcher = chokidar.watch(envDir)
+        .on('add', masterUpdateApi)
+        .on('change', masterUpdateApi)
+        .on('unlink', masterDeleteApi);
+}
 

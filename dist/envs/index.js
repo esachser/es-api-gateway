@@ -12,10 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadEnv = exports.reloadApi = void 0;
+exports.masterLoadApiWatcher = exports.loadEnv = exports.reloadApi = void 0;
 const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const chokidar_1 = __importDefault(require("chokidar"));
+const cluster_1 = __importDefault(require("cluster"));
 const lodash_1 = __importDefault(require("lodash"));
 const util_1 = require("../util");
 const logger_1 = require("../util/logger");
@@ -24,6 +26,7 @@ const config_1 = require("../util/config");
 const http_server_1 = require("../util/http-server");
 const transports_1 = require("../core/transports");
 const middlewares_1 = require("../core/middlewares");
+const etdc_1 = __importDefault(require("../util/etdc"));
 let apis = {};
 function loadApiFile(fname) {
     var _a, _b;
@@ -82,18 +85,16 @@ function loadApiFile(fname) {
         apis[fname] = api;
     });
 }
-function reloadEnv(dir) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const finfos = yield promises_1.default.readdir(dir, { withFileTypes: true });
-        finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml'))).forEach(finfo => {
-            logger_1.logger.info(`Loading API ${finfo.name}`);
-            loadApiFile(path_1.default.resolve(dir, finfo.name)).catch(e => {
-                logger_1.logger.error(`Error loading file ${finfo.name}`, e);
-            });
-        });
-    });
-}
-let watcher = undefined;
+// async function reloadEnv(dir: string) {
+//     const finfos = await fsasync.readdir(dir, { withFileTypes: true });
+//     finfos.filter(f => f.isFile() && (f.name.endsWith('.json') || f.name.endsWith('.yaml') )).forEach(finfo => {
+//         logger.info(`Loading API ${finfo.name}`);
+//         loadApiFile(path.resolve(dir, finfo.name)).catch(e => {
+//             logger.error(`Error loading file ${finfo.name}`, e);
+//         });
+//     });
+// }
+let watcher;
 function reloadApi(apiName) {
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = path_1.default.resolve(util_1.baseDirectory, 'envs', config_1.configuration.env, `${apiName}.json`);
@@ -118,12 +119,13 @@ function loadEnv(envName) {
         if (envDirExists) {
             const envFinfo = yield promises_1.default.stat(envDir);
             if (envFinfo.isDirectory()) {
-                reloadEnv(envDir);
-                watcher = fs_1.default.watch(envDir, (ev, fname) => {
+                //reloadEnv(envDir);
+                watcher = chokidar_1.default.watch(envDir).on('all', (ev, fname) => {
+                    if (ev === 'addDir')
+                        return;
                     if (fname.endsWith('.json') || fname.endsWith('.yaml')) {
-                        // reloadEnv(envDir);
-                        logger_1.logger.info(`Reloading ${fname}.`);
-                        loadApiFile(path_1.default.resolve(envDir, fname)).catch(err => {
+                        logger_1.logger.info(`Reloading ${path_1.default.basename(fname)}.`);
+                        loadApiFile(fname).catch(err => {
                             logger_1.logger.error(`Error reloading file ${fname}.`, err);
                         });
                     }
@@ -134,4 +136,100 @@ function loadEnv(envName) {
 }
 exports.loadEnv = loadEnv;
 ;
+// ======== MASTER FUNCTIONS ==================
+let masterEtcdWatcher;
+let masterFileWatcher;
+let apiStatuses = {};
+function masterLoadApiWatcher(envName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!cluster_1.default.isMaster)
+            return;
+        apiStatuses = {};
+        const envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);
+        // Configura o watcher de API
+        if (masterEtcdWatcher !== undefined) {
+            yield masterEtcdWatcher.cancel();
+        }
+        masterEtcdWatcher = yield etdc_1.default().watch().prefix(`esgateway/envs/${envName}/apis/`).create();
+        masterEtcdWatcher.on('put', (kv) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const basename = path_1.default.basename(kv.key.toString('utf8'));
+                const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
+                if (status !== 'local_changed') {
+                    const fname = path_1.default.resolve(envDir, basename);
+                    apiStatuses[basename] = 'etcd_changed';
+                    yield promises_1.default.writeFile(fname, kv.value);
+                }
+                else {
+                    delete apiStatuses[basename];
+                }
+            }
+            catch (err) {
+                logger_1.logger.error('Error adding/updating API', err);
+            }
+        }));
+        masterEtcdWatcher.on('delete', (kv) => __awaiter(this, void 0, void 0, function* () {
+            var _b;
+            try {
+                const basename = path_1.default.basename(kv.key.toString('utf8'));
+                const status = (_b = apiStatuses[basename]) !== null && _b !== void 0 ? _b : '';
+                if (status !== 'local_deleted') {
+                    const fname = path_1.default.resolve(envDir, basename);
+                    if (fs_1.default.existsSync(fname)) {
+                        apiStatuses[basename] = 'etcd_deleted';
+                        yield promises_1.default.unlink(fname);
+                    }
+                }
+                else {
+                    delete apiStatuses[basename];
+                }
+            }
+            catch (err) {
+                logger_1.logger.error('Error deleting API', err);
+            }
+        }));
+        // Terá que carregar todas as APIs antes.
+        // Carrega o file watcher
+        function masterUpdateApi(fname) {
+            var _a;
+            return __awaiter(this, void 0, void 0, function* () {
+                const basename = path_1.default.basename(fname);
+                const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
+                if (status !== 'etcd_changed') {
+                    apiStatuses[basename] = 'local_changed';
+                    const key = `esgateway/envs/${envName}/apis/${basename}`;
+                    const value = yield promises_1.default.readFile(fname);
+                    yield etdc_1.default().put(key).value(value);
+                }
+                else {
+                    delete apiStatuses[basename];
+                }
+            });
+        }
+        function masterDeleteApi(fname) {
+            var _a;
+            return __awaiter(this, void 0, void 0, function* () {
+                const basename = path_1.default.basename(fname);
+                const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
+                if (status !== 'etcd_deleted') {
+                    apiStatuses[basename] = 'local_deleted';
+                    const key = `esgateway/envs/${envName}/apis/${basename}`;
+                    yield etdc_1.default().delete().key(key);
+                }
+                else {
+                    delete apiStatuses[basename];
+                }
+            });
+        }
+        if (masterFileWatcher !== undefined) {
+            yield masterFileWatcher.close();
+        }
+        masterFileWatcher = chokidar_1.default.watch(envDir)
+            .on('add', masterUpdateApi)
+            .on('change', masterUpdateApi)
+            .on('unlink', masterDeleteApi);
+    });
+}
+exports.masterLoadApiWatcher = masterLoadApiWatcher;
 //# sourceMappingURL=index.js.map

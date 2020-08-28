@@ -24,6 +24,7 @@
     "@grpc/proto-loader": "^0.5.4",
     "@keyv/redis": "^2.1.2",
     "ajv": "^6.12.2",
+    "chokidar": "^3.4.2",
     "content-type": "^1.0.4",
     "decache": "^4.6.0",
     "etcd3": "^1.0.1",
