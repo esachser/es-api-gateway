@@ -149,12 +149,14 @@ export async function loadEnv(envName: string) {
 
 let masterEtcdWatcher: Watcher;
 let masterFileWatcher: chokidar.FSWatcher;
-let apiStatuses: { [index: string]: string } = {};
+let apiStatuses: { [index: string]: 'local_changed' | 'local_deleted' | 'etcd_changed' | 'etcd_deleted' } = {};
 export async function masterLoadApiWatcher(envName: string) {
     if (!cluster.isMaster) return;
 
+    
     apiStatuses = {};
     const envDir = path.resolve(baseDirectory, 'envs', envName);
+    await fsasync.mkdir(envDir, { recursive: true });
 
     // Configura o watcher de API
     if (masterEtcdWatcher !== undefined) {
@@ -166,6 +168,7 @@ export async function masterLoadApiWatcher(envName: string) {
             const basename = path.basename(kv.key.toString('utf8'));
             const status = apiStatuses[basename] ?? '';
             if (status !== 'local_changed') {
+                logger.info(`Receiving update (ETCD --> Local) from api ${basename}`);
                 const fname = path.resolve(envDir, basename);
 
                 apiStatuses[basename] = 'etcd_changed';
@@ -184,6 +187,7 @@ export async function masterLoadApiWatcher(envName: string) {
             const basename = path.basename(kv.key.toString('utf8'));
             const status = apiStatuses[basename] ?? '';
             if (status !== 'local_deleted') {
+                logger.info(`Receiving delete (ETCD --> Local) from api ${basename}`);
                 const fname = path.resolve(envDir, basename);
 
                 if (fs.existsSync(fname)) {
@@ -202,12 +206,22 @@ export async function masterLoadApiWatcher(envName: string) {
 
     // Terá que carregar todas as APIs antes.
     // TODO: Carregar as APIs do ETCD primeiro, e depois deixar o watcher atualizar
+    const etcdApis = await getEtcdClient().getAll().prefix(`esgateway/envs/${envName}/apis/`);
+    for (const key in etcdApis) {
+        const basename = path.basename(key);
+        const value = etcdApis[key];
+
+        apiStatuses[basename] = 'etcd_changed';
+        const fname = path.resolve(envDir, basename);
+        await fsasync.writeFile(fname, value);
+    }
     
     // Carrega o file watcher
     async function masterUpdateApi(fname: string) {
         const basename = path.basename(fname);
         const status = apiStatuses[basename] ?? '';
         if (status !== 'etcd_changed') {
+            logger.info(`Sending update (local --> ETCD) from api ${basename}`);
             apiStatuses[basename] = 'local_changed';
             const key = `esgateway/envs/${envName}/apis/${basename}`;
             const value = await fsasync.readFile(fname);
@@ -222,6 +236,7 @@ export async function masterLoadApiWatcher(envName: string) {
         const basename = path.basename(fname);
         const status = apiStatuses[basename] ?? '';
         if (status !== 'etcd_deleted') {
+            logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
             apiStatuses[basename] = 'local_deleted';
             const key = `esgateway/envs/${envName}/apis/${basename}`;
             await getEtcdClient().delete().key(key);

@@ -146,6 +146,7 @@ function masterLoadApiWatcher(envName) {
             return;
         apiStatuses = {};
         const envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);
+        yield promises_1.default.mkdir(envDir, { recursive: true });
         // Configura o watcher de API
         if (masterEtcdWatcher !== undefined) {
             yield masterEtcdWatcher.cancel();
@@ -157,6 +158,7 @@ function masterLoadApiWatcher(envName) {
                 const basename = path_1.default.basename(kv.key.toString('utf8'));
                 const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                 if (status !== 'local_changed') {
+                    logger_1.logger.info(`Receiving update (ETCD --> Local) from api ${basename}`);
                     const fname = path_1.default.resolve(envDir, basename);
                     apiStatuses[basename] = 'etcd_changed';
                     yield promises_1.default.writeFile(fname, kv.value);
@@ -175,6 +177,7 @@ function masterLoadApiWatcher(envName) {
                 const basename = path_1.default.basename(kv.key.toString('utf8'));
                 const status = (_b = apiStatuses[basename]) !== null && _b !== void 0 ? _b : '';
                 if (status !== 'local_deleted') {
+                    logger_1.logger.info(`Receiving delete (ETCD --> Local) from api ${basename}`);
                     const fname = path_1.default.resolve(envDir, basename);
                     if (fs_1.default.existsSync(fname)) {
                         apiStatuses[basename] = 'etcd_deleted';
@@ -190,6 +193,15 @@ function masterLoadApiWatcher(envName) {
             }
         }));
         // Terá que carregar todas as APIs antes.
+        // TODO: Carregar as APIs do ETCD primeiro, e depois deixar o watcher atualizar
+        const etcdApis = yield etdc_1.default().getAll().prefix(`esgateway/envs/${envName}/apis/`);
+        for (const key in etcdApis) {
+            const basename = path_1.default.basename(key);
+            const value = etcdApis[key];
+            apiStatuses[basename] = 'etcd_changed';
+            const fname = path_1.default.resolve(envDir, basename);
+            yield promises_1.default.writeFile(fname, value);
+        }
         // Carrega o file watcher
         function masterUpdateApi(fname) {
             var _a;
@@ -197,6 +209,7 @@ function masterLoadApiWatcher(envName) {
                 const basename = path_1.default.basename(fname);
                 const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                 if (status !== 'etcd_changed') {
+                    logger_1.logger.info(`Sending update (local --> ETCD) from api ${basename}`);
                     apiStatuses[basename] = 'local_changed';
                     const key = `esgateway/envs/${envName}/apis/${basename}`;
                     const value = yield promises_1.default.readFile(fname);
@@ -213,6 +226,7 @@ function masterLoadApiWatcher(envName) {
                 const basename = path_1.default.basename(fname);
                 const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                 if (status !== 'etcd_deleted') {
+                    logger_1.logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
                     apiStatuses[basename] = 'local_deleted';
                     const key = `esgateway/envs/${envName}/apis/${basename}`;
                     yield etdc_1.default().delete().key(key);

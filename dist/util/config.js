@@ -42,23 +42,14 @@ function masterProcessNewConfig() {
         return;
     setImmediate(() => __awaiter(this, void 0, void 0, function* () {
         try {
-            if (fs_1.default.existsSync(configFileName) && actual_version !== 'cancel') {
-                if (actual_version === 'no_version') {
-                    logger_1.logger.info('Updating ETCD Global config');
-                    actual_version = 'this';
-                    const client = etdc_1.default();
-                    yield loadConfig();
-                    const r = yield client
-                        .if(ETCD_GLOBAL_CONFIG_KEY, 'Version', '!==', actual_version)
-                        .then(client.put(ETCD_GLOBAL_CONFIG_KEY).value(JSON.stringify(exports.configuration, undefined, 2)))
-                        .commit();
-                }
-                else {
-                    actual_version = 'no_version';
-                }
+            if (configStatus !== 'etcd_changed') {
+                logger_1.logger.info('Updating ETCD Global config');
+                yield loadConfig();
+                configStatus = 'local_changed';
+                yield etdc_1.default().put(ETCD_GLOBAL_CONFIG_KEY).value(JSON.stringify(exports.configuration, undefined, 2));
             }
             else {
-                actual_version = 'no_version';
+                configStatus = '';
             }
         }
         catch (err) {
@@ -74,8 +65,8 @@ function loadConfig() {
         if (!fs_1.default.existsSync(configFileName)) {
             yield promises_1.default.mkdir(path_1.default.dirname(configFileName), { recursive: true });
             const cfg = yield etdc_1.default().get(ETCD_GLOBAL_CONFIG_KEY).json();
-            actual_version = 'cancel';
             if (cfg !== null) {
+                configStatus = 'etcd_changed';
                 yield promises_1.default.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
             }
             else {
@@ -121,7 +112,7 @@ function loadConfig() {
 }
 exports.loadConfig = loadConfig;
 let masterWatcher;
-let actual_version = 'no_version';
+let configStatus = '';
 const ETCD_GLOBAL_CONFIG_KEY = 'esgateway/global.json';
 function loadMasterWatcher() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -135,7 +126,7 @@ function loadMasterWatcher() {
                 .commit();
             const cfg = yield client.get(ETCD_GLOBAL_CONFIG_KEY).json();
             if (cfg !== null) {
-                actual_version = 'cancel';
+                configStatus = 'etcd_changed';
                 yield promises_1.default.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
             }
             if (masterWatcher !== undefined) {
@@ -144,12 +135,13 @@ function loadMasterWatcher() {
             masterWatcher = yield client.watch().key(ETCD_GLOBAL_CONFIG_KEY).create();
             masterWatcher.on('put', (res) => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    if (actual_version !== 'this') {
-                        actual_version = res.version;
+                    if (configStatus !== 'local_changed') {
+                        logger_1.logger.info(`Receiving configuration update (ETCD --> Local)`);
+                        configStatus = 'etcd_changed';
                         yield promises_1.default.writeFile(configFileName, res.value);
                     }
                     else {
-                        actual_version = 'no_version';
+                        configStatus = '';
                     }
                 }
                 catch (err) {

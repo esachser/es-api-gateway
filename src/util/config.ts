@@ -38,23 +38,14 @@ function masterProcessNewConfig() {
     if (!cluster.isMaster) return;
     setImmediate(async () => {
         try {
-            if (fs.existsSync(configFileName) && actual_version !== 'cancel') {
-                if (actual_version === 'no_version') {
-                    logger.info('Updating ETCD Global config');
-                    actual_version = 'this';
-                    const client = getEtcdClient();
-                    await loadConfig();
-                    const r = await client
-                        .if(ETCD_GLOBAL_CONFIG_KEY, 'Version', '!==', actual_version)
-                        .then(client.put(ETCD_GLOBAL_CONFIG_KEY).value(JSON.stringify(configuration, undefined, 2)))
-                        .commit();
-                }
-                else {
-                    actual_version = 'no_version';
-                }
+            if (configStatus !== 'etcd_changed') {
+                logger.info('Updating ETCD Global config');
+                await loadConfig();
+                configStatus = 'local_changed';
+                await getEtcdClient().put(ETCD_GLOBAL_CONFIG_KEY).value(JSON.stringify(configuration, undefined, 2));
             }
             else {
-                actual_version = 'no_version';
+                configStatus = '';
             }
         }
         catch (err) {
@@ -71,8 +62,8 @@ export async function loadConfig() {
     if (!fs.existsSync(configFileName)) {
         await fsasync.mkdir(path.dirname(configFileName), { recursive: true });
         const cfg = await getEtcdClient().get(ETCD_GLOBAL_CONFIG_KEY).json();
-        actual_version = 'cancel';
         if (cfg !== null) {
+            configStatus = 'etcd_changed';
             await fsasync.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
         }
         else {
@@ -119,7 +110,7 @@ export async function loadConfig() {
 }
 
 let masterWatcher: Watcher;
-let actual_version: string = 'no_version';
+let configStatus: 'local_changed' | 'local_deleted' | 'etcd_changed' | 'etcd_deleted' | '' = '';
 const ETCD_GLOBAL_CONFIG_KEY = 'esgateway/global.json';
 export async function loadMasterWatcher() {
     if (cluster.isMaster) {
@@ -134,7 +125,7 @@ export async function loadMasterWatcher() {
 
         const cfg = await client.get(ETCD_GLOBAL_CONFIG_KEY).json();
         if (cfg !== null) {
-            actual_version = 'cancel';
+            configStatus = 'etcd_changed';
             await fsasync.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
         }
 
@@ -144,12 +135,13 @@ export async function loadMasterWatcher() {
         masterWatcher = await client.watch().key(ETCD_GLOBAL_CONFIG_KEY).create();
         masterWatcher.on('put', async res => {
             try {
-                if (actual_version !== 'this') {
-                    actual_version = res.version;
+                if (configStatus !== 'local_changed') {
+                    logger.info(`Receiving configuration update (ETCD --> Local)`);
+                    configStatus = 'etcd_changed';
                     await fsasync.writeFile(configFileName, res.value);
                 }
                 else {
-                    actual_version = 'no_version';
+                    configStatus = '';
                 }
             }
             catch (err) {

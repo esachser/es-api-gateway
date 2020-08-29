@@ -92,6 +92,10 @@ Aspectos que devem ser vistos:
   - [**OK**] Será usado
   - [**OK**] Usar para quotaLimiter
   - Utilizar como replicação de cluster
+    - [**OK**] Melhorar código do config.ts
+    - [**OK**] Adicionar logs ao watcher das APIs
+    - [**OK**] Carregar as APIs inicialmente/preferencialmente do ETCD
+    - Sincronizar arquivos auxiliares
 - Ajustar middlewares
   - [**OK**] Debug unificado
   - Verificar código
