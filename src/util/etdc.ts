@@ -6,6 +6,7 @@ import { logger } from './logger';
 import { loadMasterWatcher, configuration } from './config';
 import chokidar from 'chokidar';
 import { masterLoadApiWatcher } from '../envs';
+import { masterLoadResourcesWatcher } from './sync-resources';
 
 const ETCD_CONF_PATH = path.resolve(baseDirectory, 'conf', 'etcd.json');
 
@@ -32,6 +33,7 @@ async function reloadEtcd() {
         createEtcd();
         await loadMasterWatcher();
         await masterLoadApiWatcher(configuration.env);
+        await masterLoadResourcesWatcher(configuration.env);
     }
     catch (err) {
         logger.error('Error loading ETCD', err);

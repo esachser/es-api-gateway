@@ -24,7 +24,7 @@ const cacheFiles = new keyv_1.default({
 });
 function getPublicCert(api, certName) {
     return __awaiter(this, void 0, void 0, function* () {
-        const fname = path_1.default.resolve(_1.baseDirectory, 'certs', config_1.configuration.env, api, certName);
+        const fname = path_1.default.resolve(_1.baseDirectory, 'resources', config_1.configuration.env, api, certName);
         const fcontents = yield cacheFiles.get(fname);
         if (fcontents !== undefined) {
             return fcontents;
@@ -37,7 +37,7 @@ function getPublicCert(api, certName) {
 exports.getPublicCert = getPublicCert;
 function getPrivateKey(api, certName, certPass) {
     return __awaiter(this, void 0, void 0, function* () {
-        const fname = path_1.default.resolve(_1.baseDirectory, 'certs', config_1.configuration.env, api, certName);
+        const fname = path_1.default.resolve(_1.baseDirectory, 'resources', config_1.configuration.env, api, certName);
         const fcontents = yield cacheFiles.get(`${certPass}::/::${fname}`);
         if (fcontents !== undefined) {
             return fcontents;

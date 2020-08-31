@@ -21,6 +21,7 @@ const logger_1 = require("./logger");
 const config_1 = require("./config");
 const chokidar_1 = __importDefault(require("chokidar"));
 const envs_1 = require("../envs");
+const sync_resources_1 = require("./sync-resources");
 const ETCD_CONF_PATH = path_1.default.resolve(_1.baseDirectory, 'conf', 'etcd.json');
 let ETCD_CLIENT;
 // Lê configuração de arquivo no conf
@@ -48,6 +49,7 @@ function reloadEtcd() {
             createEtcd();
             yield config_1.loadMasterWatcher();
             yield envs_1.masterLoadApiWatcher(config_1.configuration.env);
+            yield sync_resources_1.masterLoadResourcesWatcher(config_1.configuration.env);
         }
         catch (err) {
             logger_1.logger.error('Error loading ETCD', err);

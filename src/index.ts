@@ -39,6 +39,7 @@ import { setIdScheduler } from './transports/schedule';
 import { setIdSub } from './transports/redissub';
 import _ from 'lodash';
 import { createEtcd } from './util/etdc';
+import { masterLoadResourcesWatcher } from './util/sync-resources';
 
 let numCpus = os.cpus().length;
 
@@ -95,6 +96,7 @@ if (cluster.isMaster) {
             await createEtcd();
             await loadMasterWatcher();
             await masterLoadApiWatcher(configuration.env);
+            await masterLoadResourcesWatcher(configuration.env);
             for (let i = 0; i < numCpus; i++) {
                 cluster.fork();
             }

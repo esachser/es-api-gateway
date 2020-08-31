@@ -10,7 +10,7 @@ const cacheFiles = new Keyv({
 });
 
 export async function getPublicCert(api: string, certName: string) {
-    const fname = path.resolve(baseDirectory, 'certs', configuration.env, api, certName);
+    const fname = path.resolve(baseDirectory, 'resources', configuration.env, api, certName);
     const fcontents = await cacheFiles.get(fname);
     if (fcontents !== undefined) {
         return fcontents;
@@ -21,7 +21,7 @@ export async function getPublicCert(api: string, certName: string) {
 }
 
 export async function getPrivateKey(api: string, certName: string, certPass?: string) {
-    const fname = path.resolve(baseDirectory, 'certs', configuration.env, api, certName);
+    const fname = path.resolve(baseDirectory, 'resources', configuration.env, api, certName);
     const fcontents = await cacheFiles.get(`${certPass}::/::${fname}`);
     if (fcontents !== undefined) {
         return fcontents;

@@ -50,6 +50,7 @@ const rate_limiter_flexible_1 = require("rate-limiter-flexible");
 const schedule_1 = require("./transports/schedule");
 const redissub_1 = require("./transports/redissub");
 const etdc_1 = require("./util/etdc");
+const sync_resources_1 = require("./util/sync-resources");
 let numCpus = os_1.default.cpus().length;
 try {
     if (process.env['NUM_PROCS'] !== undefined) {
@@ -101,6 +102,7 @@ if (cluster_1.default.isMaster) {
         yield etdc_1.createEtcd();
         yield config_1.loadMasterWatcher();
         yield envs_1.masterLoadApiWatcher(config_1.configuration.env);
+        yield sync_resources_1.masterLoadResourcesWatcher(config_1.configuration.env);
         for (let i = 0; i < numCpus; i++) {
             cluster_1.default.fork();
         }

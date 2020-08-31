@@ -48,9 +48,9 @@
       "port": 8443,
       "id": "https",
       "secure": true,
-      "keyFile": "./certs/server.key",
+      "keyFile": "./resources/development/server.key",
       "passphrase": "esapi",
-      "certFile": "./certs/server.crt"
+      "certFile": "./resources/development/server.crt"
     }
   ],
   "redisLogger": {
