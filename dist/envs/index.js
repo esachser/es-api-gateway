@@ -206,33 +206,43 @@ function masterLoadApiWatcher(envName) {
         function masterUpdateApi(fname) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
-                const basename = path_1.default.basename(fname);
-                const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
-                if (status !== 'etcd_changed') {
-                    logger_1.logger.info(`Sending update (local --> ETCD) from api ${basename}`);
-                    apiStatuses[basename] = 'local_changed';
-                    const key = `esgateway/envs/${envName}/apis/${basename}`;
-                    const value = yield promises_1.default.readFile(fname);
-                    yield etdc_1.default().put(key).value(value);
+                try {
+                    const basename = path_1.default.basename(fname);
+                    const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
+                    if (status !== 'etcd_changed') {
+                        logger_1.logger.info(`Sending update (local --> ETCD) from api ${basename}`);
+                        apiStatuses[basename] = 'local_changed';
+                        const key = `esgateway/envs/${envName}/apis/${basename}`;
+                        const value = yield promises_1.default.readFile(fname);
+                        yield etdc_1.default().put(key).value(value);
+                    }
+                    else {
+                        delete apiStatuses[basename];
+                    }
                 }
-                else {
-                    delete apiStatuses[basename];
+                catch (err) {
+                    logger_1.logger.error('Error adding/updating API', err);
                 }
             });
         }
         function masterDeleteApi(fname) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
-                const basename = path_1.default.basename(fname);
-                const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
-                if (status !== 'etcd_deleted') {
-                    logger_1.logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
-                    apiStatuses[basename] = 'local_deleted';
-                    const key = `esgateway/envs/${envName}/apis/${basename}`;
-                    yield etdc_1.default().delete().key(key);
+                try {
+                    const basename = path_1.default.basename(fname);
+                    const status = (_a = apiStatuses[basename]) !== null && _a !== void 0 ? _a : '';
+                    if (status !== 'etcd_deleted') {
+                        logger_1.logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
+                        apiStatuses[basename] = 'local_deleted';
+                        const key = `esgateway/envs/${envName}/apis/${basename}`;
+                        yield etdc_1.default().delete().key(key);
+                    }
+                    else {
+                        delete apiStatuses[basename];
+                    }
                 }
-                else {
-                    delete apiStatuses[basename];
+                catch (err) {
+                    logger_1.logger.error('Error deleting API', err);
                 }
             });
         }

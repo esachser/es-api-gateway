@@ -30,7 +30,7 @@ function createEtcd() {
         try {
             if (!fs_1.default.existsSync(ETCD_CONF_PATH)) {
                 fs_1.default.mkdirSync(path_1.default.dirname(ETCD_CONF_PATH), { recursive: true });
-                fs_1.default.writeFileSync(ETCD_CONF_PATH, JSON.stringify({ hosts: 'http://localhost:2379' }));
+                fs_1.default.writeFileSync(ETCD_CONF_PATH, JSON.stringify({ hosts: 'http://localhost:2379' }, undefined, 2));
             }
             const cfg = JSON.parse(fs_1.default.readFileSync(ETCD_CONF_PATH, { encoding: 'utf-8' }));
             ETCD_CLIENT = new etcd3_1.Etcd3(cfg);

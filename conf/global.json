@@ -54,7 +54,7 @@
     }
   ],
   "redisLogger": {
-    "enabled": true,
+    "enabled": false,
     "config": {}
   }
 }

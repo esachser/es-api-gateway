@@ -33,7 +33,10 @@ function start() {
         yield config_1.loadConfig();
         parsers_1.loadParsers();
         middlewares_1.loadMiddlewares();
-        yield middlewares_1.loadCustomMiddlewares();
+        yield middlewares_1.loadCustomMiddlewares()
+            .catch(err => {
+            logger_1.logger.error('Error loading compound middlewares', err);
+        });
         transports_1.loadTransports();
         transports_1.loadCustomTransports();
         authenticators_1.loadAuthenticators();
@@ -51,6 +54,7 @@ const schedule_1 = require("./transports/schedule");
 const redissub_1 = require("./transports/redissub");
 const etdc_1 = require("./util/etdc");
 const sync_resources_1 = require("./util/sync-resources");
+const sync_custom_1 = require("./util/sync-custom");
 let numCpus = os_1.default.cpus().length;
 try {
     if (process.env['NUM_PROCS'] !== undefined) {
@@ -97,12 +101,13 @@ if (cluster_1.default.isMaster) {
             }
         }
     }
-    config_1.loadConfig()
+    etdc_1.createEtcd()
         .then(() => __awaiter(void 0, void 0, void 0, function* () {
-        yield etdc_1.createEtcd();
+        yield config_1.loadConfig();
         yield config_1.loadMasterWatcher();
         yield envs_1.masterLoadApiWatcher(config_1.configuration.env);
         yield sync_resources_1.masterLoadResourcesWatcher(config_1.configuration.env);
+        yield sync_custom_1.masterLoadCustomWatcher();
         for (let i = 0; i < numCpus; i++) {
             cluster_1.default.fork();
         }

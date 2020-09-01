@@ -21,7 +21,10 @@ async function start() {
     await loadConfig();
     loadParsers();
     loadMiddlewares();
-    await loadCustomMiddlewares();
+    await loadCustomMiddlewares()
+        .catch(err => {
+            logger.error('Error loading compound middlewares', err);
+        });
     loadTransports();
     loadCustomTransports();
     loadAuthenticators();
@@ -40,6 +43,7 @@ import { setIdSub } from './transports/redissub';
 import _ from 'lodash';
 import { createEtcd } from './util/etdc';
 import { masterLoadResourcesWatcher } from './util/sync-resources';
+import { masterLoadCustomWatcher } from './util/sync-custom';
 
 let numCpus = os.cpus().length;
 
@@ -91,12 +95,13 @@ if (cluster.isMaster) {
         }
     }
 
-    loadConfig()
+    createEtcd()
         .then(async () => {
-            await createEtcd();
+            await loadConfig();
             await loadMasterWatcher();
             await masterLoadApiWatcher(configuration.env);
             await masterLoadResourcesWatcher(configuration.env);
+            await masterLoadCustomWatcher();
             for (let i = 0; i < numCpus; i++) {
                 cluster.fork();
             }

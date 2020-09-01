@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.masterLoadResourcesWatcher = void 0;
+exports.masterLoadCustomWatcher = void 0;
 const chokidar_1 = __importDefault(require("chokidar"));
 const cluster_1 = __importDefault(require("cluster"));
 const path_1 = __importDefault(require("path"));
@@ -25,14 +25,14 @@ const logger_1 = require("./logger");
 let masterEtcdWatcher;
 let masterFileWatcher;
 let resourcesStatuses = {};
-function masterLoadResourcesWatcher(envName) {
+function masterLoadCustomWatcher() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!cluster_1.default.isMaster)
             return;
         resourcesStatuses = {};
-        const envDir = path_1.default.resolve(_1.baseDirectory, 'resources', envName);
+        const envDir = path_1.default.resolve(_1.baseDirectory, 'custom');
         yield promises_1.default.mkdir(envDir, { recursive: true });
-        const etcdDir = `esgateway/envs/${envName}/resources`;
+        const etcdDir = `esgateway/custom`;
         // Configura o watcher de API
         if (masterEtcdWatcher !== undefined) {
             yield masterEtcdWatcher.cancel();
@@ -46,7 +46,7 @@ function masterLoadResourcesWatcher(envName) {
                     return;
                 const status = (_a = resourcesStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                 if (status !== 'local_changed') {
-                    logger_1.logger.info(`Receiving update (ETCD --> Local) from resource ${basename}`);
+                    logger_1.logger.info(`Receiving update (ETCD --> Local) from custom ${basename}`);
                     const fname = path_1.default.resolve(envDir, ...basename.split('/'));
                     resourcesStatuses[basename] = 'etcd_changed';
                     const fdir = path_1.default.dirname(fname);
@@ -58,7 +58,7 @@ function masterLoadResourcesWatcher(envName) {
                 }
             }
             catch (err) {
-                logger_1.logger.error('Error adding/updating resource', err);
+                logger_1.logger.error('Error adding/updating custom', err);
             }
         }));
         masterEtcdWatcher.on('delete', (kv) => __awaiter(this, void 0, void 0, function* () {
@@ -69,7 +69,7 @@ function masterLoadResourcesWatcher(envName) {
                     return;
                 const status = (_b = resourcesStatuses[basename]) !== null && _b !== void 0 ? _b : '';
                 if (status !== 'local_deleted') {
-                    logger_1.logger.info(`Receiving delete (ETCD --> Local) from resource ${basename}`);
+                    logger_1.logger.info(`Receiving delete (ETCD --> Local) from custom ${basename}`);
                     const fname = path_1.default.resolve(envDir, ...basename.split('/'));
                     if (fs_1.default.existsSync(fname)) {
                         resourcesStatuses[basename] = 'etcd_deleted';
@@ -81,7 +81,7 @@ function masterLoadResourcesWatcher(envName) {
                 }
             }
             catch (err) {
-                logger_1.logger.error('Error deleting resource', err);
+                logger_1.logger.error('Error deleting custom', err);
             }
         }));
         // Terá que carregar todos os recursos antes.
@@ -107,7 +107,7 @@ function masterLoadResourcesWatcher(envName) {
                         return;
                     const status = (_a = resourcesStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                     if (status !== 'etcd_changed') {
-                        logger_1.logger.info(`Sending update (local --> ETCD) from resource ${basename}`);
+                        logger_1.logger.info(`Sending update (local --> ETCD) from custom ${basename}`);
                         resourcesStatuses[basename] = 'local_changed';
                         const key = `${etcdDir}${basename}`;
                         const value = yield promises_1.default.readFile(fname);
@@ -118,7 +118,7 @@ function masterLoadResourcesWatcher(envName) {
                     }
                 }
                 catch (err) {
-                    logger_1.logger.error('Error adding/updating resource', err);
+                    logger_1.logger.error('Error adding/updating custom', err);
                 }
             });
         }
@@ -131,7 +131,7 @@ function masterLoadResourcesWatcher(envName) {
                         return;
                     const status = (_a = resourcesStatuses[basename]) !== null && _a !== void 0 ? _a : '';
                     if (status !== 'etcd_deleted') {
-                        logger_1.logger.info(`Sending delete (local --> ETCD) from resource ${basename}`);
+                        logger_1.logger.info(`Sending delete (local --> ETCD) from custom ${basename}`);
                         resourcesStatuses[basename] = 'local_deleted';
                         const key = `${etcdDir}${basename}`;
                         yield etdc_1.default().delete().key(key);
@@ -141,7 +141,7 @@ function masterLoadResourcesWatcher(envName) {
                     }
                 }
                 catch (err) {
-                    logger_1.logger.error('Error deleting resource', err);
+                    logger_1.logger.error('Error deleting custom', err);
                 }
             });
         }
@@ -154,5 +154,5 @@ function masterLoadResourcesWatcher(envName) {
             .on('unlink', masterDeleteApi);
     });
 }
-exports.masterLoadResourcesWatcher = masterLoadResourcesWatcher;
-//# sourceMappingURL=sync-resources.js.map
+exports.masterLoadCustomWatcher = masterLoadCustomWatcher;
+//# sourceMappingURL=sync-custom.js.map

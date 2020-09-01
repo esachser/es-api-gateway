@@ -153,7 +153,7 @@ let apiStatuses: { [index: string]: 'local_changed' | 'local_deleted' | 'etcd_ch
 export async function masterLoadApiWatcher(envName: string) {
     if (!cluster.isMaster) return;
 
-    
+
     apiStatuses = {};
     const envDir = path.resolve(baseDirectory, 'envs', envName);
     await fsasync.mkdir(envDir, { recursive: true });
@@ -215,34 +215,44 @@ export async function masterLoadApiWatcher(envName: string) {
         const fname = path.resolve(envDir, basename);
         await fsasync.writeFile(fname, value);
     }
-    
+
     // Carrega o file watcher
     async function masterUpdateApi(fname: string) {
-        const basename = path.basename(fname);
-        const status = apiStatuses[basename] ?? '';
-        if (status !== 'etcd_changed') {
-            logger.info(`Sending update (local --> ETCD) from api ${basename}`);
-            apiStatuses[basename] = 'local_changed';
-            const key = `esgateway/envs/${envName}/apis/${basename}`;
-            const value = await fsasync.readFile(fname);
-            await getEtcdClient().put(key).value(value);
+        try {
+            const basename = path.basename(fname);
+            const status = apiStatuses[basename] ?? '';
+            if (status !== 'etcd_changed') {
+                logger.info(`Sending update (local --> ETCD) from api ${basename}`);
+                apiStatuses[basename] = 'local_changed';
+                const key = `esgateway/envs/${envName}/apis/${basename}`;
+                const value = await fsasync.readFile(fname);
+                await getEtcdClient().put(key).value(value);
+            }
+            else {
+                delete apiStatuses[basename];
+            }
         }
-        else {
-            delete apiStatuses[basename];
+        catch (err) {
+            logger.error('Error adding/updating API', err);
         }
     }
-    
+
     async function masterDeleteApi(fname: string) {
-        const basename = path.basename(fname);
-        const status = apiStatuses[basename] ?? '';
-        if (status !== 'etcd_deleted') {
-            logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
-            apiStatuses[basename] = 'local_deleted';
-            const key = `esgateway/envs/${envName}/apis/${basename}`;
-            await getEtcdClient().delete().key(key);
+        try {
+            const basename = path.basename(fname);
+            const status = apiStatuses[basename] ?? '';
+            if (status !== 'etcd_deleted') {
+                logger.info(`Sending delete (local --> ETCD) from api ${basename}`);
+                apiStatuses[basename] = 'local_deleted';
+                const key = `esgateway/envs/${envName}/apis/${basename}`;
+                await getEtcdClient().delete().key(key);
+            }
+            else {
+                delete apiStatuses[basename];
+            }
         }
-        else {
-            delete apiStatuses[basename];
+        catch (err) {
+            logger.error('Error deleting API', err);
         }
     }
     if (masterFileWatcher !== undefined) {

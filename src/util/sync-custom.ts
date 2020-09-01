@@ -13,14 +13,14 @@ import { logger } from "./logger";
 let masterEtcdWatcher: Watcher;
 let masterFileWatcher: chokidar.FSWatcher;
 let resourcesStatuses: { [index: string]: 'local_changed' | 'local_deleted' | 'etcd_changed' | 'etcd_deleted' } = {};
-export async function masterLoadResourcesWatcher(envName: string) {
+export async function masterLoadCustomWatcher() {
     if (!cluster.isMaster) return;
 
     resourcesStatuses = {};
-    const envDir = path.resolve(baseDirectory, 'resources', envName);
+    const envDir = path.resolve(baseDirectory, 'custom');
     await fsasync.mkdir(envDir, { recursive: true });
 
-    const etcdDir = `esgateway/envs/${envName}/resources`;
+    const etcdDir = `esgateway/custom`;
 
     // Configura o watcher de API
     if (masterEtcdWatcher !== undefined) {
@@ -33,7 +33,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             if (basename.endsWith('/.DS_Store')) return;
             const status = resourcesStatuses[basename] ?? '';
             if (status !== 'local_changed') {
-                logger.info(`Receiving update (ETCD --> Local) from resource ${basename}`);
+                logger.info(`Receiving update (ETCD --> Local) from custom ${basename}`);
                 const fname = path.resolve(envDir, ...basename.split('/'));
 
                 resourcesStatuses[basename] = 'etcd_changed';
@@ -46,7 +46,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             }
         }
         catch (err) {
-            logger.error('Error adding/updating resource', err);
+            logger.error('Error adding/updating custom', err);
         }
     });
     masterEtcdWatcher.on('delete', async kv => {
@@ -55,7 +55,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             if (basename.endsWith('/.DS_Store')) return;
             const status = resourcesStatuses[basename] ?? '';
             if (status !== 'local_deleted') {
-                logger.info(`Receiving delete (ETCD --> Local) from resource ${basename}`);
+                logger.info(`Receiving delete (ETCD --> Local) from custom ${basename}`);
                 const fname = path.resolve(envDir, ...basename.split('/'));
 
                 if (fs.existsSync(fname)) {
@@ -68,7 +68,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             }
         }
         catch (err) {
-            logger.error('Error deleting resource', err);
+            logger.error('Error deleting custom', err);
         }
     });
 
@@ -93,7 +93,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             if (basename.endsWith('/.DS_Store')) return;
             const status = resourcesStatuses[basename] ?? '';
             if (status !== 'etcd_changed') {
-                logger.info(`Sending update (local --> ETCD) from resource ${basename}`);
+                logger.info(`Sending update (local --> ETCD) from custom ${basename}`);
                 resourcesStatuses[basename] = 'local_changed';
                 const key = `${etcdDir}${basename}`;
                 const value = await fsasync.readFile(fname);
@@ -104,7 +104,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             }
         }
         catch (err) {
-            logger.error('Error adding/updating resource', err);
+            logger.error('Error adding/updating custom', err);
         }
     }
 
@@ -114,7 +114,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             if (basename.endsWith('/.DS_Store')) return;
             const status = resourcesStatuses[basename] ?? '';
             if (status !== 'etcd_deleted') {
-                logger.info(`Sending delete (local --> ETCD) from resource ${basename}`);
+                logger.info(`Sending delete (local --> ETCD) from custom ${basename}`);
                 resourcesStatuses[basename] = 'local_deleted';
                 const key = `${etcdDir}${basename}`;
                 await getEtcdClient().delete().key(key);
@@ -124,7 +124,7 @@ export async function masterLoadResourcesWatcher(envName: string) {
             }
         }
         catch (err) {
-            logger.error('Error deleting resource', err);
+            logger.error('Error deleting custom', err);
         }
     }
     if (masterFileWatcher !== undefined) {

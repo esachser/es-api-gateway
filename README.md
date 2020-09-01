@@ -95,7 +95,8 @@ Aspectos que devem ser vistos:
     - [**OK**] Melhorar código do config.ts
     - [**OK**] Adicionar logs ao watcher das APIs
     - [**OK**] Carregar as APIs inicialmente/preferencialmente do ETCD
-    - Sincronizar arquivos auxiliares
+    - [**OK**] Sincronizar arquivos auxiliares
+- Considerar troca de koa para fastify
 - Ajustar middlewares
   - [**OK**] Debug unificado
   - Verificar código
