@@ -1,18 +1,15 @@
-import koa from 'koa';
-//import Router from '@koa/router';
-import router from 'koa-router-find-my-way';
-import helmet from 'koa-helmet';
 import { configuration } from './config';
 import { logger } from './logger';
 import _ from 'lodash';
+import fs from 'fs';
+import Router from 'find-my-way';
 import http from 'http';
 import https from 'https';
-import fs from 'fs';
 import { Server } from 'net';
 
 const routers: {
     [id: string]: {
-        router?: router.Instance,
+        router?: Router.Instance<Router.HTTPVersion.V1>
         server?: Server
     }
 } = {};
@@ -25,49 +22,23 @@ export function clearRouters() {
     for (const k in routers) {
         const r = routers[k].router;
         if (r !== undefined) {
-            //r.stack = [];
             r.reset();
         }
     }
 }
 
-//export const httpRouter = new Router();
-
-export function loadHttpServer(conf: any) {
+export async function loadHttpServer(conf: any) {
     const port = _.get(conf, 'port');
     const secure = _.get(conf, 'secure', false);
     const id = _.get(conf, 'id');
 
-    const app = new koa();
-
-    app.use(async (ctx, next) => {
-        // Avaliando tempo de execução total da aplicação koa
-        let init = Date.now();
-        await next();
-        let diff = Date.now() - init;
-        logger.debug(`Total app process time: ${diff}ms`);
+    let app = Router({
+        ignoreTrailingSlash: true
     });
 
-    app.use(helmet());
-    app.use(async (ctx, next) => {
-        await next();
-        if (ctx.status === 404 && ctx.body === undefined) {
-            ctx.body = {
-                error: 'Not Found'
-            };
-            ctx.status = 404;
-        }
-    });
+    //app.register(helmet);
 
-    // const httpRouter = routers[id]?.router ?? new Router();
-    const httpRouter = routers[id]?.router ?? router({ ignoreTrailingSlash: true });
-    _.set(routers, `[${id}].router`, httpRouter);
-    // app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
-    app.use(httpRouter.routes());
-
-    app.on('error', (err, ctx) => {
-        logger.error('Erro no servidor HTTP', err);
-    });
+    _.set(routers, `[${id}].router`, app);
 
     return new Promise((resolve, reject) => {
         let server: Server | undefined = routers[id]?.server;
@@ -80,14 +51,18 @@ export function loadHttpServer(conf: any) {
                     key: fs.readFileSync(keyFile, 'binary'),
                     passphrase,
                     cert: fs.readFileSync(certFile, 'binary')
-                }, app.callback()).listen(port, () => {
+                }, (req, res) => {
+                    app.lookup(req, res);
+                }).listen(port, () => {
                     const { port } = server?.address() as import('net').AddressInfo;
                     logger.info(`Https Server running on port ${port}`);
                     return resolve();
                 });
             }
             else {
-                server = http.createServer(app.callback()).listen(port, () => {
+                server = http.createServer((req, res) => {
+                    app.lookup(req, res);
+                }).listen(port, () => {
                     const { port } = server?.address() as import('net').AddressInfo;
                     logger.info(`Http Server running on port ${port}`);
                     return resolve();

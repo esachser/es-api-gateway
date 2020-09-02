@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransportSchema = exports.TransportContructor = exports.EsHttpTransport = void 0;
-const http_server_1 = require("../util/http-server");
+const http_server_koa_1 = require("../util/http-server-koa");
 const lodash_1 = __importDefault(require("lodash"));
 const logger_1 = require("../util/logger");
 const nanoid_1 = require("nanoid");
@@ -26,12 +26,11 @@ let EsHttpTransport = /** @class */ (() => {
          *
          */
         constructor(params, api, tid, apiLogger, middleware, initMiddleware) {
-            this._routes = [];
             // Verifica padrões
             this.apiLogger = apiLogger;
             this.api = api;
             this.tid = tid;
-            const httpRouter = http_server_1.getHttpRouter(tid);
+            const httpRouter = http_server_koa_1.getHttpRouter(tid);
             if (httpRouter === undefined) {
                 throw new errors_1.EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
             }
@@ -54,90 +53,100 @@ let EsHttpTransport = /** @class */ (() => {
             this.middleware = middleware;
             this.initMiddleware = initMiddleware;
             this.routeContext = params.routeContext;
+            const routeContextSize = this.routeContext.length - 1;
+            try {
+                httpRouter.use(this.routeContext, (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                    // Prepara a chamada
+                    let allPath = ctx.path;
+                    if (!allPath.endsWith('/')) {
+                        allPath += '/';
+                    }
+                    const context = {
+                        properties: {
+                            request: {
+                                headers: ctx.request.headers,
+                                params: ctx.params,
+                                query: ctx.query,
+                                path: allPath.substr(routeContextSize),
+                                method: ctx.method,
+                                routePrefix: this.routeContext
+                            },
+                            httpctx: ctx
+                        },
+                        body: ctx.request.body,
+                        logger: this.apiLogger,
+                        meta: {
+                            api,
+                            transport: 'EsHttpTransport',
+                            uid: nanoid_1.nanoid(12)
+                        }
+                    };
+                    //logger.info(`Started api with path ${context.properties.request.path}`);
+                    ctx.iesContext = context;
+                    //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
+                    let init = process.hrtime();
+                    try {
+                        // Roda o que precisa
+                        yield next();
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
+                        const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
+                        ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
+                        const body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
+                        ctx.body = body;
+                    }
+                    catch (err) {
+                        ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
+                        ctx.set('host', 'es-api-gateway 0.1.0');
+                        ctx.remove('content-encoding');
+                        if (err instanceof errors_1.EsError && err.statusCode < 500) {
+                            ctx.status = err.statusCode;
+                            ctx.body = {
+                                error: err.error,
+                                error_description: err.errorDescription
+                            };
+                        }
+                        else {
+                            const nerr = err instanceof errors_1.EsError ?
+                                new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
+                                new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
+                            ctx.status = nerr.statusCode;
+                            ctx.body = {
+                                error: nerr.error,
+                                error_description: nerr.errorDescription
+                            };
+                            err = nerr;
+                        }
+                        context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
+                    }
+                    const diffs = process.hrtime(init);
+                    const diff = diffs[0] * 1000 + diffs[1] / 1000000;
+                    //logger.info(`Call ${ctx.path} ended in ${diff}ms`);
+                }));
+            }
+            catch (err) {
+                this.clear();
+                throw new errors_1.EsTransportError(EsHttpTransport.name, `Error loading transport HTTP for ${this.routeContext}`, err);
+            }
         }
         loadAsync(params) {
             return __awaiter(this, void 0, void 0, function* () {
-                const httpRouter = http_server_1.getHttpRouter(this.tid);
+                const httpRouter = http_server_koa_1.getHttpRouter(this.tid);
                 if (httpRouter === undefined) {
                     throw new errors_1.EsTransportError(EsHttpTransport.name, 'HttpRouter is undefined');
                 }
                 try {
-                    const api = this.api;
-                    const routeContextSize = this.routeContext.length - 1;
                     for (const path in params.routes) {
                         let totalPath = `${this.routeContext}${path}`;
                         totalPath = totalPath.replace(/\/{2,}/g, '/');
                         for (const methodInfo of params.routes[path]) {
                             const pathMethodMid = yield middlewares_1.createMiddleware(methodInfo.mids, 0, this.api);
                             const middleware = middlewares_1.connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
-                            const method = methodInfo.method.toString().toUpperCase();
-                            this._routes.push({ method, path: totalPath });
-                            httpRouter.on(method, totalPath, (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                            httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids
                                 //      <========    ||    <==========||
-                                let allPath = ctx.path;
-                                if (!allPath.endsWith('/')) {
-                                    allPath += '/';
-                                }
-                                const context = {
-                                    properties: {
-                                        request: {
-                                            headers: ctx.request.headers,
-                                            params: ctx.params,
-                                            query: ctx.query,
-                                            path: allPath.substr(routeContextSize),
-                                            method: ctx.method,
-                                            routePrefix: this.routeContext
-                                        },
-                                        httpctx: ctx
-                                    },
-                                    body: ctx.request.body,
-                                    logger: this.apiLogger,
-                                    meta: {
-                                        api,
-                                        transport: 'EsHttpTransport',
-                                        uid: nanoid_1.nanoid(12)
-                                    }
-                                };
-                                //logger.info(`Started api with path ${context.properties.request.path}`);
-                                ctx.iesContext = context;
-                                //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
-                                let init = process.hrtime();
-                                try {
-                                    // Roda o que precisa
-                                    yield (middleware === null || middleware === void 0 ? void 0 : middleware.execute(ctx.iesContext));
-                                    yield next();
-                                    ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
-                                    const statusCode = lodash_1.default.get(ctx.iesContext.properties, 'response.status');
-                                    ctx.status = lodash_1.default.isNumber(statusCode) ? statusCode : 404;
-                                    const body = lodash_1.default.get(ctx.iesContext.properties, 'response.body');
-                                    ctx.body = body;
-                                }
-                                catch (err) {
-                                    ctx.set(lodash_1.default.get(ctx.iesContext.properties, 'response.headers', {}));
-                                    ctx.set('host', 'es-api-gateway 0.1.0');
-                                    ctx.remove('content-encoding');
-                                    if (err instanceof errors_1.EsError && err.statusCode < 500) {
-                                        ctx.status = err.statusCode;
-                                        ctx.body = {
-                                            error: err.error,
-                                            error_description: err.errorDescription
-                                        };
-                                    }
-                                    else {
-                                        const nerr = err instanceof errors_1.EsError ?
-                                            new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
-                                            new errors_1.EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
-                                        ctx.status = nerr.statusCode;
-                                        ctx.body = {
-                                            error: nerr.error,
-                                            error_description: nerr.errorDescription
-                                        };
-                                        err = nerr;
-                                    }
-                                    context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
-                                }
+                                yield (middleware === null || middleware === void 0 ? void 0 : middleware.execute(ctx.iesContext));
+                                return next();
                             }));
                         }
                     }
@@ -150,21 +159,17 @@ let EsHttpTransport = /** @class */ (() => {
             });
         }
         clear() {
-            const httpRouter = http_server_1.getHttpRouter(this.tid);
+            const httpRouter = http_server_koa_1.getHttpRouter(this.tid);
             if (httpRouter === undefined) {
                 return;
             }
-            //httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
-            for (const r of this._routes) {
-                httpRouter.off(r.method, r.path);
-            }
-            this._routes = [];
+            httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
             const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
             if (basePaths !== undefined) {
                 basePaths.delete(this.routeContext);
             }
             logger_1.logger.info(`Clear ${this.routeContext} executed`);
-            logger_1.logger.debug(httpRouter.prettyPrint());
+            logger_1.logger.debug(httpRouter.stack);
         }
     }
     EsHttpTransport.baseRoutesUsed = new Map();
@@ -212,4 +217,4 @@ exports.TransportSchema = {
         }
     }
 };
-//# sourceMappingURL=http.js.map
+//# sourceMappingURL=http-koa.js.map

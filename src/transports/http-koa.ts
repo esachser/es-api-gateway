@@ -1,4 +1,4 @@
-import { getHttpRouter } from '../util/http-server';
+import { getHttpRouter } from '../util/http-server-koa';
 import _ from 'lodash';
 import { logger } from '../util/logger';
 import { Logger, http } from 'winston';
@@ -29,9 +29,8 @@ export class EsHttpTransport implements IEsTransport {
     initMiddleware: IEsMiddleware | undefined;
 
     routeContext: string;
-    _routes: { method: string, path: string }[] = [];
 
-    static baseRoutesUsed: Map<string, Set<string>> = new Map<string, Set<string>>();
+    static baseRoutesUsed: Map<string,Set<string>> = new Map<string, Set<string>>();
 
     apiLogger: Logger;
 
@@ -75,6 +74,89 @@ export class EsHttpTransport implements IEsTransport {
         this.middleware = middleware;
         this.initMiddleware = initMiddleware;
         this.routeContext = params.routeContext;
+        const routeContextSize = this.routeContext.length - 1;
+
+        try {
+            httpRouter.use(this.routeContext, async (ctx, next) => {
+                // Prepara a chamada
+                let allPath = ctx.path;
+                if (!allPath.endsWith('/')) {
+                    allPath += '/';
+                }
+                const context: IEsContext = {
+                    properties: {
+                        request: {
+                            headers: ctx.request.headers,
+                            params: ctx.params,
+                            query: ctx.query,
+                            path: allPath.substr(routeContextSize),
+                            method: ctx.method,
+                            routePrefix: this.routeContext
+                        },
+                        httpctx: ctx
+                    },
+                    body: ctx.request.body,
+                    logger: this.apiLogger,
+                    meta: {
+                        api,
+                        transport: 'EsHttpTransport',
+                        uid: nanoid(12)
+                    }
+                };
+
+                //logger.info(`Started api with path ${context.properties.request.path}`);
+
+                ctx.iesContext = context;
+
+                //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
+                let init = process.hrtime();
+
+                try {
+                    // Roda o que precisa
+                    await next();
+
+                    ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
+                    const statusCode = _.get(ctx.iesContext.properties, 'response.status');
+                    ctx.status = _.isNumber(statusCode) ? statusCode : 404;
+                    const body = _.get(ctx.iesContext.properties, 'response.body');
+                    ctx.body = body;
+                }
+                catch (err) {
+                    ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
+                    ctx.set('host', 'es-api-gateway 0.1.0');
+                    ctx.remove('content-encoding');
+                    if (err instanceof EsError && err.statusCode < 500) {
+                        ctx.status = err.statusCode;
+                        ctx.body = {
+                            error: err.error,
+                            error_description: err.errorDescription
+                        };
+                    }
+                    else {
+                        const nerr = err instanceof EsError ?
+                            new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
+                            new EsTransportError(EsHttpTransport.name, 'Error running middlewares', {message: err.message});
+
+                        ctx.status = nerr.statusCode;
+                        ctx.body = {
+                            error: nerr.error,
+                            error_description: nerr.errorDescription
+                        };
+                        err = nerr;
+                    }
+                    
+                    context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
+                }
+
+                const diffs = process.hrtime(init);
+                const diff = diffs[0] * 1000 + diffs[1] / 1000000;
+                //logger.info(`Call ${ctx.path} ended in ${diff}ms`);
+            });
+        }
+        catch (err) {
+            this.clear();
+            throw new EsTransportError(EsHttpTransport.name, `Error loading transport HTTP for ${this.routeContext}`, err);
+        }
     }
 
     async loadAsync(params: IEsHttpTransportParams) {
@@ -85,8 +167,7 @@ export class EsHttpTransport implements IEsTransport {
         }
 
         try {
-            const api = this.api;
-            const routeContextSize = this.routeContext.length - 1;
+
             for (const path in params.routes) {
                 let totalPath = `${this.routeContext}${path}`;
                 totalPath = totalPath.replace(/\/{2,}/g, '/');
@@ -94,81 +175,12 @@ export class EsHttpTransport implements IEsTransport {
                 for (const methodInfo of params.routes[path]) {
                     const pathMethodMid = await createMiddleware(methodInfo.mids, 0, this.api);
                     const middleware = connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
-                    const method = methodInfo.method.toString().toUpperCase();
-                    this._routes.push({ method, path: totalPath });
-                    httpRouter.on(method as any, totalPath, async (ctx, next) => {
+                    httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
                         // Executa middleware central, correspondente a:
                         // pathMids ==> transportMids ==> executionMids
                         //      <========    ||    <==========||
-                        let allPath = ctx.path;
-                        if (!allPath.endsWith('/')) {
-                            allPath += '/';
-                        }
-                        const context: IEsContext = {
-                            properties: {
-                                request: {
-                                    headers: ctx.request.headers,
-                                    params: ctx.params,
-                                    query: ctx.query,
-                                    path: allPath.substr(routeContextSize),
-                                    method: ctx.method,
-                                    routePrefix: this.routeContext
-                                },
-                                httpctx: ctx
-                            },
-                            body: ctx.request.body,
-                            logger: this.apiLogger,
-                            meta: {
-                                api,
-                                transport: 'EsHttpTransport',
-                                uid: nanoid(12)
-                            }
-                        };
-
-                        //logger.info(`Started api with path ${context.properties.request.path}`);
-
-                        ctx.iesContext = context;
-
-                        //logger.info(`Call ${context.properties.httpctx.path} started at ${new Date().valueOf()}`);
-                        let init = process.hrtime();
-
-                        try {
-                            // Roda o que precisa
-                            await middleware?.execute(ctx.iesContext);
-                            await next();
-
-                            ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
-                            const statusCode = _.get(ctx.iesContext.properties, 'response.status');
-                            ctx.status = _.isNumber(statusCode) ? statusCode : 404;
-                            const body = _.get(ctx.iesContext.properties, 'response.body');
-                            ctx.body = body;
-                        }
-                        catch (err) {
-                            ctx.set(_.get(ctx.iesContext.properties, 'response.headers', {}));
-                            ctx.set('host', 'es-api-gateway 0.1.0');
-                            ctx.remove('content-encoding');
-                            if (err instanceof EsError && err.statusCode < 500) {
-                                ctx.status = err.statusCode;
-                                ctx.body = {
-                                    error: err.error,
-                                    error_description: err.errorDescription
-                                };
-                            }
-                            else {
-                                const nerr = err instanceof EsError ?
-                                    new EsTransportError(EsHttpTransport.name, 'Error running middlewares', err) :
-                                    new EsTransportError(EsHttpTransport.name, 'Error running middlewares', { message: err.message });
-
-                                ctx.status = nerr.statusCode;
-                                ctx.body = {
-                                    error: nerr.error,
-                                    error_description: nerr.errorDescription
-                                };
-                                err = nerr;
-                            }
-
-                            context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
-                        }
+                        await middleware?.execute(ctx.iesContext);
+                        return next();
                     });
                 }
             }
@@ -188,18 +200,13 @@ export class EsHttpTransport implements IEsTransport {
             return;
         }
 
-        //httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
-        for (const r of this._routes) {
-            httpRouter.off(r.method as any, r.path);
-        }
-
-        this._routes = [];
+        httpRouter.stack = httpRouter.stack.filter(l => !l.path.startsWith(this.routeContext));
         const basePaths = EsHttpTransport.baseRoutesUsed.get(this.tid);
         if (basePaths !== undefined) {
             basePaths.delete(this.routeContext);
         }
         logger.info(`Clear ${this.routeContext} executed`);
-        logger.debug(httpRouter.prettyPrint());
+        logger.debug(httpRouter.stack);
     }
 }
 

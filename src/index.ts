@@ -32,6 +32,7 @@ async function start() {
     loadJsonSchemaValidator();
     await startAuthenticators();
     await loadEnv(configuration.env);
+    //await delay(10000).then(runServers);
 }
 
 // Cluster start
@@ -41,9 +42,10 @@ import { RateLimiterClusterMaster } from 'rate-limiter-flexible';
 import { setIdScheduler } from './transports/schedule';
 import { setIdSub } from './transports/redissub';
 import _ from 'lodash';
-import { createEtcd } from './util/etdc';
+import getEtcdClient, { createEtcd } from './util/etdc';
 import { masterLoadResourcesWatcher } from './util/sync-resources';
 import { masterLoadCustomWatcher } from './util/sync-custom';
+import { delay } from './util';
 
 let numCpus = os.cpus().length;
 

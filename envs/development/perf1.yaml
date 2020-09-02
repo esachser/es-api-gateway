@@ -42,7 +42,7 @@ execution:
 - type: EsLoadPrivateKeyMiddleware
   after: false
   data:
-    keyFile: server.key
+    keyFile: server.pem
     keyPassProp: "keypass"
     destProp: jwskey
 # - type: EsPropertyMiddleware
@@ -72,3 +72,4 @@ execution:
     expression: ctx.properties.jws
 logging:
   level: info
+enabled: true

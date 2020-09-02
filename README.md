@@ -91,12 +91,11 @@ Aspectos que devem ser vistos:
 - [**OK**] Avaliar uso de ETCD para escala horizontal dos clusters
   - [**OK**] Será usado
   - [**OK**] Usar para quotaLimiter
-  - Utilizar como replicação de cluster
+  - [**OK**] Utilizar como replicação de cluster
     - [**OK**] Melhorar código do config.ts
     - [**OK**] Adicionar logs ao watcher das APIs
     - [**OK**] Carregar as APIs inicialmente/preferencialmente do ETCD
     - [**OK**] Sincronizar arquivos auxiliares
-- Considerar troca de koa para fastify
 - Ajustar middlewares
   - [**OK**] Debug unificado
   - Verificar código
@@ -110,6 +109,16 @@ Aspectos que devem ser vistos:
   - Descrição de cada middleware
   - Descrição de cada autenticador
   - Exemplos e casos de uso
+- Middlewares necessários para primeira versão
+  - Timeout Middleware
+  - Salvar dado no ETCD Store da API
+  - Capturar dado no ETCD Store da API
+  - Capturar ou retornar arquivo das resources (buffer ou stream)
+  - Verificar payload contra Regex
+  - Autenticação Básica
+  - Autenticação com certificado (Mutual TLS)
+  - Kafka
+- Unificar configuração
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka
@@ -128,6 +137,7 @@ Aspectos que devem ser vistos:
 - Parâmetros configuráveis para os middlewares criados (e todos os middlewares)
   - Algo do tipo ${request.headers.test}
 - Validar configuração global
+- Considerar troca de koa para fastify
 
 ## Outros pontos
 

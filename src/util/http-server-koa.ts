@@ -1,6 +1,6 @@
 import koa from 'koa';
-//import Router from '@koa/router';
-import router from 'koa-router-find-my-way';
+import Router from '@koa/router';
+//import router from 'koa-router-find-my-way';
 import helmet from 'koa-helmet';
 import { configuration } from './config';
 import { logger } from './logger';
@@ -12,7 +12,7 @@ import { Server } from 'net';
 
 const routers: {
     [id: string]: {
-        router?: router.Instance,
+        router?: Router,
         server?: Server
     }
 } = {};
@@ -25,8 +25,8 @@ export function clearRouters() {
     for (const k in routers) {
         const r = routers[k].router;
         if (r !== undefined) {
-            //r.stack = [];
-            r.reset();
+            r.stack = [];
+            // r.reset();
         }
     }
 }
@@ -59,11 +59,11 @@ export function loadHttpServer(conf: any) {
         }
     });
 
-    // const httpRouter = routers[id]?.router ?? new Router();
-    const httpRouter = routers[id]?.router ?? router({ ignoreTrailingSlash: true });
+    const httpRouter = routers[id]?.router ?? new Router();
+    // const httpRouter = routers[id]?.router ?? router();
     _.set(routers, `[${id}].router`, httpRouter);
-    // app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
-    app.use(httpRouter.routes());
+    app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
+    // app.use(httpRouter.routes());
 
     app.on('error', (err, ctx) => {
         logger.error('Erro no servidor HTTP', err);

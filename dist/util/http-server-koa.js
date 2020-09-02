@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadHttpServers = exports.loadHttpServer = exports.clearRouters = exports.getHttpRouter = void 0;
 const koa_1 = __importDefault(require("koa"));
-//import Router from '@koa/router';
-const koa_router_find_my_way_1 = __importDefault(require("koa-router-find-my-way"));
+const router_1 = __importDefault(require("@koa/router"));
+//import router from 'koa-router-find-my-way';
 const koa_helmet_1 = __importDefault(require("koa-helmet"));
 const config_1 = require("./config");
 const logger_1 = require("./logger");
@@ -32,8 +32,8 @@ function clearRouters() {
     for (const k in routers) {
         const r = routers[k].router;
         if (r !== undefined) {
-            //r.stack = [];
-            r.reset();
+            r.stack = [];
+            // r.reset();
         }
     }
 }
@@ -62,11 +62,11 @@ function loadHttpServer(conf) {
             ctx.status = 404;
         }
     }));
-    // const httpRouter = routers[id]?.router ?? new Router();
-    const httpRouter = (_b = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.router) !== null && _b !== void 0 ? _b : koa_router_find_my_way_1.default({ ignoreTrailingSlash: true });
+    const httpRouter = (_b = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.router) !== null && _b !== void 0 ? _b : new router_1.default();
+    // const httpRouter = routers[id]?.router ?? router();
     lodash_1.default.set(routers, `[${id}].router`, httpRouter);
-    // app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
-    app.use(httpRouter.routes());
+    app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
+    // app.use(httpRouter.routes());
     app.on('error', (err, ctx) => {
         logger_1.logger.error('Erro no servidor HTTP', err);
     });
@@ -130,4 +130,4 @@ function loadHttpServers() {
     });
 }
 exports.loadHttpServers = loadHttpServers;
-//# sourceMappingURL=http-server.js.map
+//# sourceMappingURL=http-server-koa.js.map

@@ -44,6 +44,7 @@ function start() {
         schemas_1.loadJsonSchemaValidator();
         yield authenticators_1.startAuthenticators();
         yield envs_1.loadEnv(config_1.configuration.env);
+        //await delay(10000).then(runServers);
     });
 }
 // Cluster start

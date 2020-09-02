@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readFileToObject = exports.baseDirectory = void 0;
+exports.delay = exports.readFileToObject = exports.baseDirectory = void 0;
 const path_1 = __importDefault(require("path"));
 const promises_1 = __importDefault(require("fs/promises"));
 const yaml_1 = __importDefault(require("yaml"));
@@ -30,4 +30,8 @@ function readFileToObject(fname) {
     });
 }
 exports.readFileToObject = readFileToObject;
+function delay(ms) {
+    return new Promise(resolve => setTimeout(() => resolve(), ms));
+}
+exports.delay = delay;
 //# sourceMappingURL=index.js.map
