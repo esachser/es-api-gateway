@@ -45,13 +45,6 @@ function loadHttpServer(conf) {
     const secure = lodash_1.default.get(conf, 'secure', false);
     const id = lodash_1.default.get(conf, 'id');
     const app = new koa_1.default();
-    // app.use(async (ctx, next) => {
-    //     // Avaliando tempo de execução total da aplicação koa
-    //     let init = Date.now();
-    //     await next();
-    //     let diff = Date.now() - init;
-    //     logger.debug(`Total app process time: ${diff}ms`);
-    // });
     app.use(koa_helmet_1.default());
     app.use((ctx, next) => __awaiter(this, void 0, void 0, function* () {
         yield next();

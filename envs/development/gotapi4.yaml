@@ -77,7 +77,7 @@ execution:
   - type: EsLoadPrivateKeyMiddleware
     after: false
     data:
-      keyFile: server.key
+      keyFile: key.pem
       keyPassProp: "keypass"
       destProp: key
   - type: EsPropertyMiddleware
@@ -121,3 +121,4 @@ execution:
     data: {}
 logging:
   level: info
+enabled: true
