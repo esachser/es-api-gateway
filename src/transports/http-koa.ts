@@ -93,7 +93,9 @@ export class EsHttpTransport implements IEsTransport {
 
                 for (const methodInfo of params.routes[path]) {
                     const pathMethodMid = await createMiddleware(methodInfo.mids, 0, this.api);
-                    const middleware = connectMiddlewares(this.initMiddleware, pathMethodMid, this.middleware);
+                    const init = _.clone(this.initMiddleware);
+                    const mid = _.clone(this.middleware);
+                    const middleware = connectMiddlewares(init, pathMethodMid, mid);
                     httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
                         // Executa middleware central, correspondente a:
                         // pathMids ==> transportMids ==> executionMids
@@ -205,7 +207,7 @@ export const TransportSchema = {
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {
-                "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
+                ".*": {
                     "type": "array",
                     "items": {
                         "type": "object",

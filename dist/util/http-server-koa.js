@@ -38,7 +38,6 @@ function clearRouters() {
     }
 }
 exports.clearRouters = clearRouters;
-//export const httpRouter = new Router();
 function loadHttpServer(conf) {
     var _a, _b;
     const port = lodash_1.default.get(conf, 'port');
@@ -53,6 +52,12 @@ function loadHttpServer(conf) {
                 error: 'Not Found'
             };
             ctx.status = 404;
+        }
+        else if (ctx.status === 405 && ctx.body === undefined) {
+            ctx.body = {
+                error: 'Method not allowed'
+            };
+            ctx.status = 405;
         }
     }));
     const httpRouter = (_b = (_a = routers[id]) === null || _a === void 0 ? void 0 : _a.router) !== null && _b !== void 0 ? _b : new router_1.default();

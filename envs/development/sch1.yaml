@@ -70,3 +70,4 @@ execution:
 #     waitFor: false
 logging:
   level: info
+enabled: false

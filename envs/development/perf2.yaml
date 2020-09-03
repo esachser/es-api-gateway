@@ -8,6 +8,12 @@ transports:
         "/":
         - method: GET
           mids: []
+        "/wait-:delay(\\d+)":
+        - method: GET
+          mids:
+          - type: EsDelayMiddleware
+            data:
+              delayProp: request.params.delay
     mids: []
     enabled: true
   - type: EsHttpTransport
@@ -23,7 +29,7 @@ transports:
 init: 
   - type: EsMetricsMiddleware
     data: 
-      prop: execution-time
+      prop: response.headers.x-esgateway-execution-time
 execution: 
 # - type: EsRateLimiterMiddleware
 #   data: 

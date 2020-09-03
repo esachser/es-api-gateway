@@ -46,7 +46,7 @@ export declare const TransportSchema: {
             type: string;
             additionalProperties: boolean;
             patternProperties: {
-                "^\\/([a-z0-9\\-._~%!$&'()*+,;=:@/]*)$": {
+                ".*": {
                     type: string;
                     items: {
                         type: string;

@@ -29,6 +29,7 @@ import { MiddlewareCtor as EsQuotaLimiterMiddlewareContructor, MiddlewareSchema 
 import { MiddlewareCtor as EsGetRawBodyMiddlewareContructor, MiddlewareSchema as EsGetRawBodySchema } from './getrawbody-middleware';
 import { MiddlewareCtor as EsRedisPublishMiddlewareContructor, MiddlewareSchema as EsRedisPublishSchema } from './redispublish-middleware';
 import { MiddlewareCtor as EsRedisXaddMiddlewareContructor, MiddlewareSchema as EsRedisXaddSchema } from './redisxadd-middleware';
+import { MiddlewareCtor as EsDelayMiddlewareContructor, MiddlewareSchema as EsDelaySchema } from './delay-middleware';
 import { addMiddleware, removeAllCustomMiddlewares, getCustomConstructor, getCustomSchema } from '../core/middlewares';
 import { baseDirectory, readFileToObject } from '../util';
 import _ from 'lodash';
@@ -75,6 +76,7 @@ export function loadMiddlewares() {
     addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
     addMiddleware('EsRedisPublishMiddleware', EsRedisPublishMiddlewareContructor, EsRedisPublishSchema);
     addMiddleware('EsRedisXaddMiddleware', EsRedisXaddMiddlewareContructor, EsRedisXaddSchema);
+    addMiddleware('EsDelayMiddleware', EsDelayMiddlewareContructor, EsDelaySchema);
 };
 
 let apiReloader: {[id: string]: EventEmitter} = {};

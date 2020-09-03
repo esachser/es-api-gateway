@@ -43,6 +43,7 @@ const quotalimiter_middleware_1 = require("./quotalimiter-middleware");
 const getrawbody_middleware_1 = require("./getrawbody-middleware");
 const redispublish_middleware_1 = require("./redispublish-middleware");
 const redisxadd_middleware_1 = require("./redisxadd-middleware");
+const delay_middleware_1 = require("./delay-middleware");
 const middlewares_1 = require("../core/middlewares");
 const util_1 = require("../util");
 const lodash_1 = __importDefault(require("lodash"));
@@ -85,6 +86,7 @@ function loadMiddlewares() {
     middlewares_1.addMiddleware('EsGetRawBodyMiddleware', getrawbody_middleware_1.MiddlewareCtor, getrawbody_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsRedisPublishMiddleware', redispublish_middleware_1.MiddlewareCtor, redispublish_middleware_1.MiddlewareSchema);
     middlewares_1.addMiddleware('EsRedisXaddMiddleware', redisxadd_middleware_1.MiddlewareCtor, redisxadd_middleware_1.MiddlewareSchema);
+    middlewares_1.addMiddleware('EsDelayMiddleware', delay_middleware_1.MiddlewareCtor, delay_middleware_1.MiddlewareSchema);
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

@@ -31,8 +31,6 @@ export function clearRouters() {
     }
 }
 
-//export const httpRouter = new Router();
-
 export function loadHttpServer(conf: any) {
     const port = _.get(conf, 'port');
     const secure = _.get(conf, 'secure', false);
@@ -49,6 +47,12 @@ export function loadHttpServer(conf: any) {
                 error: 'Not Found'
             };
             ctx.status = 404;
+        }
+        else if (ctx.status === 405 && ctx.body === undefined) {
+            ctx.body = {
+                error: 'Method not allowed'
+            };
+            ctx.status = 405;
         }
     });
 
