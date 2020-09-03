@@ -1,6 +1,6 @@
 import koa from 'koa';
-import Router from '@koa/router';
-//import router from 'koa-router-find-my-way';
+//import Router from '@koa/router';
+import router from 'koa-router-find-my-way';
 import helmet from 'koa-helmet';
 import { configuration } from './config';
 import { logger } from './logger';
@@ -12,7 +12,7 @@ import { Server } from 'net';
 
 const routers: {
     [id: string]: {
-        router?: Router,
+        router?: router.Instance,
         server?: Server
     }
 } = {};
@@ -25,8 +25,8 @@ export function clearRouters() {
     for (const k in routers) {
         const r = routers[k].router;
         if (r !== undefined) {
-            r.stack = [];
-            // r.reset();
+            //r.stack = [];
+            r.reset();
         }
     }
 }
@@ -39,11 +39,15 @@ export function loadHttpServer(conf: any) {
     const id = _.get(conf, 'id');
 
     const app = new koa();
+    const httpRouter = routers[id]?.router ?? router({ ignoreTrailingSlash: true });
 
     app.use(helmet());
     
     app.use(async (ctx, next) => {
         await next();
+
+        
+
         if (ctx.status === 404 && ctx.body === undefined) {
             ctx.body = {
                 error: 'Not Found'
@@ -52,11 +56,8 @@ export function loadHttpServer(conf: any) {
         }
     });
 
-    const httpRouter = routers[id]?.router ?? new Router();
-    // const httpRouter = routers[id]?.router ?? router();
     _.set(routers, `[${id}].router`, httpRouter);
-    app.use(httpRouter.routes()).use(httpRouter.allowedMethods());
-    // app.use(httpRouter.routes());
+    app.use(httpRouter.routes());
 
     app.on('error', (err, ctx) => {
         logger.error('Erro no servidor HTTP', err);

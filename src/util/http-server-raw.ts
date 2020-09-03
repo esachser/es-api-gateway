@@ -33,7 +33,16 @@ export async function loadHttpServer(conf: any) {
     const id = _.get(conf, 'id');
 
     let app = Router({
-        ignoreTrailingSlash: true
+        ignoreTrailingSlash: true,
+        defaultRoute: (req, res) => {
+            res.writeHead(404, {
+                host: 'es-api-gateway 0.1.0',
+                'content-type': 'application/json; charset=utf-8'
+            });
+            res.end(JSON.stringify({
+                error: 'Not Found'
+            }));
+        }
     });
 
     //app.register(helmet);

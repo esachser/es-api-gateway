@@ -1,43 +1,4 @@
-import { Logger } from 'winston';
-import { IEsContext } from '../core';
-import { IEsTransport, IEsTranportConstructor } from '../core/transports';
-import { IEsMiddleware } from '../core/middlewares';
-declare type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-interface IEsHttpTransportParams {
-    routeContext: string;
-    routes: {
-        [id: string]: Array<{
-            method: Method;
-            mids: Array<any>;
-        }>;
-    };
-    swagger?: any;
-}
-declare module 'koa' {
-    interface BaseContext {
-        iesContext: IEsContext;
-    }
-}
-export declare class EsHttpTransport implements IEsTransport {
-    middleware: IEsMiddleware | undefined;
-    initMiddleware: IEsMiddleware | undefined;
-    routeContext: string;
-    _routes: {
-        method: string;
-        path: string;
-    }[];
-    static baseRoutesUsed: Map<string, Set<string>>;
-    apiLogger: Logger;
-    api: string;
-    tid: string;
-    /**
-     *
-     */
-    constructor(params: IEsHttpTransportParams, api: string, tid: string, apiLogger: Logger, middleware: IEsMiddleware | undefined, initMiddleware?: IEsMiddleware);
-    loadAsync(params: IEsHttpTransportParams): Promise<void>;
-    clear(): void;
-}
-export declare const TransportContructor: IEsTranportConstructor;
+export declare const TransportContructor: import("../core/transports").IEsTranportConstructor;
 export declare const TransportSchema: {
     $schema: string;
     $id: string;
@@ -75,4 +36,3 @@ export declare const TransportSchema: {
         };
     };
 };
-export {};

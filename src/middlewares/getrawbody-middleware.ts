@@ -51,10 +51,10 @@ export class EsGetRawBodyMiddleware extends EsMiddleware {
         }
 
         try {
-            if (stream.readableLength > 0) {
-                const rawBody = await getRawBody(stream, {
-                    limit: maxLen
-                });
+            const rawBody = await getRawBody(stream, {
+                limit: maxLen
+            });
+            if (rawBody.length > 0){
                 _.set(context.properties, this._destProp, rawBody);
             }
         }

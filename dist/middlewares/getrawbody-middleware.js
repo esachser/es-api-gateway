@@ -53,10 +53,10 @@ let EsGetRawBodyMiddleware = /** @class */ (() => {
                     throw new errors_1.EsMiddlewareError(EsGetRawBodyMiddleware.name, 'maxLen MUST be a number greater than 0');
                 }
                 try {
-                    if (stream.readableLength > 0) {
-                        const rawBody = yield raw_body_1.default(stream, {
-                            limit: maxLen
-                        });
+                    const rawBody = yield raw_body_1.default(stream, {
+                        limit: maxLen
+                    });
+                    if (rawBody.length > 0) {
                         lodash_1.default.set(context.properties, this._destProp, rawBody);
                     }
                 }
