@@ -1,6 +1,15 @@
 import path from 'path';
-import fsasync from 'fs/promises';
 import YAML from 'yaml';
+import fs from 'fs';
+import util from 'util';
+
+const fsasync = {
+    stat: util.promisify(fs.stat),
+    mkdir: util.promisify(fs.mkdir),
+    writeFile: util.promisify(fs.writeFile),
+    readFile: util.promisify(fs.readFile),
+    unlink: util.promisify(fs.unlink)
+}
 
 export const baseDirectory =  path.resolve('.');
 

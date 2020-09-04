@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadMasterWatcher = exports.loadConfig = exports.configuration = void 0;
-const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const chokidar_1 = __importDefault(require("chokidar"));
@@ -24,6 +23,14 @@ const authenticators_1 = require("../authenticators");
 const http_server_1 = require("./http-server");
 const cluster_1 = __importDefault(require("cluster"));
 const etdc_1 = __importDefault(require("./etdc"));
+const util_1 = __importDefault(require("util"));
+const fsasync = {
+    stat: util_1.default.promisify(fs_1.default.stat),
+    mkdir: util_1.default.promisify(fs_1.default.mkdir),
+    writeFile: util_1.default.promisify(fs_1.default.writeFile),
+    readFile: util_1.default.promisify(fs_1.default.readFile),
+    unlink: util_1.default.promisify(fs_1.default.unlink)
+};
 ;
 exports.configuration = { env: 'local' };
 const configFileName = path_1.default.resolve(_1.baseDirectory, 'conf', 'global.json');
@@ -63,17 +70,17 @@ function loadConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Reloading global config file');
         if (!fs_1.default.existsSync(configFileName)) {
-            yield promises_1.default.mkdir(path_1.default.dirname(configFileName), { recursive: true });
+            yield fsasync.mkdir(path_1.default.dirname(configFileName), { recursive: true });
             const cfg = yield etdc_1.default().get(ETCD_GLOBAL_CONFIG_KEY).json();
             if (cfg !== null) {
                 configStatus = 'etcd_changed';
-                yield promises_1.default.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
+                yield fsasync.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
             }
             else {
-                yield promises_1.default.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
+                yield fsasync.writeFile(configFileName, JSON.stringify(DEFAULT_CONFIG));
             }
         }
-        const text = yield promises_1.default.readFile(configFileName);
+        const text = yield fsasync.readFile(configFileName);
         try {
             exports.configuration = JSON.parse(text.toString());
         }
@@ -127,7 +134,7 @@ function loadMasterWatcher() {
             const cfg = yield client.get(ETCD_GLOBAL_CONFIG_KEY).json();
             if (cfg !== null) {
                 configStatus = 'etcd_changed';
-                yield promises_1.default.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
+                yield fsasync.writeFile(configFileName, JSON.stringify(cfg, undefined, 2));
             }
             if (masterWatcher !== undefined) {
                 yield masterWatcher.cancel();
@@ -138,7 +145,7 @@ function loadMasterWatcher() {
                     if (configStatus !== 'local_changed') {
                         logger_1.logger.info(`Receiving configuration update (ETCD --> Local)`);
                         configStatus = 'etcd_changed';
-                        yield promises_1.default.writeFile(configFileName, res.value);
+                        yield fsasync.writeFile(configFileName, res.value);
                     }
                     else {
                         configStatus = '';

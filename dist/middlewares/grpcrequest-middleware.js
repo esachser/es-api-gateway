@@ -16,10 +16,18 @@ exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsGrpcRequestMiddlew
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const tmp_1 = __importDefault(require("tmp"));
-const promises_1 = __importDefault(require("fs/promises"));
+const fs_1 = __importDefault(require("fs"));
 const proto_loader_1 = require("@grpc/proto-loader");
 const certs_1 = require("../util/certs");
 const middlewares_1 = require("../core/middlewares");
+const util_1 = __importDefault(require("util"));
+const fsasync = {
+    stat: util_1.default.promisify(fs_1.default.stat),
+    mkdir: util_1.default.promisify(fs_1.default.mkdir),
+    writeFile: util_1.default.promisify(fs_1.default.writeFile),
+    readFile: util_1.default.promisify(fs_1.default.readFile),
+    unlink: util_1.default.promisify(fs_1.default.unlink)
+};
 const grpc = require('@grpc/grpc-js');
 let EsGrpcRequestMiddleware = /** @class */ (() => {
     class EsGrpcRequestMiddleware extends middlewares_1.EsMiddleware {
@@ -92,10 +100,10 @@ let EsGrpcRequestMiddleware = /** @class */ (() => {
                             return resolve(`${name}.json`);
                         });
                     });
-                    yield promises_1.default.writeFile(ftmpname, JSON.stringify(protoObj));
+                    yield fsasync.writeFile(ftmpname, JSON.stringify(protoObj));
                     const proto = yield proto_loader_1.load(ftmpname);
                     this._grpcObj = grpc.loadPackageDefinition(proto);
-                    yield promises_1.default.unlink(ftmpname);
+                    yield fsasync.unlink(ftmpname);
                 }
                 catch (err) {
                     throw new errors_1.EsMiddlewareError(EsGrpcRequestMiddleware.name, 'Error loading proto', err);

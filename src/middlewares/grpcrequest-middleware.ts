@@ -1,14 +1,22 @@
 import _ from 'lodash';
 import { EsMiddlewareError } from '../core/errors';
 import tmp from 'tmp';
-import fsasync from 'fs/promises';
+import fs from 'fs';
 import { load as protoLoad } from '@grpc/proto-loader';
 import { GrpcObject } from '@grpc/grpc-js';
 import { ServiceClientConstructor } from '@grpc/grpc-js/build/src/make-client';
 import { getPrivateKey, getPublicCert } from '../util/certs';
-import { logger } from '../util/logger';
 import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
 import { IEsContext } from '../core';
+import util from 'util';
+
+const fsasync = {
+    stat: util.promisify(fs.stat),
+    mkdir: util.promisify(fs.mkdir),
+    writeFile: util.promisify(fs.writeFile),
+    readFile: util.promisify(fs.readFile),
+    unlink: util.promisify(fs.unlink)
+}
 
 const grpc = require('@grpc/grpc-js');
 

@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.masterLoadApiWatcher = exports.loadEnv = exports.reloadApi = void 0;
-const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const chokidar_1 = __importDefault(require("chokidar"));
@@ -27,6 +26,14 @@ const http_server_1 = require("../util/http-server");
 const transports_1 = require("../core/transports");
 const middlewares_1 = require("../core/middlewares");
 const etdc_1 = __importDefault(require("../util/etdc"));
+const util_2 = __importDefault(require("util"));
+const fsasync = {
+    stat: util_2.default.promisify(fs_1.default.stat),
+    mkdir: util_2.default.promisify(fs_1.default.mkdir),
+    writeFile: util_2.default.promisify(fs_1.default.writeFile),
+    readFile: util_2.default.promisify(fs_1.default.readFile),
+    unlink: util_2.default.promisify(fs_1.default.unlink)
+};
 let apis = {};
 function loadApiFile(fname) {
     var _a, _b;
@@ -117,7 +124,7 @@ function loadEnv(envName) {
             http_server_1.clearRouters();
         }
         if (envDirExists) {
-            const envFinfo = yield promises_1.default.stat(envDir);
+            const envFinfo = yield fsasync.stat(envDir);
             if (envFinfo.isDirectory()) {
                 //reloadEnv(envDir);
                 watcher = chokidar_1.default.watch(envDir).on('all', (ev, fname) => {
@@ -146,7 +153,7 @@ function masterLoadApiWatcher(envName) {
             return;
         apiStatuses = {};
         const envDir = path_1.default.resolve(util_1.baseDirectory, 'envs', envName);
-        yield promises_1.default.mkdir(envDir, { recursive: true });
+        yield fsasync.mkdir(envDir, { recursive: true });
         // Configura o watcher de API
         if (masterEtcdWatcher !== undefined) {
             yield masterEtcdWatcher.cancel();
@@ -161,7 +168,7 @@ function masterLoadApiWatcher(envName) {
                     logger_1.logger.info(`Receiving update (ETCD --> Local) from api ${basename}`);
                     const fname = path_1.default.resolve(envDir, basename);
                     apiStatuses[basename] = 'etcd_changed';
-                    yield promises_1.default.writeFile(fname, kv.value);
+                    yield fsasync.writeFile(fname, kv.value);
                 }
                 else {
                     delete apiStatuses[basename];
@@ -181,7 +188,7 @@ function masterLoadApiWatcher(envName) {
                     const fname = path_1.default.resolve(envDir, basename);
                     if (fs_1.default.existsSync(fname)) {
                         apiStatuses[basename] = 'etcd_deleted';
-                        yield promises_1.default.unlink(fname);
+                        yield fsasync.unlink(fname);
                     }
                 }
                 else {
@@ -200,7 +207,7 @@ function masterLoadApiWatcher(envName) {
             const value = etcdApis[key];
             apiStatuses[basename] = 'etcd_changed';
             const fname = path_1.default.resolve(envDir, basename);
-            yield promises_1.default.writeFile(fname, value);
+            yield fsasync.writeFile(fname, value);
         }
         // Carrega o file watcher
         function masterUpdateApi(fname) {
@@ -213,7 +220,7 @@ function masterLoadApiWatcher(envName) {
                         logger_1.logger.info(`Sending update (local --> ETCD) from api ${basename}`);
                         apiStatuses[basename] = 'local_changed';
                         const key = `esgateway/envs/${envName}/apis/${basename}`;
-                        const value = yield promises_1.default.readFile(fname);
+                        const value = yield fsasync.readFile(fname);
                         yield etdc_1.default().put(key).value(value);
                     }
                     else {

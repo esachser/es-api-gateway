@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCustomSchema = exports.getCustomConstructor = exports.removeMiddleware = exports.removeAllCustomMiddlewares = exports.getMiddlewareConstructor = exports.addMiddleware = exports.connectMiddlewares = exports.createMiddleware = exports.EsMiddleware = exports.IEsMiddleware = void 0;
+exports.getCustomSchema = exports.getCustomConstructor = exports.removeMiddleware = exports.removeAllCustomMiddlewares = exports.getMiddlewareConstructor = exports.addMiddleware = exports.copyMiddleware = exports.connectMiddlewares = exports.createMiddleware = exports.EsMiddleware = exports.IEsMiddleware = void 0;
 const logger_1 = require("../util/logger");
 const schemas_1 = require("./schemas");
 const envs_1 = require("../envs");
@@ -96,6 +96,15 @@ function connectMiddlewares(...middlewares) {
     return mid;
 }
 exports.connectMiddlewares = connectMiddlewares;
+function copyMiddleware(mid) {
+    if (mid === undefined) {
+        return undefined;
+    }
+    const nmid = lodash_1.default.clone(mid);
+    nmid.next = copyMiddleware(mid.next);
+    return nmid;
+}
+exports.copyMiddleware = copyMiddleware;
 const mids = {};
 function addMiddleware(name, constructor, parameters, custom = false) {
     try {

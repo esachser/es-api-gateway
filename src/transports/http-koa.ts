@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import { IEsContext } from '../core';
 import { IEsTransport, IEsTranportConstructor } from '../core/transports';
-import { IEsMiddleware, createMiddleware, connectMiddlewares } from '../core/middlewares';
+import { IEsMiddleware, createMiddleware, connectMiddlewares, copyMiddleware } from '../core/middlewares';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -93,8 +93,8 @@ export class EsHttpTransport implements IEsTransport {
 
                 for (const methodInfo of params.routes[path]) {
                     const pathMethodMid = await createMiddleware(methodInfo.mids, 0, this.api);
-                    const init = _.clone(this.initMiddleware);
-                    const mid = _.clone(this.middleware);
+                    const init = copyMiddleware(this.initMiddleware);
+                    const mid = copyMiddleware(this.middleware);
                     const middleware = connectMiddlewares(init, pathMethodMid, mid);
                     httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
                         // Executa middleware central, correspondente a:

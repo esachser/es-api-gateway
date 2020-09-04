@@ -5,10 +5,18 @@ import chokidar from 'chokidar';
 import cluster from 'cluster';
 import path from 'path';
 import fs from 'fs';
-import fsasync from 'fs/promises';
 import getEtcdClient from "./etdc";
 import { baseDirectory } from ".";
 import { logger } from "./logger";
+import util from 'util';
+
+const fsasync = {
+    stat: util.promisify(fs.stat),
+    mkdir: util.promisify(fs.mkdir),
+    writeFile: util.promisify(fs.writeFile),
+    readFile: util.promisify(fs.readFile),
+    unlink: util.promisify(fs.unlink)
+}
 
 let masterEtcdWatcher: Watcher;
 let masterFileWatcher: chokidar.FSWatcher;

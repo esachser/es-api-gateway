@@ -1,4 +1,3 @@
-import fsasync from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import chokidar from 'chokidar';
@@ -10,6 +9,15 @@ import { loadHttpServers } from './http-server';
 import cluster from 'cluster';
 import { Watcher } from 'etcd3';
 import getEtcdClient from './etdc';
+import util from 'util';
+
+const fsasync = {
+    stat: util.promisify(fs.stat),
+    mkdir: util.promisify(fs.mkdir),
+    writeFile: util.promisify(fs.writeFile),
+    readFile: util.promisify(fs.readFile),
+    unlink: util.promisify(fs.unlink)
+}
 
 export interface IEsConfig {
     env: string,

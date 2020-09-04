@@ -4,6 +4,11 @@ import { JWS, JWK } from 'jose';
 import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
 import { IEsContext } from '../core';
 
+function sign(payload: Buffer | string | Object, key: any, opts: any) {
+    const jwsStr = JWS.sign(payload, key === JWK.None ? key : JWK.asKey(key, opts));
+    return jwsStr;
+}
+
 export class EsJwsGenerateMiddleware extends EsMiddleware {
     static readonly isInOut = true;
     static readonly middlewareName = 'EsJwsGenerateMiddleware';
@@ -76,7 +81,8 @@ export class EsJwsGenerateMiddleware extends EsMiddleware {
                 opts = _.merge({}, othOpts, opts);
             }
         }
-        const jwsStr = JWS.sign(payload, key === JWK.None ? key : JWK.asKey(key, opts));
+        const jwsStr = sign(payload, key, opts);
+
         _.set(context.properties, this._destProp, jwsStr);
     }
 };

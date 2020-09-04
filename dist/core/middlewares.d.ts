@@ -23,6 +23,7 @@ export declare abstract class EsMiddleware extends IEsMiddleware {
 }
 export declare function createMiddleware(arr: any[], idx: number, api: string): Promise<IEsMiddleware | undefined>;
 export declare function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]): IEsMiddleware | undefined;
+export declare function copyMiddleware(mid?: IEsMiddleware): IEsMiddleware | undefined;
 export declare function addMiddleware(name: string, constructor: IEsMiddlewareConstructor, parameters: any, custom?: boolean): void;
 export declare function getMiddlewareConstructor(name: string): IEsMiddlewareConstructor | undefined;
 export declare function removeAllCustomMiddlewares(): void;

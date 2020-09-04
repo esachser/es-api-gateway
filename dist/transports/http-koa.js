@@ -67,8 +67,8 @@ let EsHttpTransport = /** @class */ (() => {
                         totalPath = totalPath.replace(/\/{2,}/g, '/');
                         for (const methodInfo of params.routes[path]) {
                             const pathMethodMid = yield middlewares_1.createMiddleware(methodInfo.mids, 0, this.api);
-                            const init = lodash_1.default.clone(this.initMiddleware);
-                            const mid = lodash_1.default.clone(this.middleware);
+                            const init = middlewares_1.copyMiddleware(this.initMiddleware);
+                            const mid = middlewares_1.copyMiddleware(this.middleware);
                             const middleware = middlewares_1.connectMiddlewares(init, pathMethodMid, mid);
                             httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:

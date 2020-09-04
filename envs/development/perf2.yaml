@@ -27,9 +27,12 @@ transports:
     mids: []
     enabled: true
 init: 
-  - type: EsMetricsMiddleware
-    data: 
-      prop: response.headers.x-esgateway-execution-time
+- type: EsMetricsMiddleware
+  data: 
+    prop: response.headers.x-esgateway-execution-time
+- type: EsTimeoutMiddleware
+  data: 
+    timeout: 1000
 execution: 
 # - type: EsRateLimiterMiddleware
 #   data: 

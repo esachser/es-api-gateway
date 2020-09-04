@@ -18,10 +18,17 @@ const chokidar_1 = __importDefault(require("chokidar"));
 const cluster_1 = __importDefault(require("cluster"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const promises_1 = __importDefault(require("fs/promises"));
 const etdc_1 = __importDefault(require("./etdc"));
 const _1 = require(".");
 const logger_1 = require("./logger");
+const util_1 = __importDefault(require("util"));
+const fsasync = {
+    stat: util_1.default.promisify(fs_1.default.stat),
+    mkdir: util_1.default.promisify(fs_1.default.mkdir),
+    writeFile: util_1.default.promisify(fs_1.default.writeFile),
+    readFile: util_1.default.promisify(fs_1.default.readFile),
+    unlink: util_1.default.promisify(fs_1.default.unlink)
+};
 let masterEtcdWatcher;
 let masterFileWatcher;
 let resourcesStatuses = {};
@@ -31,7 +38,7 @@ function masterLoadCustomWatcher() {
             return;
         resourcesStatuses = {};
         const envDir = path_1.default.resolve(_1.baseDirectory, 'custom');
-        yield promises_1.default.mkdir(envDir, { recursive: true });
+        yield fsasync.mkdir(envDir, { recursive: true });
         const etcdDir = `esgateway/custom`;
         // Configura o watcher de API
         if (masterEtcdWatcher !== undefined) {
@@ -50,8 +57,8 @@ function masterLoadCustomWatcher() {
                     const fname = path_1.default.resolve(envDir, ...basename.split('/'));
                     resourcesStatuses[basename] = 'etcd_changed';
                     const fdir = path_1.default.dirname(fname);
-                    yield promises_1.default.mkdir(fdir, { recursive: true });
-                    yield promises_1.default.writeFile(fname, kv.value);
+                    yield fsasync.mkdir(fdir, { recursive: true });
+                    yield fsasync.writeFile(fname, kv.value);
                 }
                 else {
                     delete resourcesStatuses[basename];
@@ -73,7 +80,7 @@ function masterLoadCustomWatcher() {
                     const fname = path_1.default.resolve(envDir, ...basename.split('/'));
                     if (fs_1.default.existsSync(fname)) {
                         resourcesStatuses[basename] = 'etcd_deleted';
-                        yield promises_1.default.unlink(fname);
+                        yield fsasync.unlink(fname);
                     }
                 }
                 else {
@@ -94,8 +101,8 @@ function masterLoadCustomWatcher() {
             resourcesStatuses[basename] = 'etcd_changed';
             const fname = path_1.default.resolve(envDir, basename.substr(1));
             const fdir = path_1.default.dirname(fname);
-            yield promises_1.default.mkdir(fdir, { recursive: true });
-            yield promises_1.default.writeFile(fname, value);
+            yield fsasync.mkdir(fdir, { recursive: true });
+            yield fsasync.writeFile(fname, value);
         }
         // Carrega o file watcher
         function masterUpdateApi(fname) {
@@ -110,7 +117,7 @@ function masterLoadCustomWatcher() {
                         logger_1.logger.info(`Sending update (local --> ETCD) from custom ${basename}`);
                         resourcesStatuses[basename] = 'local_changed';
                         const key = `${etcdDir}${basename}`;
-                        const value = yield promises_1.default.readFile(fname);
+                        const value = yield fsasync.readFile(fname);
                         yield etdc_1.default().put(key).value(value);
                     }
                     else {

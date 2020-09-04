@@ -42,8 +42,8 @@ execution:
 - type: EsLoadPrivateKeyMiddleware
   after: false
   data:
-    keyFile: server.pem
-    keyPassProp: "keypass"
+    keyFile: es256.pem
+    keyPassProp: "keypasss"
     destProp: jwskey
 # - type: EsPropertyMiddleware
 #   after: false
@@ -54,7 +54,7 @@ execution:
   after: false
   data:
     name: jwsalg
-    value: "RS256"
+    value: "ES256"
 - type: EsJwsGenerateMiddleware
   after: false
   data:

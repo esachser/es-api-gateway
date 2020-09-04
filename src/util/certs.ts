@@ -1,9 +1,18 @@
 import forge from 'node-forge';
-import fsasync from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 import { baseDirectory } from '.';
 import { configuration } from './config';
 import Keyv from 'keyv';
+import util from 'util';
+
+const fsasync = {
+    stat: util.promisify(fs.stat),
+    mkdir: util.promisify(fs.mkdir),
+    writeFile: util.promisify(fs.writeFile),
+    readFile: util.promisify(fs.readFile),
+    unlink: util.promisify(fs.unlink)
+}
 
 const cacheFiles = new Keyv({
     ttl: 60 * 60 * 1000,
@@ -27,8 +36,18 @@ export async function getPrivateKey(api: string, certName: string, certPass?: st
         return fcontents;
     }
     const fileContents = await fsasync.readFile(fname, 'binary');
-    const privateKey = forge.pki.decryptRsaPrivateKey(fileContents, certPass);
-    const pkStr = forge.pki.privateKeyToPem(privateKey);
+    const pem = forge.pem.decode(fileContents)[0];
+    if (!pem.type.includes('PRIVATE')) {
+        return undefined;
+    }
+    let pkStr: string;
+    if (pem.type.includes('ENCRYPTED') && certPass !== undefined) {
+        const privateKey = forge.pki.decryptRsaPrivateKey(fileContents, certPass);
+        pkStr = forge.pki.privateKeyToPem(privateKey);
+    }
+    else {
+        pkStr = fileContents;
+    }
     cacheFiles.set(`${certPass}::/::${fname}`, pkStr);
     return pkStr;
 }

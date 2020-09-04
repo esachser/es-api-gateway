@@ -111,6 +111,15 @@ export function connectMiddlewares(...middlewares: (IEsMiddleware | undefined)[]
     return mid;
 }
 
+export function copyMiddleware(mid?: IEsMiddleware): IEsMiddleware | undefined {
+    if (mid === undefined) {
+        return undefined;
+    }
+    const nmid = _.clone(mid);
+    nmid.next = copyMiddleware(mid.next);
+    return nmid;
+}
+
 const mids: {[id:string]:{mc:IEsMiddlewareConstructor, custom:boolean}} = {};
 
 export function addMiddleware(name: string, constructor: IEsMiddlewareConstructor, parameters: any, custom=false) {

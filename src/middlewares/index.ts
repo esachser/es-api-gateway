@@ -30,6 +30,7 @@ import { MiddlewareCtor as EsGetRawBodyMiddlewareContructor, MiddlewareSchema as
 import { MiddlewareCtor as EsRedisPublishMiddlewareContructor, MiddlewareSchema as EsRedisPublishSchema } from './redispublish-middleware';
 import { MiddlewareCtor as EsRedisXaddMiddlewareContructor, MiddlewareSchema as EsRedisXaddSchema } from './redisxadd-middleware';
 import { MiddlewareCtor as EsDelayMiddlewareContructor, MiddlewareSchema as EsDelaySchema } from './delay-middleware';
+import { MiddlewareCtor as EsTimeoutMiddlewareContructor, MiddlewareSchema as EsTimeoutSchema } from './timeout-middleware';
 import { addMiddleware, removeAllCustomMiddlewares, getCustomConstructor, getCustomSchema } from '../core/middlewares';
 import { baseDirectory, readFileToObject } from '../util';
 import _ from 'lodash';
@@ -77,6 +78,8 @@ export function loadMiddlewares() {
     addMiddleware('EsRedisPublishMiddleware', EsRedisPublishMiddlewareContructor, EsRedisPublishSchema);
     addMiddleware('EsRedisXaddMiddleware', EsRedisXaddMiddlewareContructor, EsRedisXaddSchema);
     addMiddleware('EsDelayMiddleware', EsDelayMiddlewareContructor, EsDelaySchema);
+    addMiddleware('EsTimeoutMiddleware', EsTimeoutMiddlewareContructor, EsTimeoutSchema);
+
 };
 
 let apiReloader: {[id: string]: EventEmitter} = {};

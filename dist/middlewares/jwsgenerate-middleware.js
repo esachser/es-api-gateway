@@ -17,6 +17,10 @@ const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const jose_1 = require("jose");
 const middlewares_1 = require("../core/middlewares");
+function sign(payload, key, opts) {
+    const jwsStr = jose_1.JWS.sign(payload, key === jose_1.JWK.None ? key : jose_1.JWK.asKey(key, opts));
+    return jwsStr;
+}
 let EsJwsGenerateMiddleware = /** @class */ (() => {
     class EsJwsGenerateMiddleware extends middlewares_1.EsMiddleware {
         /**
@@ -77,7 +81,7 @@ let EsJwsGenerateMiddleware = /** @class */ (() => {
                         opts = lodash_1.default.merge({}, othOpts, opts);
                     }
                 }
-                const jwsStr = jose_1.JWS.sign(payload, key === jose_1.JWK.None ? key : jose_1.JWK.asKey(key, opts));
+                const jwsStr = sign(payload, key, opts);
                 lodash_1.default.set(context.properties, this._destProp, jwsStr);
             });
         }

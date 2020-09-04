@@ -99,6 +99,8 @@ Aspectos que devem ser vistos:
 - Ajustar middlewares
   - [**OK**] Debug unificado
   - Verificar código
+- Criar ferramenta que edita direto etcd
+  - Sincronizar somente ETCD --> Local
 - [**OK**] Ajustar transportes
   - [**OK**] Ajustar index.ts para não carregar de lugar nenhum
 - Iniciar documentação, exemplos, testes, e casos de uso
