@@ -20,7 +20,7 @@ async function start() {
     await createEtcd();
     await loadConfig();
     loadParsers();
-    loadMiddlewares();
+    await loadMiddlewares();
     await loadCustomMiddlewares()
         .catch(err => {
             logger.error('Error loading compound middlewares', err);

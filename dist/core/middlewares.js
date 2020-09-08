@@ -139,7 +139,7 @@ function removeMiddleware(name) {
     }
 }
 exports.removeMiddleware = removeMiddleware;
-function getCustomConstructor(mids, changeEmitter) {
+function getCustomConstructor(middlewares, changeEmitter) {
     var _a;
     return _a = class C extends EsMiddleware {
             constructor(_values, after, api, nextMiddleware) {
@@ -153,7 +153,7 @@ function getCustomConstructor(mids, changeEmitter) {
             }
             loadAsync() {
                 return __awaiter(this, void 0, void 0, function* () {
-                    this._mid = yield createMiddleware(mids, 0, this.api);
+                    this._mid = yield createMiddleware(middlewares, 0, this.api);
                 });
             }
             runInternal(context) {

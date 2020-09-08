@@ -32,7 +32,7 @@ function start() {
         yield etdc_1.createEtcd();
         yield config_1.loadConfig();
         parsers_1.loadParsers();
-        middlewares_1.loadMiddlewares();
+        yield middlewares_1.loadMiddlewares();
         yield middlewares_1.loadCustomMiddlewares()
             .catch(err => {
             logger_1.logger.error('Error loading compound middlewares', err);

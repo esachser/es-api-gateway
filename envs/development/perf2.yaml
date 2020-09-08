@@ -1,7 +1,7 @@
 ---
 transports:
   - type: EsHttpTransport
-    id: http
+    id: http, https
     parameters:
       routeContext: /api/perf/v2
       routes:
@@ -16,23 +16,20 @@ transports:
               delayProp: request.params.delay
     mids: []
     enabled: true
-  - type: EsHttpTransport
-    id: https
-    parameters:
-      routeContext: /api/perf/v2
-      routes:
-        "/":
-        - method: GET
-          mids: []
-    mids: []
-    enabled: true
 init: 
 - type: EsMetricsMiddleware
   data: 
     prop: response.headers.x-esgateway-execution-time
-- type: EsTimeoutMiddleware
-  data: 
-    timeout: 1000
+# - type: EsTimeoutMiddleware
+#   data: 
+#     timeout: 12
+# - type: EsPropertyMiddleware
+#   data:
+#     name: delay
+#     value: 10
+# - type: EsDelayMiddleware
+#   data:
+#     delayProp: delay
 execution: 
 # - type: EsRateLimiterMiddleware
 #   data: 
@@ -47,6 +44,22 @@ execution:
     name: response.body
     value: 
       ok: true
+- type: EsPropertyMiddleware
+  data:
+    name: ttl
+    value: 10
+- type: EsPropertyMiddleware
+  data:
+    name: source
+    value: time
+- type: EsGetPublicDataMiddleware
+  data:
+    sourceProp: source
+    destProp: response.body.time
+- type: EsPropertyMiddleware
+  data:
+    name: response.body.time
+    expression: Number.parseInt(ctx.properties.response.body.time)
 logging:
   level: info
 enabled: true

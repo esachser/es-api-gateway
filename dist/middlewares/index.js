@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,6 +27,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,79 +42,77 @@ exports.loadCustomMiddlewares = exports.loadMiddlewares = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const logger_1 = require("../util/logger");
-const property_middleware_1 = require("./property-middleware");
-const metrics_middleware_1 = require("./metrics-middleware");
-const parallel_middleware_1 = require("./parallel-middleware");
-const sequence_middleware_1 = require("./sequence-middleware");
-const condition_middleware_1 = require("./condition-middleware");
-const httprequest_middleware_1 = require("./httprequest-middleware");
-const openapiverify_middleware_1 = require("./openapiverify-middleware");
-const throw_middleware_1 = require("./throw-middleware");
-const catch_middleware_1 = require("./catch-middleware");
-const authenticate_middleware_1 = require("./authenticate-middleware");
-const execjs_middleware_1 = require("./execjs-middleware");
-const decode_middleware_1 = require("./decode-middleware");
-const encode_middleware_1 = require("./encode-middleware");
-const grpcrequest_middleware_1 = require("./grpcrequest-middleware");
-const loadprivatekey_middleware_1 = require("./loadprivatekey-middleware");
-const loadpubliccertificate_middleware_1 = require("./loadpubliccertificate-middleware");
-const jwsgenerate_middleware_1 = require("./jwsgenerate-middleware");
-const jwsverify_middleware_1 = require("./jwsverify-middleware");
-const jwegenerate_middleware_1 = require("./jwegenerate-middleware");
-const jweverify_middleware_1 = require("./jweverify-middleware");
-const redisset_middleware_1 = require("./redisset-middleware");
-const redisget_middleware_1 = require("./redisget-middleware");
-const ratelimiter_middleware_1 = require("./ratelimiter-middleware");
-const quotalimiter_middleware_1 = require("./quotalimiter-middleware");
-const getrawbody_middleware_1 = require("./getrawbody-middleware");
-const redispublish_middleware_1 = require("./redispublish-middleware");
-const redisxadd_middleware_1 = require("./redisxadd-middleware");
-const delay_middleware_1 = require("./delay-middleware");
-const timeout_middleware_1 = require("./timeout-middleware");
 const middlewares_1 = require("../core/middlewares");
 const util_1 = require("../util");
 const lodash_1 = __importDefault(require("lodash"));
 const events_1 = require("events");
 const errors_1 = require("../core/errors");
 function readDirectoryProjects(dir) {
-    const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
-    finfos.forEach(finfo => {
-        if (finfo.isDirectory()) {
-            logger_1.logger.info(`Loading middleware ${finfo.name}`);
+    var e_1, _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const finfos = fs_1.default.readdirSync(dir, { withFileTypes: true });
+        try {
+            for (var finfos_1 = __asyncValues(finfos), finfos_1_1; finfos_1_1 = yield finfos_1.next(), !finfos_1_1.done;) {
+                const finfo = finfos_1_1.value;
+                if (path_1.default.extname(finfo.name) === '.js' && path_1.default.basename(finfo.name) !== 'index.js') {
+                    try {
+                        const f = path_1.default.basename(finfo.name);
+                        logger_1.logger.info(`Loading middleware ${f}`);
+                        const ipt = yield Promise.resolve().then(() => __importStar(require(path_1.default.resolve(dir, f))));
+                        const ctor = lodash_1.default.get(ipt, 'MiddlewareCtor');
+                        const schema = lodash_1.default.get(ipt, 'MiddlewareSchema');
+                        if (ctor !== undefined && schema !== undefined) {
+                            middlewares_1.addMiddleware(ctor.name, ctor, schema);
+                        }
+                    }
+                    catch (err) {
+                        logger_1.logger.error('Error loading middleware', err);
+                    }
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (finfos_1_1 && !finfos_1_1.done && (_a = finfos_1.return)) yield _a.call(finfos_1);
+            }
+            finally { if (e_1) throw e_1.error; }
         }
     });
 }
 function loadMiddlewares() {
-    //readDirectoryProjects(path.resolve(baseDirectory, 'middlewares'));
-    middlewares_1.addMiddleware('EsPropertyMiddleware', property_middleware_1.MiddlewareCtor, property_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsMetricsMiddleware', metrics_middleware_1.MiddlewareCtor, metrics_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsParallelMiddleware', parallel_middleware_1.MiddlewareCtor, parallel_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsSequenceMiddleware', sequence_middleware_1.MiddlewareCtor, sequence_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsConditionMiddleware', condition_middleware_1.MiddlewareCtor, condition_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsHttpRequestMiddleware', httprequest_middleware_1.MiddlewareCtor, httprequest_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsOpenApiVerifyMiddleware', openapiverify_middleware_1.MiddlewareCtor, openapiverify_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsThrowMiddleware', throw_middleware_1.MiddlewareCtor, throw_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsCatchMiddleware', catch_middleware_1.MiddlewareCtor, catch_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsAuthenticateMiddleware', authenticate_middleware_1.MiddlewareCtor, authenticate_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsExecJsMiddleware', execjs_middleware_1.MiddlewareCtor, execjs_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsDecodeMiddleware', decode_middleware_1.MiddlewareCtor, decode_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsEncodeMiddleware', encode_middleware_1.MiddlewareCtor, encode_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsGrpcRequestMiddleware', grpcrequest_middleware_1.MiddlewareCtor, grpcrequest_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsLoadPrivateKeyMiddleware', loadprivatekey_middleware_1.MiddlewareCtor, loadprivatekey_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsLoadPublicCertificateMiddleware', loadpubliccertificate_middleware_1.MiddlewareCtor, loadpubliccertificate_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsJwsGenerateMiddleware', jwsgenerate_middleware_1.MiddlewareCtor, jwsgenerate_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsJwsVerifyMiddleware', jwsverify_middleware_1.MiddlewareCtor, jwsverify_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsJweGenerateMiddleware', jwegenerate_middleware_1.MiddlewareCtor, jwegenerate_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsJweVerifyMiddleware', jweverify_middleware_1.MiddlewareCtor, jweverify_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsRedisSetMiddleware', redisset_middleware_1.MiddlewareCtor, redisset_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsRedisGetMiddleware', redisget_middleware_1.MiddlewareCtor, redisget_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsRateLimiterMiddleware', ratelimiter_middleware_1.MiddlewareCtor, ratelimiter_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsQuotaLimiterMiddleware', quotalimiter_middleware_1.MiddlewareCtor, quotalimiter_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsGetRawBodyMiddleware', getrawbody_middleware_1.MiddlewareCtor, getrawbody_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsRedisPublishMiddleware', redispublish_middleware_1.MiddlewareCtor, redispublish_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsRedisXaddMiddleware', redisxadd_middleware_1.MiddlewareCtor, redisxadd_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsDelayMiddleware', delay_middleware_1.MiddlewareCtor, delay_middleware_1.MiddlewareSchema);
-    middlewares_1.addMiddleware('EsTimeoutMiddleware', timeout_middleware_1.MiddlewareCtor, timeout_middleware_1.MiddlewareSchema);
+    return __awaiter(this, void 0, void 0, function* () {
+        yield readDirectoryProjects(__dirname);
+        // addMiddleware('EsPropertyMiddleware', EsPropertyMiddlewareContructor, EsPropertySchema);
+        // addMiddleware('EsMetricsMiddleware', EsMetricsMiddlewareContructor, EsMetricsSchema);
+        // addMiddleware('EsParallelMiddleware', EsParallelMiddlewareContructor, EsParallelSchema);
+        // addMiddleware('EsSequenceMiddleware', EsSequenceMiddlewareContructor, EsSequenceSchema);
+        // addMiddleware('EsConditionMiddleware', EsConditionMiddlewareContructor, EsConditionSchema);
+        // addMiddleware('EsHttpRequestMiddleware', EsHttpRequestMiddlewareContructor, EsHttpRequestSchema);
+        // addMiddleware('EsOpenApiVerifyMiddleware', EsOpenApiVerifyMiddlewareContructor, EsOpenApiVerifySchema);
+        // addMiddleware('EsThrowMiddleware', EsThrowMiddlewareContructor, EsThrowSchema);
+        // addMiddleware('EsCatchMiddleware', EsCatchMiddlewareContructor, EsCatchSchema);
+        // addMiddleware('EsAuthenticateMiddleware', EsAuthenticateMiddlewareContructor, EsAuthenticateSchema);
+        // addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
+        // addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
+        // addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
+        // addMiddleware('EsGrpcRequestMiddleware', EsGrpcRequestMiddlewareContructor, EsGrpcRequestSchema);
+        // addMiddleware('EsLoadPrivateKeyMiddleware', EsLoadPrivateKeyMiddlewareContructor, EsLoadPrivateKeySchema);
+        // addMiddleware('EsLoadPublicCertificateMiddleware', EsLoadPublicCertificateMiddlewareContructor, EsLoadPublicCertificateSchema);
+        // addMiddleware('EsJwsGenerateMiddleware', EsJwsGenerateMiddlewareContructor, EsJwsGenerateSchema);
+        // addMiddleware('EsJwsVerifyMiddleware', EsJwsVerifyMiddlewareContructor, EsJwsVerifySchema);
+        // addMiddleware('EsJweGenerateMiddleware', EsJweGenerateMiddlewareContructor, EsJweGenerateSchema);
+        // addMiddleware('EsJweVerifyMiddleware', EsJweVerifyMiddlewareContructor, EsJweVerifySchema);
+        // addMiddleware('EsRedisSetMiddleware', EsRedisSetMiddlewareContructor, EsRedisSetSchema);
+        // addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
+        // addMiddleware('EsRateLimiterMiddleware', EsRateLimiterMiddlewareContructor, EsRateLimiterSchema);
+        // addMiddleware('EsQuotaLimiterMiddleware', EsQuotaLimiterMiddlewareContructor, EsQuotaLimiterSchema);
+        // addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
+        // addMiddleware('EsRedisPublishMiddleware', EsRedisPublishMiddlewareContructor, EsRedisPublishSchema);
+        // addMiddleware('EsRedisXaddMiddleware', EsRedisXaddMiddlewareContructor, EsRedisXaddSchema);
+        // addMiddleware('EsDelayMiddleware', EsDelayMiddlewareContructor, EsDelaySchema);
+        // addMiddleware('EsTimeoutMiddleware', EsTimeoutMiddlewareContructor, EsTimeoutSchema);
+    });
 }
 exports.loadMiddlewares = loadMiddlewares;
 ;

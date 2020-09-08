@@ -4,3 +4,4 @@ certs
 resources
 .DS_Store
 resources\ copy
+Etcd*

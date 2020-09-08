@@ -37,52 +37,65 @@ import _ from 'lodash';
 import { EventEmitter } from 'events';
 import { EsMiddlewareError } from '../core/errors';
 
-function readDirectoryProjects(dir: string) {
+async function readDirectoryProjects(dir: string) {
     const finfos = fs.readdirSync(dir, { withFileTypes: true });
 
-    finfos.forEach(finfo => {
-        if (finfo.isDirectory()) {
-            logger.info(`Loading middleware ${finfo.name}`);
+    for await (const finfo of finfos) {
+        if (path.extname(finfo.name) === '.js' && path.basename(finfo.name) !== 'index.js') {
+            try {
+                const f = path.basename(finfo.name);
+                logger.info(`Loading middleware ${f}`);
 
+                const ipt = await import(path.resolve(dir, f));
+
+                const ctor = _.get(ipt, 'MiddlewareCtor');
+                const schema = _.get(ipt, 'MiddlewareSchema');
+
+                if (ctor !== undefined && schema !== undefined) {
+                    addMiddleware(ctor.name, ctor, schema);
+                }
+            }
+            catch (err) {
+                logger.error('Error loading middleware', err);
+            }
         }
-    });
+    }
 }
 
-export function loadMiddlewares() {
-    //readDirectoryProjects(path.resolve(baseDirectory, 'middlewares'));
-    addMiddleware('EsPropertyMiddleware', EsPropertyMiddlewareContructor, EsPropertySchema);
-    addMiddleware('EsMetricsMiddleware', EsMetricsMiddlewareContructor, EsMetricsSchema);
-    addMiddleware('EsParallelMiddleware', EsParallelMiddlewareContructor, EsParallelSchema);
-    addMiddleware('EsSequenceMiddleware', EsSequenceMiddlewareContructor, EsSequenceSchema);
-    addMiddleware('EsConditionMiddleware', EsConditionMiddlewareContructor, EsConditionSchema);
-    addMiddleware('EsHttpRequestMiddleware', EsHttpRequestMiddlewareContructor, EsHttpRequestSchema);
-    addMiddleware('EsOpenApiVerifyMiddleware', EsOpenApiVerifyMiddlewareContructor, EsOpenApiVerifySchema);
-    addMiddleware('EsThrowMiddleware', EsThrowMiddlewareContructor, EsThrowSchema);
-    addMiddleware('EsCatchMiddleware', EsCatchMiddlewareContructor, EsCatchSchema);
-    addMiddleware('EsAuthenticateMiddleware', EsAuthenticateMiddlewareContructor, EsAuthenticateSchema);
-    addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
-    addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
-    addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
-    addMiddleware('EsGrpcRequestMiddleware', EsGrpcRequestMiddlewareContructor, EsGrpcRequestSchema);
-    addMiddleware('EsLoadPrivateKeyMiddleware', EsLoadPrivateKeyMiddlewareContructor, EsLoadPrivateKeySchema);
-    addMiddleware('EsLoadPublicCertificateMiddleware', EsLoadPublicCertificateMiddlewareContructor, EsLoadPublicCertificateSchema);
-    addMiddleware('EsJwsGenerateMiddleware', EsJwsGenerateMiddlewareContructor, EsJwsGenerateSchema);
-    addMiddleware('EsJwsVerifyMiddleware', EsJwsVerifyMiddlewareContructor, EsJwsVerifySchema);
-    addMiddleware('EsJweGenerateMiddleware', EsJweGenerateMiddlewareContructor, EsJweGenerateSchema);
-    addMiddleware('EsJweVerifyMiddleware', EsJweVerifyMiddlewareContructor, EsJweVerifySchema);
-    addMiddleware('EsRedisSetMiddleware', EsRedisSetMiddlewareContructor, EsRedisSetSchema);
-    addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
-    addMiddleware('EsRateLimiterMiddleware', EsRateLimiterMiddlewareContructor, EsRateLimiterSchema);
-    addMiddleware('EsQuotaLimiterMiddleware', EsQuotaLimiterMiddlewareContructor, EsQuotaLimiterSchema);
-    addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
-    addMiddleware('EsRedisPublishMiddleware', EsRedisPublishMiddlewareContructor, EsRedisPublishSchema);
-    addMiddleware('EsRedisXaddMiddleware', EsRedisXaddMiddlewareContructor, EsRedisXaddSchema);
-    addMiddleware('EsDelayMiddleware', EsDelayMiddlewareContructor, EsDelaySchema);
-    addMiddleware('EsTimeoutMiddleware', EsTimeoutMiddlewareContructor, EsTimeoutSchema);
-
+export async function loadMiddlewares() {
+    await readDirectoryProjects(__dirname);
+    // addMiddleware('EsPropertyMiddleware', EsPropertyMiddlewareContructor, EsPropertySchema);
+    // addMiddleware('EsMetricsMiddleware', EsMetricsMiddlewareContructor, EsMetricsSchema);
+    // addMiddleware('EsParallelMiddleware', EsParallelMiddlewareContructor, EsParallelSchema);
+    // addMiddleware('EsSequenceMiddleware', EsSequenceMiddlewareContructor, EsSequenceSchema);
+    // addMiddleware('EsConditionMiddleware', EsConditionMiddlewareContructor, EsConditionSchema);
+    // addMiddleware('EsHttpRequestMiddleware', EsHttpRequestMiddlewareContructor, EsHttpRequestSchema);
+    // addMiddleware('EsOpenApiVerifyMiddleware', EsOpenApiVerifyMiddlewareContructor, EsOpenApiVerifySchema);
+    // addMiddleware('EsThrowMiddleware', EsThrowMiddlewareContructor, EsThrowSchema);
+    // addMiddleware('EsCatchMiddleware', EsCatchMiddlewareContructor, EsCatchSchema);
+    // addMiddleware('EsAuthenticateMiddleware', EsAuthenticateMiddlewareContructor, EsAuthenticateSchema);
+    // addMiddleware('EsExecJsMiddleware', EsExecJsMiddlewareContructor, EsExecJsSchema);
+    // addMiddleware('EsDecodeMiddleware', EsDecodeMiddlewareContructor, EsDecodeSchema);
+    // addMiddleware('EsEncodeMiddleware', EsEncodeMiddlewareContructor, EsEncodeSchema);
+    // addMiddleware('EsGrpcRequestMiddleware', EsGrpcRequestMiddlewareContructor, EsGrpcRequestSchema);
+    // addMiddleware('EsLoadPrivateKeyMiddleware', EsLoadPrivateKeyMiddlewareContructor, EsLoadPrivateKeySchema);
+    // addMiddleware('EsLoadPublicCertificateMiddleware', EsLoadPublicCertificateMiddlewareContructor, EsLoadPublicCertificateSchema);
+    // addMiddleware('EsJwsGenerateMiddleware', EsJwsGenerateMiddlewareContructor, EsJwsGenerateSchema);
+    // addMiddleware('EsJwsVerifyMiddleware', EsJwsVerifyMiddlewareContructor, EsJwsVerifySchema);
+    // addMiddleware('EsJweGenerateMiddleware', EsJweGenerateMiddlewareContructor, EsJweGenerateSchema);
+    // addMiddleware('EsJweVerifyMiddleware', EsJweVerifyMiddlewareContructor, EsJweVerifySchema);
+    // addMiddleware('EsRedisSetMiddleware', EsRedisSetMiddlewareContructor, EsRedisSetSchema);
+    // addMiddleware('EsRedisGetMiddleware', EsRedisGetMiddlewareContructor, EsRedisGetSchema);
+    // addMiddleware('EsRateLimiterMiddleware', EsRateLimiterMiddlewareContructor, EsRateLimiterSchema);
+    // addMiddleware('EsQuotaLimiterMiddleware', EsQuotaLimiterMiddlewareContructor, EsQuotaLimiterSchema);
+    // addMiddleware('EsGetRawBodyMiddleware', EsGetRawBodyMiddlewareContructor, EsGetRawBodySchema);
+    // addMiddleware('EsRedisPublishMiddleware', EsRedisPublishMiddlewareContructor, EsRedisPublishSchema);
+    // addMiddleware('EsRedisXaddMiddleware', EsRedisXaddMiddlewareContructor, EsRedisXaddSchema);
+    // addMiddleware('EsDelayMiddleware', EsDelayMiddlewareContructor, EsDelaySchema);
+    // addMiddleware('EsTimeoutMiddleware', EsTimeoutMiddlewareContructor, EsTimeoutSchema);
 };
 
-let apiReloader: {[id: string]: EventEmitter} = {};
+let apiReloader: { [id: string]: EventEmitter } = {};
 
 async function loadCompoundMiddleware(fname: string) {
     if (fname.endsWith('.json') || fname.endsWith('.yaml')) {

@@ -4,10 +4,10 @@ import { getPublicCert } from '../util/certs';
 import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
 import { IEsContext } from '../core';
 
-export class EsLoadPublicCerficateMiddleware extends EsMiddleware {
+export class EsLoadPublicCertificateMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = 'EsLoadPublicCerficateMiddleware';
-    static readonly meta = { middleware: EsLoadPublicCerficateMiddleware.middlewareName };
+    static readonly middlewareName = 'EsLoadPublicCertificateMiddleware';
+    static readonly meta = { middleware: EsLoadPublicCertificateMiddleware.middlewareName };
 
     private _certFile: string;
     private _destProp: string;
@@ -22,10 +22,10 @@ export class EsLoadPublicCerficateMiddleware extends EsMiddleware {
         this._destProp = _.get(values, 'destProp', 'publicCert');
 
         if (!_.isString(this._certFile)) {
-            throw new EsMiddlewareError(EsLoadPublicCerficateMiddleware.name, 'keyFile MUST be String');
+            throw new EsMiddlewareError(EsLoadPublicCertificateMiddleware.name, 'keyFile MUST be String');
         }
         if (!_.isString(this._destProp)) {
-            throw new EsMiddlewareError(EsLoadPublicCerficateMiddleware.name, 'destProp MUST be String');
+            throw new EsMiddlewareError(EsLoadPublicCertificateMiddleware.name, 'destProp MUST be String');
         }
     }
 
@@ -38,11 +38,11 @@ export class EsLoadPublicCerficateMiddleware extends EsMiddleware {
     }
 };
 
-export const MiddlewareCtor: IEsMiddlewareConstructor = EsLoadPublicCerficateMiddleware;
+export const MiddlewareCtor: IEsMiddlewareConstructor = EsLoadPublicCertificateMiddleware;
 
 export const MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsLoadPublicCerficateMiddleware",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsLoadPublicCertificateMiddleware",
     "title": "LoadPublicCerficate Middleware",
     "type": "object",
     "additionalProperties": false,

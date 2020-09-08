@@ -12,32 +12,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsRedisSaveMiddleware = void 0;
-const core_1 = require("../core");
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsSetDataMiddleware = void 0;
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
-const ioredis_1 = __importDefault(require("ioredis"));
+const middlewares_1 = require("../core/middlewares");
 const config_1 = require("../util/config");
-let EsRedisSaveMiddleware = /** @class */ (() => {
-    class EsRedisSaveMiddleware extends core_1.EsMiddleware {
+const etdc_1 = __importDefault(require("../util/etdc"));
+let EsSetDataMiddleware = /** @class */ (() => {
+    class EsSetDataMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
-        constructor(values, after, nextMiddleware) {
-            super(after, nextMiddleware);
+        constructor(values, after, api, nextMiddleware) {
+            super(after, api, nextMiddleware);
             this._srcProp = lodash_1.default.get(values, 'sourceProp');
             this._ttlProp = lodash_1.default.get(values, 'ttlProp');
-            this._redisDestProp = lodash_1.default.get(values, 'redisDestProp');
+            this._destProp = lodash_1.default.get(values, 'destProp');
             if (!lodash_1.default.isString(this._srcProp)) {
-                throw new errors_1.EsMiddlewareError(EsRedisSaveMiddleware.name, 'sourceProp MUST be string');
+                throw new errors_1.EsMiddlewareError(EsSetDataMiddleware.name, 'sourceProp MUST be string');
             }
             if (!lodash_1.default.isUndefined(this._ttlProp) && !lodash_1.default.isString(this._ttlProp)) {
-                throw new errors_1.EsMiddlewareError(EsRedisSaveMiddleware.name, 'ttlProp MUST be string');
+                throw new errors_1.EsMiddlewareError(EsSetDataMiddleware.name, 'ttlProp MUST be string');
             }
-            if (!lodash_1.default.isUndefined(this._redisDestProp) && !lodash_1.default.isString(this._redisDestProp)) {
-                throw new errors_1.EsMiddlewareError(EsRedisSaveMiddleware.name, 'redisDestProp MUST be string');
+            if (!lodash_1.default.isUndefined(this._destProp) && !lodash_1.default.isString(this._destProp)) {
+                throw new errors_1.EsMiddlewareError(EsSetDataMiddleware.name, 'destProp MUST be string');
             }
-            this._redis = new ioredis_1.default();
         }
         loadAsync() {
             return __awaiter(this, void 0, void 0, function* () { });
@@ -52,34 +51,37 @@ let EsRedisSaveMiddleware = /** @class */ (() => {
                         ttl = ttlVal;
                     }
                 }
-                const redisDest = lodash_1.default.get(context.properties, this._redisDestProp);
-                if (!lodash_1.default.isString(redisDest)) {
-                    throw new errors_1.EsMiddlewareError(EsRedisSaveMiddleware.name, `redisDest (prop ${this._redisDestProp}) MUST be string`);
+                const dest = lodash_1.default.get(context.properties, this._destProp);
+                if (!lodash_1.default.isString(dest)) {
+                    throw new errors_1.EsMiddlewareError(EsSetDataMiddleware.name, `Destination (prop ${this._destProp}) MUST be string`);
                 }
-                const realDest = `esgateway:runtime:apis:${config_1.configuration.env}:${context.meta.api}:${redisDest}`;
-                // Não vou deixar o TTL ser infinito, pode gerar problemas -- 30 dias no máximo
-                ttl = ttl !== null && ttl !== void 0 ? ttl : 1000 * 60 * 60 * 24 * 30;
-                yield this._redis.set(realDest, prop, 'px', ttl);
+                const realDest = `esgateway/runtime/apis/${config_1.configuration.env}/${context.meta.api}/store/${dest}`;
+                const etcdClient = etdc_1.default();
+                if (ttl !== undefined) {
+                    yield etcdClient.put(realDest).value(prop).lease(ttl);
+                }
+                else {
+                    yield etcdClient.put(realDest).value(prop);
+                }
             });
         }
     }
-    EsRedisSaveMiddleware.isInOut = true;
-    EsRedisSaveMiddleware.middlewareName = 'EsRedisSaveMiddleware';
-    EsRedisSaveMiddleware.meta = { middleware: EsRedisSaveMiddleware.middlewareName };
-    return EsRedisSaveMiddleware;
+    EsSetDataMiddleware.isInOut = true;
+    EsSetDataMiddleware.middlewareName = 'EsSetDataMiddleware';
+    EsSetDataMiddleware.meta = { middleware: EsSetDataMiddleware.middlewareName };
+    return EsSetDataMiddleware;
 })();
-exports.EsRedisSaveMiddleware = EsRedisSaveMiddleware;
-;
-exports.MiddlewareCtor = EsRedisSaveMiddleware;
+exports.EsSetDataMiddleware = EsSetDataMiddleware;
+exports.MiddlewareCtor = EsSetDataMiddleware;
 exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsRedisSaveMiddleware",
-    "title": "RedisSave Middleware",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsSetDataMiddleware",
+    "title": "SetData Middleware",
     "type": "object",
     "additionalProperties": false,
     "required": [
         "sourceProp",
-        "redisDestProp"
+        "destProp"
     ],
     "properties": {
         "sourceProp": {
@@ -90,10 +92,10 @@ exports.MiddlewareSchema = {
             "type": "string",
             "minLength": 1
         },
-        "redisDestProp": {
+        "destProp": {
             "type": "string",
             "minLength": 1
         }
     }
 };
-//# sourceMappingURL=redissave-middleware.js.map
+//# sourceMappingURL=setdata-middleware.js.map

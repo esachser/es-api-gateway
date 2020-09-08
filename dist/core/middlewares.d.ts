@@ -28,7 +28,7 @@ export declare function addMiddleware(name: string, constructor: IEsMiddlewareCo
 export declare function getMiddlewareConstructor(name: string): IEsMiddlewareConstructor | undefined;
 export declare function removeAllCustomMiddlewares(): void;
 export declare function removeMiddleware(name: string): void;
-export declare function getCustomConstructor(mids: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor;
+export declare function getCustomConstructor(middlewares: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor;
 export declare function getCustomSchema(name: string): {
     $schema: string;
     $id: string;

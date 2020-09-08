@@ -10,7 +10,7 @@ import { Logger } from 'winston';
 import { configuration } from '../util/config';
 import { clearRouters } from '../util/http-server';
 import { IEsTransport, createTransport } from '../core/transports';
-import { createMiddleware, connectMiddlewares } from '../core/middlewares';
+import { createMiddleware, connectMiddlewares, copyMiddleware } from '../core/middlewares';
 import getEtcdClient from '../util/etdc';
 import { Watcher } from 'etcd3';
 import util from 'util';
@@ -75,24 +75,30 @@ async function loadApiFile(fname: string) {
 
     const apiEnabled = _.get(apiJson, 'enabled', true);
 
+    const initialMid = await createMiddleware(initJs, 0, fname);
+    const centralMid = await createMiddleware(executionJs, 0, fname);
+
     if (transports !== undefined && _.isArray(transports)) {
         for (const transport of transports) {
             const trpEnabled = _.get(transport, 'enabled', true);
             if (apiEnabled && trpEnabled) {
-                const initialMid = await createMiddleware(initJs, 0, fname);
-                const centralMid = await createMiddleware(executionJs, 0, fname);
-
-                const id = _.get(transport, 'id');
+                const ids = _.get(transport, 'id', '').split(',');
                 const type = _.get(transport, 'type');
                 const parameters = _.get(transport, 'parameters');
                 const mids = _.get(transport, 'mids') as any[];
 
-                const pre = await createMiddleware(mids, 0, fname);
-                const mid = connectMiddlewares(pre, centralMid);
+                for await (let id of ids) {
+                    id = id.trim();
+                    const imid = copyMiddleware(initialMid);
+                    const cmid = copyMiddleware(centralMid);
 
-                const trp = await createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
-                if (trp !== undefined) {
-                    api.transports[id] = trp;
+                    const pre = await createMiddleware(mids, 0, fname);
+                    const mid = connectMiddlewares(pre, cmid);
+
+                    const trp = await createTransport(type, fname, id, api.logger, parameters, mid, imid);
+                    if (trp !== undefined) {
+                        api.transports[id] = trp;
+                    }
                 }
             }
         }

@@ -19,6 +19,7 @@ export interface IEsMiddleware extends events.EventEmitter{
 export class IEsMiddleware { }
 applyMixins(IEsMiddleware, [events.EventEmitter]);
 
+
 export abstract class EsMiddleware extends IEsMiddleware {
     next?: IEsMiddleware
 
@@ -154,7 +155,7 @@ export function removeMiddleware(name: string) {
     }
 }
 
-export function getCustomConstructor(mids: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor {
+export function getCustomConstructor(middlewares: any[], changeEmitter: EventEmitter): IEsMiddlewareConstructor {
     return class C extends EsMiddleware {
         private static emitters: {[id:string]:boolean} = {};
         private _mid?: IEsMiddleware;
@@ -170,7 +171,7 @@ export function getCustomConstructor(mids: any[], changeEmitter: EventEmitter): 
         }
 
         async loadAsync() {
-            this._mid = await createMiddleware(mids, 0, this.api);
+            this._mid = await createMiddleware(middlewares, 0, this.api);
         }
 
         async runInternal(context: IEsContext) {

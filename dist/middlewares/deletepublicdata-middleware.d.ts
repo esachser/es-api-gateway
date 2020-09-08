@@ -1,18 +1,16 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsRedisSaveMiddleware extends EsMiddleware {
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
+export declare class EsDeletePublicDataMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = "EsRedisSaveMiddleware";
+    static readonly middlewareName = "EsDeletePublicDataMiddleware";
     static readonly meta: {
         middleware: string;
     };
     private _srcProp;
-    private _ttlProp?;
-    private _redisDestProp;
-    private _redis;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
+    constructor(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware);
     loadAsync(): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
@@ -26,14 +24,6 @@ export declare const MiddlewareSchema: {
     required: string[];
     properties: {
         sourceProp: {
-            type: string;
-            minLength: number;
-        };
-        ttlProp: {
-            type: string;
-            minLength: number;
-        };
-        redisDestProp: {
             type: string;
             minLength: number;
         };

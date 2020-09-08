@@ -1,0 +1,27 @@
+---
+transports:
+  - type: EsScheduleTransport
+    id: sch3
+    parameters:
+      schedule: "*/20 * * * * *"
+    mids: []
+init: 
+  - type: EsMetricsMiddleware
+    data: 
+      prop: execution-time
+execution: 
+- type: EsPropertyMiddleware
+  data:
+    name: body
+    expression: Date.now()
+- type: EsPropertyMiddleware
+  data:
+    name: dest
+    value: time
+- type: EsSetPublicDataMiddleware
+  data:
+    sourceProp: body
+    destProp: dest
+logging:
+  level: info
+enabled: true

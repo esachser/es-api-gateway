@@ -1,12 +1,13 @@
 import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
 import { IEsContext } from '../core';
-export declare class EsLoadPublicCertificateMiddleware extends EsMiddleware {
+export declare class EsSetPublicDataMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = "EsLoadPublicCertificateMiddleware";
+    static readonly middlewareName = "EsSetPublicDataMiddleware";
     static readonly meta: {
         middleware: string;
     };
-    private _certFile;
+    private _srcProp;
+    private _ttlProp?;
     private _destProp;
     /**
      * Constrói o middleware a partir dos parâmetros
@@ -24,7 +25,11 @@ export declare const MiddlewareSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        certFile: {
+        sourceProp: {
+            type: string;
+            minLength: number;
+        };
+        ttlProp: {
             type: string;
             minLength: number;
         };

@@ -8,6 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -36,13 +43,14 @@ const fsasync = {
 };
 let apis = {};
 function loadApiFile(fname) {
-    var _a, _b;
+    var e_1, _a;
+    var _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         const apiJson = yield util_1.readFileToObject(fname);
         logger_1.logger.debug(apiJson);
         const ext = path_1.default.extname(fname);
         fname = path_1.default.basename(fname, ext);
-        let api = (_a = apis[fname]) !== null && _a !== void 0 ? _a : {
+        let api = (_b = apis[fname]) !== null && _b !== void 0 ? _b : {
             transports: [],
             logger: {},
             apiFile: `${fname}${ext}`
@@ -51,7 +59,7 @@ function loadApiFile(fname) {
         for (const tname of Object.keys(api.transports)) {
             if (api.transports[tname] !== undefined) {
                 api.transports[tname].clear();
-                (_b = api.logger) === null || _b === void 0 ? void 0 : _b.close();
+                (_c = api.logger) === null || _c === void 0 ? void 0 : _c.close();
                 delete api.logger;
                 delete api.transports[tname];
             }
@@ -70,21 +78,36 @@ function loadApiFile(fname) {
         api.logger = logger_1.createLogger(logLevel, fname);
         const transports = lodash_1.default.get(apiJson, 'transports');
         const apiEnabled = lodash_1.default.get(apiJson, 'enabled', true);
+        const initialMid = yield middlewares_1.createMiddleware(initJs, 0, fname);
+        const centralMid = yield middlewares_1.createMiddleware(executionJs, 0, fname);
         if (transports !== undefined && lodash_1.default.isArray(transports)) {
             for (const transport of transports) {
                 const trpEnabled = lodash_1.default.get(transport, 'enabled', true);
                 if (apiEnabled && trpEnabled) {
-                    const initialMid = yield middlewares_1.createMiddleware(initJs, 0, fname);
-                    const centralMid = yield middlewares_1.createMiddleware(executionJs, 0, fname);
-                    const id = lodash_1.default.get(transport, 'id');
+                    const ids = lodash_1.default.get(transport, 'id', '').split(',');
                     const type = lodash_1.default.get(transport, 'type');
                     const parameters = lodash_1.default.get(transport, 'parameters');
                     const mids = lodash_1.default.get(transport, 'mids');
-                    const pre = yield middlewares_1.createMiddleware(mids, 0, fname);
-                    const mid = middlewares_1.connectMiddlewares(pre, centralMid);
-                    const trp = yield transports_1.createTransport(type, fname, id, api.logger, parameters, mid, initialMid);
-                    if (trp !== undefined) {
-                        api.transports[id] = trp;
+                    try {
+                        for (var ids_1 = (e_1 = void 0, __asyncValues(ids)), ids_1_1; ids_1_1 = yield ids_1.next(), !ids_1_1.done;) {
+                            let id = ids_1_1.value;
+                            id = id.trim();
+                            const imid = middlewares_1.copyMiddleware(initialMid);
+                            const cmid = middlewares_1.copyMiddleware(centralMid);
+                            const pre = yield middlewares_1.createMiddleware(mids, 0, fname);
+                            const mid = middlewares_1.connectMiddlewares(pre, cmid);
+                            const trp = yield transports_1.createTransport(type, fname, id, api.logger, parameters, mid, imid);
+                            if (trp !== undefined) {
+                                api.transports[id] = trp;
+                            }
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (ids_1_1 && !ids_1_1.done && (_a = ids_1.return)) yield _a.call(ids_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
                     }
                 }
             }

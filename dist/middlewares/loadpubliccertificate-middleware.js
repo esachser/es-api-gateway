@@ -12,13 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsLoadPublicCerficateMiddleware = void 0;
+exports.MiddlewareSchema = exports.MiddlewareCtor = exports.EsLoadPublicCertificateMiddleware = void 0;
 const lodash_1 = __importDefault(require("lodash"));
 const errors_1 = require("../core/errors");
 const certs_1 = require("../util/certs");
 const middlewares_1 = require("../core/middlewares");
-let EsLoadPublicCerficateMiddleware = /** @class */ (() => {
-    class EsLoadPublicCerficateMiddleware extends middlewares_1.EsMiddleware {
+let EsLoadPublicCertificateMiddleware = /** @class */ (() => {
+    class EsLoadPublicCertificateMiddleware extends middlewares_1.EsMiddleware {
         /**
          * Constrói o middleware a partir dos parâmetros
          */
@@ -27,10 +27,10 @@ let EsLoadPublicCerficateMiddleware = /** @class */ (() => {
             this._certFile = lodash_1.default.get(values, 'certFile', 'server.crt');
             this._destProp = lodash_1.default.get(values, 'destProp', 'publicCert');
             if (!lodash_1.default.isString(this._certFile)) {
-                throw new errors_1.EsMiddlewareError(EsLoadPublicCerficateMiddleware.name, 'keyFile MUST be String');
+                throw new errors_1.EsMiddlewareError(EsLoadPublicCertificateMiddleware.name, 'keyFile MUST be String');
             }
             if (!lodash_1.default.isString(this._destProp)) {
-                throw new errors_1.EsMiddlewareError(EsLoadPublicCerficateMiddleware.name, 'destProp MUST be String');
+                throw new errors_1.EsMiddlewareError(EsLoadPublicCertificateMiddleware.name, 'destProp MUST be String');
             }
         }
         loadAsync() {
@@ -43,17 +43,17 @@ let EsLoadPublicCerficateMiddleware = /** @class */ (() => {
             });
         }
     }
-    EsLoadPublicCerficateMiddleware.isInOut = true;
-    EsLoadPublicCerficateMiddleware.middlewareName = 'EsLoadPublicCerficateMiddleware';
-    EsLoadPublicCerficateMiddleware.meta = { middleware: EsLoadPublicCerficateMiddleware.middlewareName };
-    return EsLoadPublicCerficateMiddleware;
+    EsLoadPublicCertificateMiddleware.isInOut = true;
+    EsLoadPublicCertificateMiddleware.middlewareName = 'EsLoadPublicCertificateMiddleware';
+    EsLoadPublicCertificateMiddleware.meta = { middleware: EsLoadPublicCertificateMiddleware.middlewareName };
+    return EsLoadPublicCertificateMiddleware;
 })();
-exports.EsLoadPublicCerficateMiddleware = EsLoadPublicCerficateMiddleware;
+exports.EsLoadPublicCertificateMiddleware = EsLoadPublicCertificateMiddleware;
 ;
-exports.MiddlewareCtor = EsLoadPublicCerficateMiddleware;
+exports.MiddlewareCtor = EsLoadPublicCertificateMiddleware;
 exports.MiddlewareSchema = {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsLoadPublicCerficateMiddleware",
+    "$id": "https://esachser.github.io/es-apigw/v1/schemas/EsLoadPublicCertificateMiddleware",
     "title": "LoadPublicCerficate Middleware",
     "type": "object",
     "additionalProperties": false,

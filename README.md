@@ -99,8 +99,6 @@ Aspectos que devem ser vistos:
 - Ajustar middlewares
   - [**OK**] Debug unificado
   - Verificar código
-- Criar ferramenta que edita direto etcd
-  - Sincronizar somente ETCD --> Local
 - [**OK**] Ajustar transportes
   - [**OK**] Ajustar index.ts para não carregar de lugar nenhum
 - Iniciar documentação, exemplos, testes, e casos de uso
@@ -112,14 +110,21 @@ Aspectos que devem ser vistos:
   - Descrição de cada autenticador
   - Exemplos e casos de uso
 - Middlewares necessários para primeira versão
-  - Timeout Middleware
-  - Salvar dado no ETCD Store da API
-  - Capturar dado no ETCD Store da API
+  - [**OK**] Timeout Middleware
+  - [**OK**] Salvar dado no ETCD Store da API
+  - [**OK**] Salvar dado no ETCD Store público
+  - [**OK**] Capturar dado no ETCD Store da API
+  - [**OK**] Capturar dado no ETCD Store público
+  - [**OK**] Remover dado no ETCD Store da API
+  - [**OK**] Remover dado no ETCD Store público
   - Capturar ou retornar arquivo das resources (buffer ou stream)
   - Verificar payload contra Regex
   - Autenticação Básica
   - Autenticação com certificado (Mutual TLS)
   - Kafka
+- Ids no Transporte HTTP separados por vírgulas servem para 
+- Criar ferramenta que edita direto etcd
+  - Sincronizar somente ETCD --> Local
 - Unificar configuração
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?

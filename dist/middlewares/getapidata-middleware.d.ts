@@ -1,17 +1,18 @@
-import { IEsMiddleware, EsMiddleware, IEsContext, IEsMiddlewareConstructor } from '../core';
-export declare class EsForEachMiddleware extends EsMiddleware {
+import { EsMiddleware, IEsMiddleware, IEsMiddlewareConstructor } from '../core/middlewares';
+import { IEsContext } from '../core';
+export declare class EsGetApiDataMiddleware extends EsMiddleware {
     static readonly isInOut = true;
-    static readonly middlewareName = "EsForEachMiddleware";
+    static readonly middlewareName = "EsGetApiDataMiddleware";
     static readonly meta: {
         middleware: string;
     };
-    forEachMiddleware?: IEsMiddleware;
-    propArray: string;
+    private _srcProp;
+    private _destProp;
     /**
      * Constrói o middleware a partir dos parâmetros
      */
-    constructor(values: any, after: boolean, nextMiddleware?: IEsMiddleware);
-    loadAsync(values: any): Promise<void>;
+    constructor(values: any, after: boolean, api: string, nextMiddleware?: IEsMiddleware);
+    loadAsync(): Promise<void>;
     runInternal(context: IEsContext): Promise<void>;
 }
 export declare const MiddlewareCtor: IEsMiddlewareConstructor;
@@ -23,14 +24,13 @@ export declare const MiddlewareSchema: {
     additionalProperties: boolean;
     required: string[];
     properties: {
-        propArray: {
+        sourceProp: {
             type: string;
+            minLength: number;
         };
-        mids: {
+        destProp: {
             type: string;
-            items: {
-                $ref: string;
-            };
+            minLength: number;
         };
     };
 };
