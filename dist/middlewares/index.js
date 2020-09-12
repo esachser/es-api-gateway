@@ -57,7 +57,6 @@ function readDirectoryProjects(dir) {
                 if (path_1.default.extname(finfo.name) === '.js' && path_1.default.basename(finfo.name) !== 'index.js') {
                     try {
                         const f = path_1.default.basename(finfo.name);
-                        logger_1.logger.info(`Loading middleware ${f}`);
                         const ipt = yield Promise.resolve().then(() => __importStar(require(path_1.default.resolve(dir, f))));
                         const ctor = lodash_1.default.get(ipt, 'MiddlewareCtor');
                         const schema = lodash_1.default.get(ipt, 'MiddlewareSchema');

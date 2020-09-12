@@ -44,8 +44,6 @@ async function readDirectoryProjects(dir: string) {
         if (path.extname(finfo.name) === '.js' && path.basename(finfo.name) !== 'index.js') {
             try {
                 const f = path.basename(finfo.name);
-                logger.info(`Loading middleware ${f}`);
-
                 const ipt = await import(path.resolve(dir, f));
 
                 const ctor = _.get(ipt, 'MiddlewareCtor');

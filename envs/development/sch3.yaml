@@ -24,4 +24,4 @@ execution:
     destProp: dest
 logging:
   level: info
-enabled: true
+enabled: false

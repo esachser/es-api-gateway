@@ -1,0 +1,33 @@
+---
+logging:
+  level: info
+init:
+- type: EsMetricsMiddleware
+  data:
+    prop: response.headers.x-esgateway-execution-time
+execution:
+- type: EsGetResourceMiddleware
+  data:
+    resourceProp: resource
+- type: EsPropertyMiddleware
+  data:
+    name: response.status
+    value: 200
+- type: EsPropertyMiddleware
+  data:
+    name: response.headers.content-type
+    value: text/html
+transports:
+- type: EsHttpTransport
+  id: http
+  mids: []
+  parameters:
+    routeContext: /public/opendata
+    routes:
+      "/:filename*":
+      - method: GET
+        mids:
+        - type: EsPropertyMiddleware
+          data:
+            name: resource
+            expression: ctx.properties.request.params.filename ?? 'index.html'

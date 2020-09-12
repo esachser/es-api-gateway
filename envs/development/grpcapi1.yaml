@@ -92,7 +92,7 @@ execution:
     after: false
     data:
       name: method
-      value: Hello
+      value: hello
   - type: EsPropertyMiddleware
     after: false
     data:

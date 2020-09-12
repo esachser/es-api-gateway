@@ -117,12 +117,13 @@ Aspectos que devem ser vistos:
   - [**OK**] Capturar dado no ETCD Store público
   - [**OK**] Remover dado no ETCD Store da API
   - [**OK**] Remover dado no ETCD Store público
-  - Capturar ou retornar arquivo das resources (buffer ou stream)
+  - [**OK**] Capturar arquivo (e stats) das resources (buffer ou stream)
   - Verificar payload contra Regex
   - Autenticação Básica
   - Autenticação com certificado (Mutual TLS)
   - Kafka
-- Ids no Transporte HTTP separados por vírgulas servem para 
+- [**OK**] Ids no Transporte HTTP separados por vírgulas servem para criar mesma casca para vários
+- Schedule um cluster ou todos (usando ETCD para sincronizar)
 - Criar ferramenta que edita direto etcd
   - Sincronizar somente ETCD --> Local
 - Unificar configuração
