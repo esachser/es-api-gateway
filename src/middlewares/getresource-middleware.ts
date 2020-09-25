@@ -52,7 +52,7 @@ export class EsGetResourceMiddleware extends EsMiddleware {
         }
         catch (err) {
             throw new EsMiddlewareError(EsGetResourceMiddleware.name, 'Not Found', err, 'The resource has not been found', 404);
-        }        
+        }
     }
 }
 

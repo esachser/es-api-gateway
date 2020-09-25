@@ -1,0 +1,35 @@
+---
+transports:
+  - type: EsHttpTransport
+    id: http, https
+    parameters:
+      routeContext: /api/perf/v4
+      routes:
+        "/":
+        - method: GET
+          mids: []
+        "/wait-:delay(\\d+)":
+        - method: GET
+          mids:
+          - type: EsDelayMiddleware
+            data:
+              delayProp: request.params.delay
+    mids: []
+    enabled: true
+init: 
+- type: EsMetricsMiddleware
+  data: 
+    prop: response.headers.x-esgateway-execution-time
+execution:
+- type: EsPropertyMiddleware
+  data:
+    name: response.body
+    value:
+      ok: true
+- type: EsPropertyMiddleware
+  data:
+    name: response.status
+    value: 200
+logging:
+  level: info
+enabled: true

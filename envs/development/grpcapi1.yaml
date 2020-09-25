@@ -10,10 +10,17 @@ transports:
             mids: []
           - method: POST
             mids: 
-              - type: EsGetRawBodyMiddleware
-                after: false
-                data: 
-                  streamProp: httpctx.req
+            - type: EsGetRawBodyMiddleware
+              after: false
+              data: 
+                streamProp: httpctx.req
+            - type: EsPropertyMiddleware
+              data:
+                name: body
+                expression: ctx.properties.request.body.toString('utf-8')
+            - type: EsRegexProtectionMiddleware
+              data:
+                sourceProp: body
     mids:
       - type: EsMetricsMiddleware
         data:

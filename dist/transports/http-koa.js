@@ -70,7 +70,7 @@ let EsHttpTransport = /** @class */ (() => {
                             const init = middlewares_1.copyMiddleware(this.initMiddleware);
                             const mid = middlewares_1.copyMiddleware(this.middleware);
                             const middleware = middlewares_1.connectMiddlewares(init, pathMethodMid, mid);
-                            httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+                            httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx) => __awaiter(this, void 0, void 0, function* () {
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids
                                 //      <========    ||    <==========||

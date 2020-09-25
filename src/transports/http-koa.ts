@@ -96,7 +96,7 @@ export class EsHttpTransport implements IEsTransport {
                     const init = copyMiddleware(this.initMiddleware);
                     const mid = copyMiddleware(this.middleware);
                     const middleware = connectMiddlewares(init, pathMethodMid, mid);
-                    httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx, next) => {
+                    httpRouter.register(totalPath, [methodInfo.method.toString()], async (ctx) => {
                         // Executa middleware central, correspondente a:
                         // pathMids ==> transportMids ==> executionMids
                         //      <========    ||    <==========||
@@ -105,6 +105,7 @@ export class EsHttpTransport implements IEsTransport {
                         if (!allPath.endsWith('/')) {
                             allPath += '/';
                         }
+                        
                         const context: IEsContext = {
                             properties: {
                                 request: {
@@ -160,7 +161,7 @@ export class EsHttpTransport implements IEsTransport {
 
                             context.logger.error('Error running middlewares', _.merge({}, err, context.meta));
                         }
-                        ctx.set('host', 'es-api-gateway 0.1.0');
+                        ctx.set('server', 'es-api-gateway 0.1.0');
                     });
                 }
             }

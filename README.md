@@ -118,7 +118,7 @@ Aspectos que devem ser vistos:
   - [**OK**] Remover dado no ETCD Store da API
   - [**OK**] Remover dado no ETCD Store público
   - [**OK**] Capturar arquivo (e stats) das resources (buffer ou stream)
-  - Verificar payload contra Regex
+  - [**OK**] Verificar payload contra Regex
   - Autenticação Básica
   - Autenticação com certificado (Mutual TLS)
   - Kafka
