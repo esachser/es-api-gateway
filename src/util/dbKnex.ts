@@ -1,4 +1,6 @@
 import knex from 'knex';
+import _ from 'lodash';
+import { configuration } from './config';
 
 const dbConnections: {[index: string]: knex} = {};
 
@@ -19,4 +21,15 @@ export async function deleteDatabaseConnection(id: string) {
         await dbConnections[id].destroy();
     }
     delete dbConnections[id];
+}
+
+export async function loadDatabaseConnections() {
+    const confConnections = configuration.dbConnections ?? [];
+    for(const conf of confConnections) {
+        const id = _.get(conf, 'id');
+        const cnf = _.get(conf, 'conf');
+
+        await deleteDatabaseConnection(id);
+        addDatabaseConnection(id, cnf);
+    }
 }

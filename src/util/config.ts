@@ -24,7 +24,8 @@ export interface IEsConfig {
     logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'crit',
     authenticators?: Array<any>,
     transports?: Array<any>,
-    redisLogger?: { enabled?: boolean, isCluster?: boolean, clusterNodes?: Array<string>, config?: any }
+    redisLogger?: { enabled?: boolean, isCluster?: boolean, clusterNodes?: Array<string>, config?: any },
+    dbConnections?: Array<any> 
 };
 
 export let configuration: IEsConfig = { env: 'local' };

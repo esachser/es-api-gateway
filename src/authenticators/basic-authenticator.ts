@@ -33,7 +33,7 @@ export class EsBasicAuthenticator extends EsAuthenticator {
 
     protected async verify(tokenStr: string) {
         // Procura no db
-        const credentials = Buffer.from(tokenStr).toString('base64').split(':');
+        const credentials = Buffer.from(tokenStr, 'base64').toString('utf-8').split(':');
 
         const search = await this._db.raw(this._findQuery, credentials).then(r => r);
         const user = search[0][0];
@@ -47,7 +47,7 @@ export class EsBasicAuthenticator extends EsAuthenticator {
 
     async validate(params: any) {
         const token = _.get(params, 'token');
-        const roleNeeded = _.get(params, 'role');
+        const roleNeeded = _.get(params, 'scope');
 
         const res = await this.verify(token);
 
@@ -55,8 +55,27 @@ export class EsBasicAuthenticator extends EsAuthenticator {
         if (roleNeeded !== undefined) {
             const rolesQuery = await this._db.raw(this._roleQuery, [_.get(res, this._userColumn)]).then(r => r);
             const roles = rolesQuery[0].map((r: any) => r[this._roleColumn]);
-            if (roles === undefined || roles === null || roles.length === 0 || !roles.includes(roleNeeded)) {
-                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'Key error', undefined, 'User has no needed role', 401);
+
+            if (roles === undefined) {
+                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
+            }
+
+            if (!_.isArray(roleNeeded)) {
+                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'scopes MUST be array');
+            }
+
+            if (!_.isArray(roles)) {
+                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'scopes are not array');
+            }
+
+            if (roles.length < roleNeeded.length) {
+                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
+            }
+
+            const containScopes = roleNeeded.every(scope => roles.includes(scope));
+
+            if (!containScopes) {
+                throw new EsAuthenticatorError(EsBasicAuthenticator.name, 'Key error', undefined, 'No scopes for that resource', 401);
             }
             res.roles = roles;
         }
@@ -74,28 +93,30 @@ export const AuthenticatorSchema = {
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "inspectUri",
-        "credHeader",
-        "credValue"
+        "findQuery",
+        "roleQuery",
+        "userColumn",
+        "roleColumn",
+        "dbId"
     ],
     "properties": {
-        "inspectUri": {
-            "type": "string",
-            "format": "uri"
-        },
-        "credHeader": {
+        "findQuery": {
             "type": "string",
             "minLength": 1
         },
-        "credValue": {
+        "roleQuery": {
             "type": "string",
             "minLength": 1
         },
-        "issuer": {
+        "userColumn": {
             "type": "string",
             "minLength": 1
         },
-        "audience": {
+        "roleColumn": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dbId": {
             "type": "string",
             "minLength": 1
         }

@@ -42,6 +42,7 @@ function start() {
         authenticators_1.loadAuthenticators();
         yield http_server_1.loadHttpServers();
         schemas_1.loadJsonSchemaValidator();
+        yield dbKnex_1.loadDatabaseConnections();
         yield authenticators_1.startAuthenticators();
         yield envs_1.loadEnv(config_1.configuration.env);
         //await delay(10000).then(runServers);
@@ -56,6 +57,7 @@ const redissub_1 = require("./transports/redissub");
 const etdc_1 = require("./util/etdc");
 const sync_resources_1 = require("./util/sync-resources");
 const sync_custom_1 = require("./util/sync-custom");
+const dbKnex_1 = require("./util/dbKnex");
 let numCpus = os_1.default.cpus().length;
 try {
     if (process.env['NUM_PROCS'] !== undefined) {

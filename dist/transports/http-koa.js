@@ -131,7 +131,7 @@ let EsHttpTransport = /** @class */ (() => {
                                     }
                                     context.logger.error('Error running middlewares', lodash_1.default.merge({}, err, context.meta));
                                 }
-                                ctx.set('host', 'es-api-gateway 0.1.0');
+                                ctx.set('server', 'es-api-gateway 0.1.0');
                             }));
                         }
                     }

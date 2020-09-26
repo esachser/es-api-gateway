@@ -5,6 +5,16 @@ init:
 - type: EsMetricsMiddleware
   data:
     prop: response.headers.x-esgateway-execution-time
+- type: EsPropertyMiddleware
+  data:
+    name: scope
+    value: ["read"]
+- type: EsAuthenticateMiddleware
+  data:
+    propToken: request.headers.authorization
+    propScope: scope
+    tokenType: basic
+    authenticatorId: mysqlBasic
 execution:
 - type: EsGetResourceMiddleware
   data:

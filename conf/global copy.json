@@ -48,13 +48,26 @@
       "port": 8443,
       "id": "https",
       "secure": true,
-      "keyFile": "./certs/server.key",
+      "keyFile": "./resources/development/key.pem",
       "passphrase": "esapi",
-      "certFile": "./certs/server.crt"
+      "certFile": "./resources/development/cert.pem"
     }
   ],
   "redisLogger": {
-    "enabled": true,
+    "enabled": false,
     "config": {}
-  }
+  },
+  "dbConnections": [{
+      "id": "mysql",
+      "conf": {
+        "client": "mysql2",
+        "connection": {
+          "host": "127.0.0.1",
+          "user": "root",
+          "password": "secret",
+          "database": "userstore"
+        }
+      }
+    }
+  ]
 }

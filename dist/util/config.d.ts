@@ -9,6 +9,7 @@ export interface IEsConfig {
         clusterNodes?: Array<string>;
         config?: any;
     };
+    dbConnections?: Array<any>;
 }
 export declare let configuration: IEsConfig;
 export declare function loadConfig(): Promise<void>;

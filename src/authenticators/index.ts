@@ -3,6 +3,7 @@
 import { addAuthenticatorConstructor, createAuthenticator, clearAuthenticators } from "../core/authenticators";
 import { AuthenticatorContructor as EsOAuth2JwtAuthenticatorConstructor, AuthenticatorSchema as EsOAuth2JwtAuthenticatorSchema } from './oauth2jwt-authenticator';
 import { AuthenticatorContructor as EsOAuth2InspectAuthenticatorConstructor, AuthenticatorSchema as EsOAuth2InspectAuthenticatorSchema } from './oauth2inspect-authenticator';
+import { AuthenticatorContructor as EsBasicAuthenticatorConstructor, AuthenticatorSchema as EsBasicAuthenticatorSchema } from './basic-authenticator';
 import { configuration } from "../util/config";
 import _ from "lodash";
 import { EsAuthenticatorError } from "../core/errors";
@@ -12,8 +13,8 @@ import { logger } from "../util/logger";
 export function loadAuthenticators() {
     addAuthenticatorConstructor('EsOAuth2JwtAuthenticator', EsOAuth2JwtAuthenticatorConstructor, EsOAuth2JwtAuthenticatorSchema);
     addAuthenticatorConstructor('EsOAuth2InspectAuthenticator', EsOAuth2InspectAuthenticatorConstructor, EsOAuth2InspectAuthenticatorSchema);
-
-};
+    addAuthenticatorConstructor('EsBasicAuthenticator', EsBasicAuthenticatorConstructor, EsBasicAuthenticatorSchema);
+}
 
 export async function startAuthenticators() {
     clearAuthenticators();

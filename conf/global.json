@@ -35,6 +35,18 @@
         "issuer": "https://dev-628874.okta.com/oauth2/ausfr5hrsS075GDKa4x6",
         "audience": "http://authtestapi"
       }
+    },
+    {
+      "type": "EsBasicAuthenticator",
+      "id": "mysqlBasic",
+      "name": "MySql Basic Authenticator",
+      "parameters": {
+        "findQuery": "select user from users where user=? and password=?",
+        "roleQuery": "select role from roles where user=?",
+        "userColumn": "user",
+        "roleColumn": "role",
+        "dbId": "mysql"
+      }
     }
   ],
   "transports": [
@@ -56,5 +68,19 @@
   "redisLogger": {
     "enabled": false,
     "config": {}
-  }
+  },
+  "dbConnections": [
+    {
+      "id": "mysql",
+      "conf": {
+        "client": "mysql2",
+        "connection": {
+          "host": "127.0.0.1",
+          "user": "root",
+          "password": "secret",
+          "database": "userstore"
+        }
+      }
+    }
+  ]
 }

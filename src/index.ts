@@ -30,6 +30,7 @@ async function start() {
     loadAuthenticators();
     await loadHttpServers();
     loadJsonSchemaValidator();
+    await loadDatabaseConnections();
     await startAuthenticators();
     await loadEnv(configuration.env);
     //await delay(10000).then(runServers);
@@ -46,6 +47,7 @@ import getEtcdClient, { createEtcd } from './util/etdc';
 import { masterLoadResourcesWatcher } from './util/sync-resources';
 import { masterLoadCustomWatcher } from './util/sync-custom';
 import { delay } from './util';
+import { loadDatabaseConnections } from './util/dbKnex';
 
 let numCpus = os.cpus().length;
 
