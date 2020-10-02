@@ -20,9 +20,14 @@ init:
 - type: EsMetricsMiddleware
   data: 
     prop: response.headers.x-esgateway-execution-time
-- type: EsCertificateValidateMiddleware
+- type: EsConditionMiddleware
   data:
-    caStoreProp: request.clientCertificate
+    conditions:
+    - conditionExpression: ctx.properties.httpctx.request.secure
+      mids:
+      - type: EsCertificateValidateMiddleware
+        data:
+          caStoreProp: request.clientCertificate
 # - type: EsTimeoutMiddleware
 #   data: 
 #     timeout: 12
