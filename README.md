@@ -120,7 +120,7 @@ Aspectos que devem ser vistos:
   - [**OK**] Capturar arquivo (e stats) das resources (buffer ou stream)
   - [**OK**] Verificar payload contra Regex
   - [**OK**] Autenticação Básica
-  - Autenticação com certificado (Mutual TLS)
+  - [**OK**] Autenticação com certificado (Mutual TLS)
   - Kafka
 - [**OK**] Ids no Transporte HTTP separados por vírgulas servem para criar mesma casca para vários
 - Schedule um cluster ou todos (usando ETCD para sincronizar)
