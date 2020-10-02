@@ -1,12 +1,13 @@
 import { getHttpRouter } from '../util/http-server-koa';
 import _ from 'lodash';
 import { logger } from '../util/logger';
-import { Logger, http } from 'winston';
+import { Logger } from 'winston';
 import { nanoid } from 'nanoid';
 import { EsTransportError, EsError } from '../core/errors';
 import { IEsContext } from '../core';
 import { IEsTransport, IEsTranportConstructor } from '../core/transports';
 import { IEsMiddleware, createMiddleware, connectMiddlewares, copyMiddleware } from '../core/middlewares';
+import forge from 'node-forge';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -128,6 +129,14 @@ export class EsHttpTransport implements IEsTransport {
                         };
 
                         try {
+                            if (ctx.request.secure) {
+                                const tlsSocket = ctx.socket as import('tls').TLSSocket;
+                                context.properties.request.clientCertificate = tlsSocket.getPeerCertificate()?.raw?.toString('base64');
+                                if (context.properties.request.clientCertificate !== undefined) {
+                                    context.properties.request.clientCertificate = `-----BEGIN CERTIFICATE-----${context.properties.request.clientCertificate}-----END CERTIFICATE-----`;
+                                }
+                            }
+
                             await middleware?.execute(context);
                             //return next();
                             ctx.set(_.get(context.properties, 'response.headers', {}));

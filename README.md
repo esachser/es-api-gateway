@@ -119,14 +119,14 @@ Aspectos que devem ser vistos:
   - [**OK**] Remover dado no ETCD Store público
   - [**OK**] Capturar arquivo (e stats) das resources (buffer ou stream)
   - [**OK**] Verificar payload contra Regex
-  - Autenticação Básica
+  - [**OK**] Autenticação Básica
   - Autenticação com certificado (Mutual TLS)
   - Kafka
 - [**OK**] Ids no Transporte HTTP separados por vírgulas servem para criar mesma casca para vários
 - Schedule um cluster ou todos (usando ETCD para sincronizar)
 - Criar ferramenta que edita direto etcd
   - Sincronizar somente ETCD --> Local
-- Unificar configuração
+- Unificar configuraçãos
 - Adicionar middleware de envio de email
   - Exige configuração centralizada?
 - Adicionar transporte Kafka

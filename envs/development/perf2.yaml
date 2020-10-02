@@ -44,22 +44,22 @@ execution:
     name: response.body
     value: 
       ok: true
-- type: EsPropertyMiddleware
-  data:
-    name: ttl
-    value: 10
-- type: EsPropertyMiddleware
-  data:
-    name: source
-    value: time
-- type: EsGetPublicDataMiddleware
-  data:
-    sourceProp: source
-    destProp: response.body.time
-- type: EsPropertyMiddleware
-  data:
-    name: response.body.time
-    expression: Number.parseInt(ctx.properties.response.body.time)
+# - type: EsPropertyMiddleware
+#   data:
+#     name: ttl
+#     value: 10
+# - type: EsPropertyMiddleware
+#   data:
+#     name: source
+#     value: time
+# - type: EsGetPublicDataMiddleware
+#   data:
+#     sourceProp: source
+#     destProp: response.body.time
+# - type: EsPropertyMiddleware
+#   data:
+#     name: response.body.time
+#     expression: Number.parseInt(ctx.properties.response.body.time)
 logging:
   level: info
 enabled: true

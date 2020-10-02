@@ -79,7 +79,9 @@ function loadHttpServer(conf) {
                 server = https_1.default.createServer({
                     key: fs_1.default.readFileSync(keyFile, 'binary'),
                     passphrase,
-                    cert: fs_1.default.readFileSync(certFile, 'binary')
+                    cert: fs_1.default.readFileSync(certFile, 'binary'),
+                    requestCert: true,
+                    rejectUnauthorized: false
                 }, app.callback()).listen(port, () => {
                     const { port } = server === null || server === void 0 ? void 0 : server.address();
                     logger_1.logger.info(`Https Server running on port ${port}`);

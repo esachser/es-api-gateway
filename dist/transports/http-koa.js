@@ -71,6 +71,7 @@ let EsHttpTransport = /** @class */ (() => {
                             const mid = middlewares_1.copyMiddleware(this.middleware);
                             const middleware = middlewares_1.connectMiddlewares(init, pathMethodMid, mid);
                             httpRouter.register(totalPath, [methodInfo.method.toString()], (ctx) => __awaiter(this, void 0, void 0, function* () {
+                                var _a, _b;
                                 // Executa middleware central, correspondente a:
                                 // pathMids ==> transportMids ==> executionMids
                                 //      <========    ||    <==========||
@@ -100,6 +101,13 @@ let EsHttpTransport = /** @class */ (() => {
                                     }
                                 };
                                 try {
+                                    if (ctx.request.secure) {
+                                        const tlsSocket = ctx.socket;
+                                        context.properties.request.clientCertificate = (_b = (_a = tlsSocket.getPeerCertificate()) === null || _a === void 0 ? void 0 : _a.raw) === null || _b === void 0 ? void 0 : _b.toString('base64');
+                                        if (context.properties.request.clientCertificate !== undefined) {
+                                            context.properties.request.clientCertificate = `-----BEGIN CERTIFICATE-----${context.properties.request.clientCertificate}-----END CERTIFICATE-----`;
+                                        }
+                                    }
                                     yield (middleware === null || middleware === void 0 ? void 0 : middleware.execute(context));
                                     //return next();
                                     ctx.set(lodash_1.default.get(context.properties, 'response.headers', {}));
